@@ -8,7 +8,8 @@ create table accounts (
 	firstname text,
 	lastname text,
 	language text,
-	active numeric not null
+	active numeric not null,
+	payer_ids text
 );
 
 drop table if exists password;
@@ -58,6 +59,7 @@ create table team (
 	date_created datetime default current_timestamp not null,
 	date_modified datetime default current_timestamp not null,
 	name text not null,
+	location text,
 	account_id integer not null,
 	league_num integer,
 	league_id integer,

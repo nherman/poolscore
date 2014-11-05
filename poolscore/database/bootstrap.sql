@@ -1,6 +1,6 @@
 insert into accounts
-	(username, email, firstname, lastname, language, active)
-	values ("admin", "", "admin", "user", "", 1);
+	(username, email, firstname, lastname, language, active, player_ids)
+	values ("admin", "", "admin", "user", "", 1, 1);
 
 insert into password
 	(password, account_id)
@@ -15,11 +15,11 @@ insert into division
 	values ("East Village", 1);
 
 insert into team
-	(name, league_num, account_id, league_id, division_id)
-	values ("Pool of Blood", 101, 1, 1, 1);
+	(name, league_num, locations, account_id, league_id, division_id)
+	values ("Pool of Blood", "Josies's", 101, 1, 1, 1);
 insert into team
 	(name, league_num, account_id, league_id, division_id)
-	values ("Mona's Athletic Club", 1105, 1, 1, 1);
+	values ("Mona's Athletic Club", "Mona's", 1105, 1, 1, 1);
 
 insert into player
 	(league_num, name, handicap)
