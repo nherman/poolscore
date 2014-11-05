@@ -1,6 +1,6 @@
 from flask import g, session, render_template, request, redirect, url_for, flash
-from poolscore import app, get_db
-from poolscore.models.entities import User
+from . import app, get_db
+from .database.entities import User
 
 
 @app.route('/')
@@ -45,7 +45,7 @@ def validate_login(req):
     if req.form['password'] == "" or req.form['password'] == None:
         return "Please enter your password."
 
-    data = get_db().get_password_by_username([req.form['username']])
+    data = get_db().get_password_by_username(req.form['username'])
 
     if data == None or not data['active']:
         return "Username doesn't exist"

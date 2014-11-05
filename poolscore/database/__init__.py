@@ -3,7 +3,7 @@
 ###
 import sqlite3 as lite
 import os
-from poolscore.models.entities import User
+from .entities import User
 
 LOCAL_DIR = os.path.abspath(os.path.dirname(__file__))  
 DEFAULT_DB_PATH = os.path.join(LOCAL_DIR, 'poolscore.db')
@@ -16,13 +16,13 @@ class DbManager():
     def __init__(self):
         self.db = None
 
-    def open(self, db_path=None):
+    def open(self, db_config=None):
         '''get new db connection'''
 
         if self.db is None:
-            if db_path == None:
-                db_path = DEFAULT_DB_PATH
-            self.db = lite.connect(db_path)
+            if db_config == None:
+                db_config = DEFAULT_DB_PATH
+            self.db = lite.connect(db_config)
             self.db.row_factory = self.make_dicts
         return self
 
@@ -67,8 +67,7 @@ class DbManager():
         '''query helper: handles creating cursor and executing queries'''
 
         if self.db == None:
-            #raise exception
-            pass
+            raise StandardError("Cannot query database: db connection not opened")
 
         cur = self.db.execute(query, args)
         rv = cur.fetchall()
@@ -82,8 +81,7 @@ class DbManager():
             return cls(data)
 
     def get_password_by_username(self, username):
-        return self.query_db('SELECT a.active, p.password FROM accounts a JOIN password p \
-            ON a.id = p.account_id WHERE a.username=?', [username], one=True)
+        return self.query_db('SELECT a.active, p.password FROM accounts a JOIN password p ON a.id = p.account_id WHERE a.username=?', [username], one=True)
 
     def get_user_by_name(self, username):
         if (username != None):

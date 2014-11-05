@@ -10,7 +10,7 @@
 """
 
 from flask import Flask, g, render_template
-from poolscore.database import DbManager
+from .database import DbManager
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -22,7 +22,7 @@ app.config.from_object('config')
 def get_db():
     db = getattr(g, 'db', None)
     if db is None:
-        db = g.db = DbManager().open(db_path=app.config['DATABASE'])
+        db = g.db = DbManager().open(db_config=app.config['DATABASE'])
     return db
 
 
@@ -55,4 +55,4 @@ def not_found(error):
 
 
 #initialize routes
-from poolscore import routes
+from . import routes
