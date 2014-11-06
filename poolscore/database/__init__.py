@@ -6,7 +6,7 @@ import os
 from .entities import User
 
 LOCAL_DIR = os.path.abspath(os.path.dirname(__file__))  
-DEFAULT_DB_PATH = os.path.join(LOCAL_DIR, 'poolscore.db')
+DEFAULT_DB_PATH = "/tmp/poolscore.db"
 
 class DbManager():
     '''Class db:
