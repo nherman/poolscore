@@ -50,7 +50,7 @@ create table division (
 	name text not null,
 	league_id integer not null,
 	region_id integer,
-	foreign key(league_id) references league(id)
+	foreign key(league_id) references league(id),
 	foreign key(region_id) references region(id)
 );
 
