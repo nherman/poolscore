@@ -76,6 +76,7 @@ create table team (
 	location text,
 	account_id integer not null,
 	league_num integer,
+	ruleset text not null,
 	league_id integer,
 	division_id integer,
 	foreign key(account_id) references accounts(id),
