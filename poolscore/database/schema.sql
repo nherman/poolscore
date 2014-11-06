@@ -50,7 +50,8 @@ create table schedule (
 	division_id integer,
 	date datetime not null,
 	home_team_id integer not null,
-	away_team_id integer not null	
+	away_team_id integer not null,
+	foreign key(division_id) references division(id)
 );
 
 drop table if exists team;
@@ -75,7 +76,8 @@ create table player (
 	date_created datetime default current_timestamp not null,
 	date_modified datetime default current_timestamp not null,
 	league_num integer not null,
-	name text,
+	firstname text,
+	lastname text,
 	handicap integer not null	
 );
 
@@ -83,7 +85,9 @@ drop table if exists team_player;
 create table team_player (
 	id integer primary key autoincrement,
 	team_id integer not null,
-	player_id integer not null
+	player_id integer not null,
+	foreign key(team_id) references team(id),
+	foreign key(player_id) references player(id)
 );
 
 drop table if exists tourney;
@@ -95,7 +99,9 @@ create table tourney (
 	home_team_id integer not null,
 	away_team_id integer not null,
 	ruleset text not null,
-	scoring_method text not null
+	scoring_method text not null,
+	foreign key(home_team_id) references team(id),
+	foreign key(away_team_id) references team(id)
 );
 
 drop table if exists match;
@@ -111,7 +117,8 @@ create table match (
 	winner integer,
 	in_progress boolean,
 	locked boolean,
-	data text
+	data text,
+	foreign key(tourney_id) references tourney(id)
 );
 
 drop table if exists game;
@@ -127,6 +134,7 @@ create table game (
 	winner integer,
 	in_progress boolean,
 	locked boolean,
-	data text
+	data text,
+	foreign key(match_id) references match(id)
 );
 
