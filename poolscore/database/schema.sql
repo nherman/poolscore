@@ -8,8 +8,7 @@ create table accounts (
 	firstname text,
 	lastname text,
 	language text,
-	active numeric not null,
-	payer_ids text
+	active numeric not null
 );
 
 drop table if exists password;
@@ -28,7 +27,8 @@ create table league (
 	date_created datetime default current_timestamp not null,
 	date_modified datetime default current_timestamp not null,
 	name text not null,
-	shortname text
+	shortname text,
+	ruleset text
 );
 
 drop table if exists region;
@@ -37,6 +37,7 @@ create table region (
 	date_created datetime default current_timestamp not null,
 	date_modified datetime default current_timestamp not null,
 	name text not null,
+	ruleset text,
 	shortname text,
 	league_id integer not null,
 	foreign key(league_id) references league(id)
@@ -48,6 +49,7 @@ create table division (
 	date_created datetime default current_timestamp not null,
 	date_modified datetime default current_timestamp not null,
 	name text not null,
+	ruleset text,
 	league_id integer not null,
 	region_id integer,
 	foreign key(league_id) references league(id),
@@ -76,7 +78,6 @@ create table team (
 	location text,
 	account_id integer not null,
 	league_num integer,
-	ruleset text not null,
 	league_id integer,
 	division_id integer,
 	foreign key(account_id) references accounts(id),

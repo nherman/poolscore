@@ -1,6 +1,12 @@
 insert into accounts
-	(username, email, firstname, lastname, language, active, player_ids)
-	values ("admin", "", "admin", "user", "", 1, 1);
+	(username, email, firstname, lastname, language, active)
+	values ("admin", "", "admin", "user", "", 101);
+insert into accounts
+	(username, email, firstname, lastname, language, active)
+	values ("player1", "", "player", "one", "", 1);
+insert into accounts
+	(username, email, firstname, lastname, language, active)
+	values ("player2", "", "player", "two", "", 1);
 
 insert into password
 	(password, account_id)
@@ -10,23 +16,27 @@ insert into league
 	(name, shortname)
 	values ("American Pool Players Association", "APA");
 
+insert into region
+	(name, shortname, league_id)
+	values ("New York - Manhattan", "NYC", 1);
+
 insert into division
-	(name, league_id)
-	values ("East Village", 1);
+	(name, league_id, region_id, ruleset)
+	values ("East Village", 1, 1, "8ball_classic");
 
 insert into team
-	(name, league_num, locations, account_id, league_id, division_id)
+	(name, location, league_num, account_id, league_id, division_id)
 	values ("Pool of Blood", "Josies's", 101, 1, 1, 1);
 insert into team
-	(name, league_num, account_id, league_id, division_id)
+	(name, location, league_num, account_id, league_id, division_id)
 	values ("Mona's Athletic Club", "Mona's", 1105, 1, 1, 1);
 
 insert into player
-	(league_num, name, handicap)
-	values (1, "Dagwood Bumstead", 6);
+	(league_num, firstname, lastname, handicap)
+	values (1, "Dagwood", "Bumstead", 6);
 insert into player
-	(league_num, name, handicap)
-	values (1, "Andy Cap", 4);
+	(league_num, firstname, lastname, handicap)
+	values (2, "Andy", "Cap", 4);
 
 insert into team_player
 	(team_id, player_id)
