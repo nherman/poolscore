@@ -31,14 +31,27 @@ create table league (
 	shortname text
 );
 
+drop table if exists region;
+create table region (
+	id integer primary key autoincrement,
+	date_created datetime default current_timestamp not null,
+	date_modified datetime default current_timestamp not null,
+	name text not null,
+	shortname text,
+	league_id integer not null,
+	foreign key(league_id) references league(id)
+);
+
 drop table if exists division;
 create table division (
 	id integer primary key autoincrement,
 	date_created datetime default current_timestamp not null,
 	date_modified datetime default current_timestamp not null,
 	name text not null,
-	league_id integer,
+	league_id integer not null,
+	region_id integer,
 	foreign key(league_id) references league(id)
+	foreign key(region_id) references region(id)
 );
 
 drop table if exists schedule;
