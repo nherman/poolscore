@@ -7,9 +7,14 @@ from .database.entities import User
 def validateAccess(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not session.get('activeuser'):
+        if session.get('activeuser'):
+            g.user = get_db().get_user_by_name(session.get('activeuser'))
+        else:
+            print("decorated: no session")
             return redirect(url_for('login'))
+
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -32,15 +37,6 @@ def validate_login(req):
     return 0
 
 #routes
-@app.route('/')
-@validateAccess
-def root():
-    user = get_db().get_user_by_name(session.get('activeuser'))
-    print(user.date_created)
-
-    return render_template('index.html', test=app.config['DATABASE'])
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -48,7 +44,7 @@ def login():
         error = validate_login(request)
         if not error:
             session['activeuser'] = request.form['username']
-            flash('You were logged in')
+#            flash('You were logged in')
             return redirect(url_for('root'))
 
     return render_template('login.html', error=error)
@@ -59,6 +55,27 @@ def logout():
     session.pop('activeuser', None)
     flash('You were logged out')
     return redirect(url_for('root'))
+
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
+
+
+@app.route('/')
+@validateAccess
+def root():
+    print(g.user.username)
+
+    return render_template('index.html')
+
+
+@app.route('/account')
+@validateAccess
+def account():
+    return render_template('account.html')
+
+
 
 
 

@@ -1,25 +1,18 @@
 
 @login-top-offset:          -250px;
-@ps-alert-text:             #fff;
-@ps-alert-danger-bg:        #64c0bb;
-@ps-alert-danger-border:    darken(spin(@ps-alert-danger-bg, -10), 5%);
-
-.ms-alert-danger {
-  .alert-variant(@ps-alert-danger-bg; @ps-alert-danger-border; @ps-alert-text);
-}
 
 html {
     height: 100%;
 }
 
-//Login
-body.login-context {
+body {
     display:block;
     height:100%;
     padding-top:70px;
     padding-bottom:50px;
 }
 
+//Login
 .login-context .container {
     position: relative;
     top:25px;
@@ -52,12 +45,14 @@ header {
 header nav {
   position:absolute;
   right:10px;
-  top:3px;
+  top:6px;
   font-size: 175%;
 }
 header nav a {
+  display:inline-block;
   line-height: 44px;
-  margin-left:10px;
+  padding:0 5px;
+  margin-left:5px;
 }
 
 footer {

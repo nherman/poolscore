@@ -21,11 +21,11 @@
         <header>
             <a href="/" class="logo"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="poolscore"></a>
             <nav>
-                <a href="#"><span class="glyphicon glyphicon-cog"></span></a>
+                <a href="/account" title="Account"><span class="glyphicon glyphicon-cog"></span></a>
                 {% if not session.activeuser %}
-                <a href="{{ url_for('login') }}"><span class="glyphicon glyphicon-off"></span></a>
+                <a href="{{ url_for('login') }}" title="Log in"><span class="glyphicon glyphicon-off"></span></a>
                 {% else %}
-                <a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-off"></span></a>
+                <a href="{{ url_for('logout') }}" title="Log out"><span class="glyphicon glyphicon-off"></span></a>
                 {% endif %}
             </nav>
         </header>
@@ -37,7 +37,7 @@
         {% block body %}{% endblock %}
 
         <footer>
-            &copy; Nick Herman 2014-??
+            &copy; Nick Herman
         </footer>
     </div>
 
