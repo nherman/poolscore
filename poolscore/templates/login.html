@@ -1,14 +1,32 @@
 {% extends "master.html" %}
+{% set body_class = "login-context" %}
 {% block body %}
-  <h2>Login</h2>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-  <form action="{{ url_for('login') }}" method=post>
-    <dl>
-      <dt>Username:
-      <dd><input type=text name=username>
-      <dt>Password:
-      <dd><input type=password name=password>
-      <dd><input type=submit value=Login>
-    </dl>
+  <form action="{{ url_for('login') }}" method=post class="form-horizontal" role="form">
+    <h2>Login</h2>
+    {% if error %}<div class="alert ps-alert-danger text-center">{{ error }}</div>{% endif %}
+
+    <div class="form-group form-group-lg">
+      <label for="username" class="control-label sr-only">Email</label>
+      <input type="text"
+        class="form-control input-lg"
+        id="username"
+        name="username" 
+        placeholder="Email Address"
+        required/>
+    </div>
+    <div class="form-group form-group-lg">
+      <label for="password" class="control-label sr-only">Password</label>
+      <input type="password"
+      class="form-control input-lg"
+      id="password"
+      name="password"
+      placeholder="Password"
+      required/>
+    </div>
+    <div class="form-group form-group-lg">
+      <button type="submit" class="btn btn-primary btn-lg submit-button">Login</button>
+    </div>
+
+
   </form>
 {% endblock %}
