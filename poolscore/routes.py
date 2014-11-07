@@ -53,7 +53,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('activeuser', None)
-    flash('You were logged out')
+#    flash('You were logged out')
     return redirect(url_for('root'))
 
 
@@ -65,9 +65,6 @@ def signup():
 @app.route('/')
 @validateAccess
 def root():
-    teams = get_db().getTeamsByAccountId(g.user.id)
-    print(teams)
-
     return render_template('index.html')
 
 
@@ -79,7 +76,10 @@ def account():
 @app.route('/tournament')
 @validateAccess
 def tournament():
-    return render_template('tournament.html')
+    teamDict = get_db().getTeamsByAccountId(g.user.id)
+    print(teamDict)
+
+    return render_template('tournament.html', teams = teamDict )
 
 
 

@@ -6069,7 +6069,7 @@ html {
 body {
   display: block;
   height: 100%;
-  padding-top: 70px;
+  padding-top: 50px;
   padding-bottom: 50px;
 }
 .container {
@@ -6093,8 +6093,8 @@ body {
   display: block;
   padding: 30px 45px;
 }
-.login-context .submit-button {
-  width: 100%;
+.tourney-context form {
+  margin-top: 40px;
 }
 header {
   position: fixed;
@@ -6120,11 +6120,9 @@ header nav a {
 }
 footer {
   width: 100%;
-  height: 40px;
-  padding-top: 12px;
+  padding: 12px;
   margin-top: 50px !important;
   margin-bottom: 0 !important;
-  text-align: center;
   font-family: inherit;
   font-weight: 500;
   line-height: 1.1;

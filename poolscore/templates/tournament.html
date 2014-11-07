@@ -1,28 +1,52 @@
+{% extends "master.html" %}
+{% set body_class = "tourney-context" %}
+{% block body %}
 
-    <form action="{{ url_for('tournament') }}" method=post class="form-horizontal" role="form">
+    <h1 class="text-center">Start Tourney</h1>
+
+    {% if teams %}
+    <form action="{{ url_for('tournament') }}" method=post role="form">
         {% if error %}<div class="form-group alert alert-danger text-center">{{ error }}</div>{% endif %}
 
-        <div class="form-group form-group-lg text-center">
-            <h2>Begin a new Tournament</h2>
+        <div class="form-group form-group-lg">
+            <label for="home_team" class="control-label">Home Team</label>
+            <select class="form-control input-lg"
+                id="home_team"
+                name="home_team" 
+                required>
+                <option value="">Select Home Team</option>
+                {% for team in teams %}
+                <option value="{{ team.id }}">{{ team.name }}</option>
+                {% endfor %}
+            </select>
+            <span class="help-block clearfix"><a href="#" class="pull-right">add team</a></span>
         </div>
         <div class="form-group form-group-lg">
-            <label for="username" class="control-label sr-only">Email</label>
-            <input type="text"
-            class="form-control input-lg"
-            id="username"
-            name="username" 
-            placeholder="Email Address"
-            required/>
+            <label for="away_team" class="control-label">Away Team</label>
+            <select class="form-control input-lg"
+                id="away_team"
+                name="away_team" 
+                required>
+                <option value="">Select Away Team</option>
+                {% for team in teams %}
+                <option value="{{ team.id }}">{{ team.name }}</option>
+                {% endfor %}
+            </select>
+            <span class="help-block clearfix"><a href="#" class="pull-right">add team</a></span>
         </div>
         <div class="form-group form-group-lg">
-            <label for="password" class="control-label sr-only">Password</label>
-            <input type="password"
-            class="form-control input-lg"
-            id="password"
-            name="password"
-            placeholder="Password"
-            required/>
+            <label for="away_team" class="control-label"> </label>
+            <div class="row">
+                <div class="col-xs-6">
+                    <a href="/" class="btn btn-default btn-lg btn-block">Cancel</a>
+                </div>
+                <div class="col-xs-6">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Start</button>
+                </div>
+            </div>
         </div>
-        <div class="form-group form-group-lg">
-            <button type="submit" class="btn btn-primary btn-lg submit-button">Login</button>
-        </div>
+    </form>
+    {% endif %}
+
+{% endblock %}
+
