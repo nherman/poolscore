@@ -6072,15 +6072,21 @@ body {
   padding-top: 70px;
   padding-bottom: 50px;
 }
-.login-context .container {
+.container {
   position: relative;
-  top: 25px;
+  max-width: 390px;
+  z-index: 1;
+}
+@media (min-width: 768px) {
+  .container {
+    top: 25px;
+    width: 390px;
+  }
 }
 @media (min-width: 768px) {
   .login-context .container {
     top: 50%;
     margin-top: -250px;
-    width: 390px;
   }
 }
 .login-context .form-horizontal {
@@ -6098,6 +6104,7 @@ header {
   height: 50px;
   width: 100%;
   padding: 0 20px;
+  z-index: 1000;
 }
 header nav {
   position: absolute;
@@ -6112,13 +6119,11 @@ header nav a {
   margin-left: 5px;
 }
 footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
   width: 100%;
-  height: 50px;
-  background-color: #fff;
+  height: 40px;
   padding-top: 12px;
+  margin-top: 50px !important;
+  margin-bottom: 0 !important;
   text-align: center;
   font-family: inherit;
   font-weight: 500;
@@ -6137,4 +6142,15 @@ footer .small {
 footer small,
 footer .small {
   font-size: 75%;
+}
+@media (min-width: 768px) {
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+  }
+}
+.btn-pair {
+  width: 25%;
 }

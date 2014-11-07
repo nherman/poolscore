@@ -74,18 +74,20 @@ class DbManager():
         cur.close()
         return (rv[0] if rv else None) if one else rv
 
-    def get_instance_by_id(self, cls, id):
+    def getInstanceById(self, cls, id):
         if (cls.__tablename__ != None and id != None):
             statement = "SELECT * FROM " + cls.__tablename__ + " tbl WHERE tbl.id=?"
             data = self.query_db(statement, [id], one=True)
             return cls(data)
 
-    def get_password_by_username(self, username):
+    def getPasswordByUsername(self, username):
         return self.query_db('SELECT a.active, p.password FROM accounts a JOIN password p ON a.id = p.account_id WHERE a.username=?', [username], one=True)
 
-    def get_user_by_name(self, username):
+    def getAccountByUsername(self, username):
         if (username != None):
             data = self.query_db("SELECT * FROM accounts WHERE accounts.username=?",
                 [username], one=True)
             return User(data)
 
+    def getTeamsByAccountId(self, account_id):
+        return self.query_db('SELECT * from team t WHERE t.account_id = ?',[account_id],one=False)

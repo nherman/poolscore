@@ -1,6 +1,17 @@
 {% extends "master.html" %}
+{% set body_class = "root-context" %}
 {% block body %}
 
-<p>Username is {{ g.user.username }}</p>
+    <h1 class="text-center">Mark it Eight, Dude</h1>  
+    <p class="text-center" style="margin-bottom:40px;">Welcome to <em>PoolScore</em> - a place to save your stats because the league won't do it for you.<p>
 
+    <p class="text-center">
+        <a href="/tournament" class="btn btn-primary btn-block btn-lg">Start New Tournament</a>
+    </p>
+    <p class="text-center">
+        <a href="/account" class="btn btn-primary btn-block btn-lg">Manage Your Teams</a>
+    </p>
+
+
+    </form>
 {% endblock %}

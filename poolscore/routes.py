@@ -8,7 +8,7 @@ def validateAccess(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if session.get('activeuser'):
-            g.user = get_db().get_user_by_name(session.get('activeuser'))
+            g.user = get_db().getAccountByUsername(session.get('activeuser'))
         else:
             print("decorated: no session")
             return redirect(url_for('login'))
@@ -26,7 +26,7 @@ def validate_login(req):
     if req.form['password'] == "" or req.form['password'] == None:
         return "Please enter your password."
 
-    data = get_db().get_password_by_username(req.form['username'])
+    data = get_db().getPasswordByUsername(req.form['username'])
 
     if data == None or not data['active']:
         return "Username doesn't exist"
@@ -65,7 +65,8 @@ def signup():
 @app.route('/')
 @validateAccess
 def root():
-    print(g.user.username)
+    teams = get_db().getTeamsByAccountId(g.user.id)
+    print(teams)
 
     return render_template('index.html')
 
@@ -74,6 +75,11 @@ def root():
 @validateAccess
 def account():
     return render_template('account.html')
+
+@app.route('/tournament')
+@validateAccess
+def tournament():
+    return render_template('tournament.html')
 
 
 

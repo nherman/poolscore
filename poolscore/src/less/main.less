@@ -12,15 +12,22 @@ body {
     padding-bottom:50px;
 }
 
-//Login
-.login-context .container {
+.container {
     position: relative;
-    top:25px;
+    max-width:390px;
+    z-index:1;
 
     @media (min-width: @screen-sm-min) {
+      top:25px;
+        width: 390px;
+    }
+}
+
+//Login
+@media (min-width: @screen-sm-min) {
+  .login-context .container {
         top:50%;
         margin-top: @login-top-offset;
-        width: 390px;
     }
 }
 
@@ -41,6 +48,7 @@ header {
   height:50px;
   width:100%;
   padding:0 20px;
+  z-index:1000;
 }
 header nav {
   position:absolute;
@@ -56,13 +64,22 @@ header nav a {
 }
 
 footer {
-  position:fixed;
-  bottom:0;
-  left:0;
   width:100%;
-  height:50px;
-  background-color:#fff;
+  height:40px;
   padding-top:12px;
+  margin-top: 50px !important;
+  margin-bottom:0 !important;
   .text-center;
   .h5;
+
+  @media (min-width: @screen-sm-min) {
+    position:fixed;
+    bottom:0;
+    left:0;
+    z-index:1000;
+  }
+}
+
+.btn-pair {
+  width:25%;
 }
