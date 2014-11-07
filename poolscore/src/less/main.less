@@ -1,0 +1,73 @@
+
+@login-top-offset:          -250px;
+@ps-alert-text:             #fff;
+@ps-alert-danger-bg:        #64c0bb;
+@ps-alert-danger-border:    darken(spin(@ps-alert-danger-bg, -10), 5%);
+
+.ms-alert-danger {
+  .alert-variant(@ps-alert-danger-bg; @ps-alert-danger-border; @ps-alert-text);
+}
+
+html {
+    height: 100%;
+}
+
+//Login
+body.login-context {
+    display:block;
+    height:100%;
+    padding-top:70px;
+    padding-bottom:50px;
+}
+
+.login-context .container {
+    position: relative;
+    top:25px;
+
+    @media (min-width: @screen-sm-min) {
+        top:50%;
+        margin-top: @login-top-offset;
+        width: 390px;
+    }
+}
+
+.login-context .form-horizontal {
+  display:block;
+  padding: @grid-gutter-width @grid-gutter-width+15;
+}
+
+.login-context .submit-button {
+  width: 100%;
+}
+
+header {
+  position:fixed;
+  top:0;
+  left:0;
+  background-color: #ddd;
+  height:50px;
+  width:100%;
+  padding:0 20px;
+}
+header nav {
+  position:absolute;
+  right:10px;
+  top:3px;
+  font-size: 175%;
+}
+header nav a {
+  line-height: 44px;
+  margin-left:10px;
+}
+
+footer {
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:50px;
+  background-color:#fff;
+  padding-top:12px;
+  .text-center;
+  .h5;
+}
