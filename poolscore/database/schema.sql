@@ -115,6 +115,12 @@ create table tourney (
 	away_team_id integer not null,
 	ruleset text not null,
 	scoring_method text not null,
+	winner integer,
+	home_matches integer,
+	away_matches integer,
+	in_proress boolean,
+	locked boolean,
+	data text,
 	foreign key(home_team_id) references team(id),
 	foreign key(away_team_id) references team(id)
 );

@@ -1,7 +1,8 @@
+from datetime import date
 from functools import wraps
 from flask import g, session, render_template, request, redirect, url_for, flash
 from . import app, get_db
-from .database.entities import User
+from .database.entities import Tourney
 
 #decorators
 def validateAccess(f):
@@ -35,6 +36,18 @@ def validate_login(req):
         return "Password is incorrect"
 
     return 0
+
+def validate_tourney_start(req):
+    if (req.form['home_team'] == "" or
+        req.form['home_team'] == None or
+        req.form['away_team'] == "" or
+        req.form['away_team'] == None):
+        return "Please select home team and away team"
+    elif (req.form['home_team'] == req.form['away_team']):
+        flash("Playing with yourself again, eh?")
+
+    return 0
+
 
 #routes
 @app.route('/login', methods=['GET', 'POST'])
@@ -73,13 +86,29 @@ def root():
 def account():
     return render_template('account.html')
 
-@app.route('/tournament')
+@app.route('/tournament', methods=['GET', 'POST'])
 @validateAccess
 def tournament():
-    teamDict = get_db().getTeamsByAccountId(g.user.id)
-    print(teamDict)
+    error = None
+    # If active tourney exist then display tourney status view
+    if session.get('activetourneyid'):
+        pass
+    else: 
+        teamDict = get_db().getTeamsByAccountId(g.user.id)
+        if request.method == 'POST':
+            error = validate_tourney_start(request)
+            if not error:
+                now = date.today()
+                t = Tourney(date=now,
+                            home_team_id = request.form['home_team'],
+                            away_team_id = request.form['away_team'],
+                            ruleset = "8ball",
+                            scoring_method = "apa8ball")
+                #save new tourney
+                t.id = get_db().storeInstance(t)
 
-    return render_template('tournament.html', teams = teamDict )
+
+        return render_template('start_tournament.html', teams = teamDict )
 
 
 

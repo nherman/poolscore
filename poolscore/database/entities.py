@@ -6,13 +6,16 @@ class Base(object):
     date_modified = None
 
     #abstract init method
-    def __init__(self, kwargs):
-        self.id             = kwargs['id']
-        self.date_created   = kwargs['date_created']
-        self.date_modified  = kwargs['date_modified']
+    def __init__(self, **kwargs):
+        if ('id' in kwargs):
+            self.id             = kwargs['id']
+        if ('date_created' in kwargs):
+            self.date_created   = kwargs['date_created']
+        if ('date_modified' in kwargs):
+            self.date_modified  = kwargs['date_modified']
 
 
-class User(Base):
+class Account(Base):
 
     __tablename__ = 'accounts'
 
@@ -23,8 +26,8 @@ class User(Base):
     language    = ""
     active      = None
 
-    def __init__(self, kwargs):
-        super(User, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(Account, self).__init__(**kwargs)
         
         self.username   = kwargs['username']
         self.email      = kwargs['email']
@@ -41,8 +44,8 @@ class League(Base):
     name        = ""
     shortname   = ""
 
-    def __init__(self, kwargs):
-        super(League, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(League, self).__init__(**kwargs)
         
         self.name       = kwargs['name']
         self.shortname  = kwargs['shortname']
@@ -55,8 +58,8 @@ class Division(Base):
     name        = ""
     leagueId   = ""
 
-    def __init__(self, kwargs):
-        super(Division, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(Division, self).__init__(**kwargs)
         
         self.name       = kwargs['name']
         self.leagueId   = kwargs['leagueId']
@@ -72,8 +75,8 @@ class Team(Base):
     leagueId    = ""
     divisionId  = ""
 
-    def __init__(self, kwargs):
-        super(Team, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(Team, self).__init__(**kwargs)
         
         self.name       = kwargs['name']
         self.accountId  = kwargs['accountId']
@@ -90,8 +93,8 @@ class Player(Base):
     leageNum    = ""
     handicap  = ""
 
-    def __init__(self, kwargs):
-        super(Player, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(Player, self).__init__(**kwargs)
         
         self.name       = kwargs['name']
         self.leagueNum  = kwargs['leagueNum']
@@ -103,23 +106,23 @@ class Tourney(Base):
     __tablename__ = 'tourney'
 
     date        = None
-    homeTeamId  = ""
-    awayTeamId  = ""
-    homeGames   = 0
-    awayGames   = 0
+    home_team_id  = ""
+    away_team_id  = ""
+    home_matches   = 0
+    away_matches   = 0
     winner      = None
     in_progress = True
     locked      = False
     data        = {}
 
-    def __init__(self, kwargs):
-        super(Tourney, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(Tourney, self).__init__(**kwargs)
 
         self.date           = kwargs['date']
-        self.homeTeamId     = kwargs['homeTeamId']
-        self.awayTeamId     = kwargs['awayTeamId']
+        self.home_team_id     = kwargs['home_team_id']
+        self.away_team_id     = kwargs['away_team_id']
         self.ruleset        = kwargs['ruleset']
-        self.scoringMethod  = kwargs['scoringMethod']
+        self.scoring_method  = kwargs['scoring_method']
         
 
 class Match(Base):
@@ -137,8 +140,8 @@ class Match(Base):
     data            = {}
 
 
-    def __init__(self, kwargs):
-        super(Match, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(Match, self).__init__(**kwargs)
 
         self.touneyId       = kwargs['touneyId']
         self.homePlayerIds  = kwargs['homePlayerIds']
@@ -165,8 +168,8 @@ class Game(Base):
     data        = {}
 
 
-    def __init__(self, kwargs):
-        super(Match, self).__init__(kwargs)
+    def __init__(self, **kwargs):
+        super(Match, self).__init__(**kwargs)
 
         self.matchId        = kwargs['matchId']
         self.breaker        = kwargs['breaker']
