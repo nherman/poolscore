@@ -1,0 +1,16 @@
+{% extends "master.html" %}
+{% set body_class = "tourney-context" %}
+{% block body %}
+
+    <h1 class="text-center clearfix">
+        Tournament in Progress<br>
+        <small class="pull-right">2014-11-10</small>
+        <small class="pull-left">League Name</small>
+    </h1>
+
+    <form action="{{ url_for('tournament') }}" method=post role="form">
+        <button type="submit" class="btn btn-primary btn-lg">End Tourney</button>
+    </form>
+
+{% endblock %}
+

@@ -118,7 +118,7 @@ create table tourney (
 	winner integer,
 	home_matches integer,
 	away_matches integer,
-	in_proress boolean,
+	in_progress boolean,
 	locked boolean,
 	data text,
 	foreign key(home_team_id) references team(id),

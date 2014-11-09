@@ -89,13 +89,27 @@ def account():
 @app.route('/tournament', methods=['GET', 'POST'])
 @validateAccess
 def tournament():
+    '''Primary route for tournaments'''
+
     error = None
     # If active tourney exist then display tourney status view
     if session.get('activetourneyid'):
-        pass
+        '''Active Tourney'''
+
+        # get active Tourney from DB
+        t = get_db().getInstanceById(Tourney, session.get('activetourneyid'))
+
+        #TEMP: end tournament
+        if request.method == 'POST':
+            session.pop('activetourneyid', None)
+            return redirect(url_for('root'))
+
+        return render_template('tournament.html')
     else: 
+        '''No active Tourney'''
         teamDict = get_db().getTeamsByAccountId(g.user.id)
         if request.method == 'POST':
+            '''Start new Tourney'''
             error = validate_tourney_start(request)
             if not error:
                 now = date.today()
@@ -104,10 +118,15 @@ def tournament():
                             away_team_id = request.form['away_team'],
                             ruleset = "8ball",
                             scoring_method = "apa8ball")
+
                 #save new tourney
                 t.id = get_db().storeInstance(t)
+                #set active tourney
+                session['activetourneyid'] = t.id
 
+                return render_template('tournament.html')
 
+        '''Display Tourney start page'''
         return render_template('start_tournament.html', teams = teamDict )
 
 

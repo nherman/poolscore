@@ -91,7 +91,7 @@ class DbManager():
         if (cls.__tablename__ != None and id != None):
             statement = "SELECT * FROM " + cls.__tablename__ + " tbl WHERE tbl.id=?"
             data = self.query_db(statement, [id], one=True)
-            return cls(data)
+            return cls(**data)
 
     def storeInstance(self, inst):
         if ('id' in inst.__dict__):
