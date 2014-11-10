@@ -2,7 +2,7 @@ from datetime import date
 from functools import wraps
 from flask import g, session, render_template, request, redirect, url_for, flash
 from . import app, get_db
-from .database.entities import Tourney
+from .database.entities import Tourney, Team
 
 #decorators
 def validateAccess(f):
@@ -96,15 +96,40 @@ def tournament():
     if session.get('activetourneyid'):
         '''Active Tourney'''
 
-        # get active Tourney from DB
-        t = get_db().getInstanceById(Tourney, session.get('activetourneyid'))
+        # get active Tourney, home team, away team & matches from DB
+        # save entities to context
+        g.tourney = get_db().getInstanceById(Tourney, session.get('activetourneyid'))
+        if (g.tourney == None):
+            return render_template('404.html')
 
-        #TEMP: end tournament
+        g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id)
+        g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id)
+        g.matches = get_db().getMatchesByTourneyId(g.tourney.id)
+
         if request.method == 'POST':
-            session.pop('activetourneyid', None)
+            print("method equals post")
+            print(request.form.keys())
+            try:
+                if (request.form['new_match']):
+                    print("new match")
+                    #Start a new Match
+                    return redirect(url_for('match'))
+            except KeyError:
+                pass
+
+            try:
+                if (request.form['end_tourney']):
+                    print("end tourney")
+                    #End the Tourney
+                    #TODO: set winner and prompt confirmation
+                    session.pop('activetourneyid', None)
+            except KeyError:
+                pass
+
             return redirect(url_for('root'))
 
         return render_template('tournament.html')
+
     else: 
         '''No active Tourney'''
         teamDict = get_db().getTeamsByAccountId(g.user.id)
@@ -112,6 +137,7 @@ def tournament():
             '''Start new Tourney'''
             error = validate_tourney_start(request)
             if not error:
+                #create new tourney in DB
                 now = date.today()
                 t = Tourney(date=now,
                             home_team_id = request.form['home_team'],
@@ -121,15 +147,21 @@ def tournament():
 
                 #save new tourney
                 t.id = get_db().storeInstance(t)
-                #set active tourney
+                #set active tourney in session
                 session['activetourneyid'] = t.id
 
-                return render_template('tournament.html')
+                return redirect(url_for('tournament'))
 
         '''Display Tourney start page'''
         return render_template('start_tournament.html', teams = teamDict )
 
 
+@app.route('/tournament/match', methods=['GET', 'POST'])
+@validateAccess
+def match():
+    '''Match View'''
+
+    error = None
 
 
 

@@ -134,3 +134,6 @@ class DbManager():
 
     def getTeamsByAccountId(self, account_id):
         return self.query_db('SELECT * from team t WHERE t.account_id = ?',[account_id],one=False)
+
+    def getMatchesByTourneyId(self, tourney_id):
+        return self.query_db('SELECT * from match m WHERE m.tourney_id = ?',[tourney_id],one=False)
