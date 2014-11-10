@@ -12,36 +12,6 @@ body {
     padding-bottom:50px;
 }
 
-.container {
-    position: relative;
-    z-index:1;
-
-    @media (min-width: @screen-sm-min) {
-      top:25px;
-    }
-}
-
-//Login
-.login-context .container {
-    max-width:390px;
-
-    @media (min-width: @screen-sm-min) {
-        top:50%;
-        width: 390px;
-        margin-top: @login-top-offset;
-    }
-}
-
-.login-context .form-horizontal {
-  display:block;
-  padding: @grid-gutter-width @grid-gutter-width+15;
-}
-
-//tourney
-.tourney-context form {
-  margin-top:40px;
-}
-
 header {
   position:fixed;
   top:0;
@@ -52,9 +22,13 @@ header {
   padding:0 20px;
   z-index:1000;
 }
+header .container {
+  top:auto;
+  padding:0;
+}
 header nav {
   position:absolute;
-  right:10px;
+  right:0;
   top:6px;
   font-size: 175%;
 }
@@ -92,4 +66,75 @@ footer {
     left:0;
     z-index:1000;
   }
+}
+
+
+.container {
+    position: relative;
+    z-index:1;
+    max-width: @container-sm;
+
+    @media (min-width: @screen-sm-min) {
+      top:25px;
+    }
+}
+
+//Login
+.login-context .container {
+    max-width:390px;
+
+    @media (min-width: @screen-sm-min) {
+        top:50%;
+        width: 390px;
+        margin-top: @login-top-offset;
+    }
+}
+
+.login-context .form-horizontal {
+  display:block;
+  padding: @grid-gutter-width @grid-gutter-width+15;
+}
+
+//tourney
+.tourney-context .subheader {
+  .text-center;
+}
+.tourney-context .subheader .title {
+  margin-top:0;
+}
+.tourney-context .subheader .sup {
+  margin-bottom: 0;
+}
+
+.tourney-context form {
+  margin-top:40px;
+}
+
+.opponents {
+  margin-top:20px;
+  font-size: @font-size-large;
+}
+.opponents h4 {
+  margin:0;
+}
+.opponents .vs {
+  margin:12px 0;
+  color:@gray-light;
+  font-weight: bold;
+  .initialism
+}
+
+.tourney-context .btn-new-match, .tourney-context .btn-end-tourney {
+  .btn;
+  .btn-block;
+
+    @media (min-width: @screen-sm-min) {
+      .btn-lg;
+    }
+}
+.tourney-context .btn-new-match {
+  .btn-primary;
+}
+.tourney-context .btn-end-tourney {
+  .btn-success;
 }

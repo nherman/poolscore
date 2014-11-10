@@ -106,6 +106,9 @@ def tournament():
         g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id)
         g.matches = get_db().getMatchesByTourneyId(g.tourney.id)
 
+        #TODO: handle league selection
+        g.league = {"name": "APA Eight Ball"}
+
         if request.method == 'POST':
             print("method equals post")
             print(request.form.keys())
