@@ -18,7 +18,7 @@
 </head>
 <body class="{{ body_class }}">
         <header>
-            <a href="/" class="logo"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="poolscore"></a>
+            <a href="/" class="logo">PoolScore</a>
             <nav>
                 <a href="/account" title="Account"><span class="glyphicon glyphicon-cog"></span></a>
                 {% if not session.activeuser %}
@@ -31,7 +31,7 @@
     <div class="container">
 
         {% for message in get_flashed_messages() %}
-        <div class="flash">{{ message }}</div>
+        <div class="alert alert-dismissible alert-info"> {{ message }}</div>
         {% endfor %}
 
         {% block body %}{% endblock %}

@@ -14,19 +14,20 @@ body {
 
 .container {
     position: relative;
-    max-width:390px;
     z-index:1;
 
     @media (min-width: @screen-sm-min) {
       top:25px;
-        width: 390px;
     }
 }
 
 //Login
-@media (min-width: @screen-sm-min) {
-  .login-context .container {
+.login-context .container {
+    max-width:390px;
+
+    @media (min-width: @screen-sm-min) {
         top:50%;
+        width: 390px;
         margin-top: @login-top-offset;
     }
 }
@@ -63,6 +64,20 @@ header nav a {
   padding:0 5px;
   margin-left:5px;
 }
+header .logo {
+  display:block;
+  background-image: url(/static/images/logo_sm.png);
+  background-repeat: no-repeat;
+  background-position:  0 0;
+  width:50px;
+  height:50px;
+  .text-hide;
+
+  @media (min-width: @container-sm) {
+    background-image: url(/static/images/logo.png);
+    width:175px;
+  }
+}
 
 footer {
   width:100%;
@@ -77,8 +92,4 @@ footer {
     left:0;
     z-index:1000;
   }
-}
-
-.btn-pair {
-  width:25%;
 }
