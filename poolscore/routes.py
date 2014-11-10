@@ -98,12 +98,13 @@ def tournament():
 
         # get active Tourney, home team, away team & matches from DB
         # save entities to context
-        g.tourney = get_db().getInstanceById(Tourney, session.get('activetourneyid'))
+        g.tourney = get_db().getInstanceById(Tourney, session.get('activetourneyid'), g.user.id)
         if (g.tourney == None):
-            return render_template('404.html')
-
-        g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id)
-        g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id)
+            session.pop('activetourneyid', None)
+            return redirect(url_for('tournament'))
+    
+        g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id)
+        g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id)
         g.matches = get_db().getMatchesByTourneyId(g.tourney.id)
 
         #TODO: handle league selection
@@ -114,7 +115,6 @@ def tournament():
             print(request.form.keys())
             try:
                 if (request.form['new_match']):
-                    print("new match")
                     #Start a new Match
                     return redirect(url_for('match'))
             except KeyError:
@@ -122,7 +122,6 @@ def tournament():
 
             try:
                 if (request.form['end_tourney']):
-                    print("end tourney")
                     #End the Tourney
                     #TODO: set winner and prompt confirmation
                     session.pop('activetourneyid', None)
@@ -149,7 +148,7 @@ def tournament():
                             scoring_method = "apa8ball")
 
                 #save new tourney
-                t.id = get_db().storeInstance(t)
+                t.id = get_db().storeInstance(t, g.user.id)
                 #set active tourney in session
                 session['activetourneyid'] = t.id
 
@@ -165,6 +164,24 @@ def match():
     '''Match View'''
 
     error = None
+    if session.get('activetourneyid'):
+        # get active Tourney, home team, away team & matches from DB
+        # save entities to context
+        g.tourney = get_db().getInstanceById(Tourney, session.get('activetourneyid'), g.user.id)
+        if (g.tourney != None):
+            g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id)
+            g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id)
+
+
+
+            g.match = get_db().getInstanceById(Match, session.get('activetourneyid'), g.user.id)
+
+
+            return render_template('404.html')
+
+
+
+    redirect(url_for('tournament'))
 
 
 

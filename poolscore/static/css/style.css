@@ -6158,11 +6158,11 @@ footer .small {
     top: 25px;
   }
 }
-.login-context .container {
+.login-context .main {
   max-width: 390px;
 }
 @media (min-width: 768px) {
-  .login-context .container {
+  .login-context .main {
     top: 50%;
     width: 390px;
     margin-top: -250px;

@@ -9,6 +9,9 @@ from .entities import Account
 LOCAL_DIR = os.path.abspath(os.path.dirname(__file__))  
 DEFAULT_DB_PATH = "/tmp/poolscore.db"
 
+class PermissionsError(Exception):
+    pass
+
 class DbManager():
     '''Class db:
     handle basic database connection and querying
@@ -87,14 +90,24 @@ class DbManager():
         cur.close()
         return lastRowId
 
-    def getInstanceById(self, cls, id):
+    def getInstanceById(self, cls, id, account_id):
         if (cls.__tablename__ != None and id != None):
             statement = "SELECT * FROM " + cls.__tablename__ + " tbl WHERE tbl.id=?"
             data = self.query_db(statement, [id], one=True)
+            if (data == None):
+                return None
+
             return cls(**data)
 
-    def storeInstance(self, inst):
+    def storeInstance(self, inst, account_id):
         if ('id' in inst.__dict__):
+            #check permissions
+            perms = self.query_db("SELECT * FROM permissions where entity = ? and row_id = ?",
+                {'entity':inst.__class__.__name__, 'row_id':inst.id},
+                one=True)
+            if (perms == None or perms['account_id'] != account_id):
+                raise permissionsError()
+
             #assume row already exists and do update
             vals = []
             sql = "UPDATE " + inst.__tablename__ + " SET "
@@ -119,9 +132,15 @@ class DbManager():
             key_list = ",".join(inst.__dict__.keys())
             vals = "?,"*len(inst.__dict__.keys())
             vals = vals[:-1]
-            sql = "INSERT into {0} ({1}) VALUES ({2})".format(inst.__tablename__, key_list, vals)
+            SQL = "INSERT into {0} ({1}) VALUES ({2})".format(inst.__tablename__, key_list, vals)
+            id = self.update_db(SQL,inst.__dict__.values())
 
-            return self.update_db(sql,inst.__dict__.values())
+            #record owner in permissions table
+            permSQL = "INSERT into permissions (entity, row_id, account_id) VALUES (?,?,?)"
+            permId = self.update_db(permSQL,
+                    (inst.__class__.__name__, id, account_id))
+            return id
+
 
     def getPasswordByUsername(self, username):
         return self.query_db('SELECT a.active, p.password FROM accounts a JOIN password p ON a.id = p.account_id WHERE a.username=?', [username], one=True)
@@ -137,3 +156,5 @@ class DbManager():
 
     def getMatchesByTourneyId(self, tourney_id):
         return self.query_db('SELECT * from match m WHERE m.tourney_id = ?',[tourney_id],one=False)
+
+

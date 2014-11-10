@@ -27,16 +27,28 @@ insert into division
 insert into team
 	(name, location, league_num, account_id, league_id, division_id)
 	values ("Pool of Blood", "Josies's", 101, 1, 1, 1);
+insert into permissions
+	(entity, row_id, account_id)
+	values ("Team", 1, 1);
 insert into team
 	(name, location, league_num, account_id, league_id, division_id)
 	values ("Mona's Athletic Club", "Mona's", 1105, 1, 1, 1);
+insert into permissions
+	(entity, row_id, account_id)
+	values ("Team", 2, 1);
 
 insert into player
 	(league_num, firstname, lastname, handicap)
 	values (1, "Dagwood", "Bumstead", 6);
+insert into permissions
+	(entity, row_id, account_id)
+	values ("Player", 1, 1);
 insert into player
 	(league_num, firstname, lastname, handicap)
 	values (2, "Andy", "Cap", 4);
+insert into permissions
+	(entity, row_id, account_id)
+	values ("Player", 2, 1);
 
 insert into team_player
 	(team_id, player_id)

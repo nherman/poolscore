@@ -1,0 +1,50 @@
+{% extends "master.html" %}
+{% set body_class = "tourney-context" %}
+{% block body %}
+
+    <div class="subheader">
+        <h6 class="sup">{{ g.league.name }} &mdash; {{ g.tourney.date }}</h6>
+        <h3 class="title">Tournament in Progress:</h3>
+    </div>
+
+    <div class="opponents">
+        <div class="row">
+            <div class="col-xs-10">
+                <h4>HOME</h4>
+                {{ g.home_team.name}}
+            </div>
+            <div class="col-xs-2">
+                {{ g.tourney.home_matches }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-10 vs">vs.</div>
+        </div>
+        <div class="row">
+            <div class="col-xs-10">
+                <h4>AWAY</h4>
+                {{ g.away_team.name}}
+            </div>
+            <div class="col-xs-2">
+                {{ g.tourney.away_matches }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+<!-- matches go here -->
+    </div>
+
+    <form action="{{ url_for('tournament') }}" method="post" role="form">
+        <div class="row">
+            <div class="col-xs-6 text-center">
+                <button type="submit" class="btn-new-match" name="new_match" value="start_match">Start New Match</button>
+            </div>
+            <div class="col-xs-6 text-center">
+                <button type="submit" class="btn-end-tourney" name="end_tourney" value="end_tourney">End Tournament</button>
+            </div>
+        </div>
+    </form>
+
+{% endblock %}
+

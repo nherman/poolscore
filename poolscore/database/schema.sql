@@ -21,6 +21,18 @@ create table password (
 	foreign key(account_id) references accounts(id)
 );
 
+drop table if exists permissions;
+create table permissions (
+	id integer primary key autoincrement,
+	date_created datetime default current_timestamp not null,
+	date_modified datetime default current_timestamp not null,
+	entity text not null,
+	row_id integer not null,
+	account_id integer not null,
+	foreign key(account_id) references accounts(id)
+);
+CREATE INDEX row_id_index ON permissions (row_id);
+
 drop table if exists league;
 create table league (
 	id integer primary key autoincrement,
