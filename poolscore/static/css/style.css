@@ -6098,6 +6098,13 @@ header nav a {
   padding: 0 5px;
   margin-left: 5px;
 }
+header nav a.pulse {
+  -webkit-animation: pulse 8s infinite;
+  -moz-animation: pulse 8s infinite;
+  -o-animation: pulse 8s infinite;
+  -ms-animation: pulse 8s infinite;
+  animation: pulse 8s infinite;
+}
 header .logo {
   display: block;
   background-image: url(/static/images/logo_sm.png);
@@ -6351,4 +6358,59 @@ fieldset[disabled] .tourney-context .btn-end-tourney.active {
 .tourney-context .btn-end-tourney .badge {
   color: #5cb85c;
   background-color: #ffffff;
+}
+@-webkit-keyframes pulse {
+  0% {
+    color: #428bca;
+  }
+  15% {
+    color: #193c5a;
+  }
+  30% {
+    color: #428bca;
+  }
+}
+@-moz-keyframes pulse {
+  0% {
+    color: #428bca;
+  }
+  15% {
+    color: #193c5a;
+  }
+  30% {
+    color: #428bca;
+  }
+}
+@-ms-keyframes pulse {
+  0% {
+    color: #428bca;
+  }
+  15% {
+    color: #193c5a;
+  }
+  30% {
+    color: #428bca;
+  }
+}
+@-o-keyframes pulse {
+  0% {
+    color: #428bca;
+  }
+  15% {
+    color: #193c5a;
+  }
+  30% {
+    color: #428bca;
+  }
+}
+@keyframes pulse {
+  0% {
+    color: #428bca;
+  }
+  15% {
+    color: #193c5a;
+  }
+  30% {
+    color: #428bca;
+  }
 }

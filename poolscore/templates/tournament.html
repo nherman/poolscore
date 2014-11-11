@@ -36,6 +36,7 @@
     </div>
 
     <form action="{{ url_for('tournament') }}" method="post" role="form">
+        <input type="hidden" name="tid" value="{{ g.tourney.id }}">
         <div class="row">
             <div class="col-xs-6 text-center">
                 <button type="submit" class="btn-new-match" name="new_match" value="start_match">Start New Match</button>

@@ -21,6 +21,9 @@
             <div class="container">
                 <a href="/" class="logo">PoolScore</a>
                 <nav>
+                    {% if session.activetourneyid %}
+                    <a href="/tournament?tid={{ session.activetourneyid }}" title="Active Tournament" class="tourney-pulse"><span class="glyphicon glyphicon-exclamation-sign"></span></a>
+                    {% endif %}
                     <a href="/account" title="Account"><span class="glyphicon glyphicon-cog"></span></a>
                     {% if not session.activeuser %}
                     <a href="{{ url_for('login') }}" title="Log in"><span class="glyphicon glyphicon-off"></span></a>
@@ -47,6 +50,7 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
 </body>
 </html>

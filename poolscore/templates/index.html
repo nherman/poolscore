@@ -10,6 +10,11 @@
             <p class="text-center">
                 <a href="/tournament" class="btn btn-primary btn-block btn-lg">Start New Tournament</a>
             </p>
+            {% if tourneys %}
+            <p class="text-center">
+                <a href="/tournaments" class="btn btn-primary btn-block btn-lg">Show all Tournaments <span class="badge">{{ tourneys }}</span></a>
+            </p>
+            {% endif %}
             <p class="text-center">
                 <a href="/account" class="btn btn-primary btn-block btn-lg">Manage Your Teams</a>
             </p>

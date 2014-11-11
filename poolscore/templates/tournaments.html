@@ -1,0 +1,19 @@
+{% extends "master.html" %}
+{% set body_class = "tourney-context" %}
+{% block body %}
+
+    <h3 class="text-center">All Tournamnets</h3>
+
+    {% if tourneys %}
+    <ul>
+        {% for tourney in tourneys %}
+        <li>{{ tourney.home_team }} vs. {{ tourney.away_team }}<br>{{ tourney.data }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-center">
+        No Tournaments Found
+    </p>
+    {% endif %}
+
+{% endblock %}

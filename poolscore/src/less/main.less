@@ -38,6 +38,13 @@ header nav a {
   padding:0 5px;
   margin-left:5px;
 }
+header nav a.pulse {
+  -webkit-animation: pulse 8s infinite;
+  -moz-animation: pulse 8s infinite;
+  -o-animation: pulse 8s infinite;
+  -ms-animation: pulse 8s infinite;
+  animation: pulse 8s infinite;
+  }
 header .logo {
   display:block;
   background-image: url(/static/images/logo_sm.png);
@@ -137,4 +144,32 @@ footer {
 }
 .tourney-context .btn-end-tourney {
   .btn-success;
+}
+
+
+//animations
+@-webkit-keyframes pulse {
+    0% { color: @link-color; }
+    15% { color: darken(@link-color, 30%); }
+    30% { color: @link-color; }
+}
+@-moz-keyframes pulse {
+    0% { color: @link-color; }
+    15% { color: darken(@link-color, 30%); }
+    30% { color: @link-color; }
+}
+@-ms-keyframes pulse {
+    0% { color: @link-color; }
+    15% { color: darken(@link-color, 30%); }
+    30% { color: @link-color; }
+}
+@-o-keyframes pulse {
+    0% { color: @link-color; }
+    15% { color: darken(@link-color, 30%); }
+    30% { color: @link-color; }
+}
+@keyframes pulse {
+    0% { color: @link-color; }
+    15% { color: darken(@link-color, 30%); }
+    30% { color: @link-color; }
 }

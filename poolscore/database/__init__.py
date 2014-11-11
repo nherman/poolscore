@@ -72,7 +72,6 @@ class DbManager():
 
         if self.db == None:
             raise StandardError("Cannot query database: db connection not opened")
-
         return self.db.execute(query, args)
 
     def query_db(self, query, args=(), one=False):
@@ -154,7 +153,53 @@ class DbManager():
     def getTeamsByAccountId(self, account_id):
         return self.query_db('SELECT * from team t WHERE t.account_id = ?',[account_id],one=False)
 
+    def getTourneyCountByAccountId(self, account_id):
+        return self.query_db('SELECT count(*) as count from permissions p WHERE p.entity=? AND p.account_id=?',
+            ("Tourney", account_id), one=True)
+
+    def getTourneyListByAccountId(self, account_id):
+        # get tourneys
+        tourneys = self.query_db('SELECT t.id, t.date, t.home_team_id, t.away_team_id, t.in_progress, t.locked \
+            from tourney t JOIN permissions p ON t.id = p.row_id WHERE p.entity=? AND p.account_id=?',
+            ("Tourney", account_id))
+
+        # get team names
+        for tourney in tourneys:
+            tourney['home_team'] = self.query_db('SELECT t.name, t.location from team t \
+                JOIN permissions p ON t.id = p.row_id WHERE p.entity=? AND p.account_id=? AND t.id = ?',
+            ("Team", account_id, tourney['home_team_id']))
+            tourney['away_team'] = self.query_db('SELECT t.name, t.location from team t \
+                JOIN permissions p ON t.id = p.row_id WHERE p.entity=? AND p.account_id=? AND t.id = ?',
+            ("Team", account_id, tourney['away_team_id']))
+
+        return tourneys
+
     def getMatchesByTourneyId(self, tourney_id):
         return self.query_db('SELECT * from match m WHERE m.tourney_id = ?',[tourney_id],one=False)
 
+    def getGamesByMatchId(self, match_id):
+        return self.query_db('SELECT * from game m WHERE m.match_id = ?',[match_id],one=False)
 
+    def getPlayersByAccountIdForTeam(self, account_id, team_id):
+        SQL = "SELECT * from player pl \
+               JOIN team_player tp ON pl.id = tp.player_id \
+               JOIN permissions p ON pl.id = p.row_id \
+               WHERE p.entity=? AND p.account_id=? \
+               AND tp.team_id = ?"
+        return self.query_db(SQL, ("Player", account_id, team_id))
+
+    def getPlayersByAccountIdNotOnTeams(self, account_id, teams):
+        team_str = ""
+        #there has to be a better way!
+        for i,v in enumerate(teams):
+            team_str += "\'" + str(v) + "\'"
+            if i < len(teams)-1:
+                team_str += ","
+
+        SQL = "SELECT * FROM player pl \
+               JOIN permissions p ON p.row_id = pl.id \
+               JOIN team_player tp ON tp.player_id = pl.id \
+               WHERE p.entity=? AND p.account_id=? \
+               AND tp.team_id NOT IN (?)"
+
+        return self.query_db(SQL, ("Player", account_id, team_str))
