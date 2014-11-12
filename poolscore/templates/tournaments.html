@@ -2,12 +2,12 @@
 {% set body_class = "tourney-context" %}
 {% block body %}
 
-    <h3 class="text-center">All Tournamnets</h3>
+    <h3 class="text-center">All Tournaments</h3>
 
     {% if tourneys %}
     <ul>
         {% for tourney in tourneys %}
-        <li>{{ tourney.home_team }} vs. {{ tourney.away_team }}<br>{{ tourney.data }}</li>
+        <li><a href="/tournament?tid={{ tourney.id }}">{{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</a><br>{{ tourney.date }}</li>
         {% endfor %}
     </ul>
     {% else %}

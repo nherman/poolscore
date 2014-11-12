@@ -2,10 +2,7 @@
 {% set body_class = "tourney-context" %}
 {% block body %}
 
-    <div class="subheader">
-        <h6 class="sup">{{ g.league.name }} &mdash; {{ g.tourney.date }}</h6>
-        <h3 class="title">Tournament in Progress:</h3>
-    </div>
+    {% include 'tourney_header.html' %}
 
     <div class="opponents">
         <div class="row">

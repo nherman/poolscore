@@ -90,16 +90,21 @@ class DbManager():
         return lastRowId
 
     def getInstanceById(self, cls, id, account_id):
-        if (cls.__tablename__ != None and id != None):
-            statement = "SELECT * FROM " + cls.__tablename__ + " tbl WHERE tbl.id=?"
-            data = self.query_db(statement, [id], one=True)
+        if (cls.get_table_name() != None and id != None):
+            statement = "SELECT tbl.* FROM " + cls.get_table_name() + " tbl \
+                         JOIN permissions p ON p.row_id = tbl.id \
+                         WHERE p.entity = ? AND p.account_id = ? \
+                         AND tbl.id = ?"
+
+            data = self.query_db(statement, (cls.__name__, account_id, id), one=True)
             if (data == None):
                 return None
+            print("Getting {} for ID: {}".format(cls.__name__, id))
 
             return cls(**data)
 
     def storeInstance(self, inst, account_id):
-        if ('id' in inst.__dict__):
+        if ('id' in inst._data):
             #check permissions
             perms = self.query_db("SELECT * FROM permissions where entity = ? and row_id = ?",
                 {'entity':inst.__class__.__name__, 'row_id':inst.id},
@@ -109,15 +114,15 @@ class DbManager():
 
             #assume row already exists and do update
             vals = []
-            sql = "UPDATE " + inst.__tablename__ + " SET "
+            sql = "UPDATE " + inst.get_table_name() + " SET "
 
-            for key in inst.__dict__.keys():
+            for key in inst._data.keys():
                 if (not key in ["id","date_created"]):
                     sql += key + " = ?,"
                     if (key == "date_modified"):
                         vals.append(datetime.now())
                     else:
-                        vals.append(inst.__dict__[key])
+                        vals.append(inst._data[key])
             sql = sql[:-1] #remove trailing comma
 
             sql += " WHERE id = ?"
@@ -128,11 +133,13 @@ class DbManager():
             return self.update_db(sql, vals)
 
         else:
-            key_list = ",".join(inst.__dict__.keys())
-            vals = "?,"*len(inst.__dict__.keys())
+            print(inst)
+            key_list = ",".join(inst._data.keys())
+            print(key_list)
+            vals = "?,"*len(inst._data.keys())
             vals = vals[:-1]
-            SQL = "INSERT into {0} ({1}) VALUES ({2})".format(inst.__tablename__, key_list, vals)
-            id = self.update_db(SQL,inst.__dict__.values())
+            SQL = "INSERT into {0} ({1}) VALUES ({2})".format(inst.get_table_name(), key_list, vals)
+            id = self.update_db(SQL,inst._data.values())
 
             #record owner in permissions table
             permSQL = "INSERT into permissions (entity, row_id, account_id) VALUES (?,?,?)"
@@ -167,10 +174,10 @@ class DbManager():
         for tourney in tourneys:
             tourney['home_team'] = self.query_db('SELECT t.name, t.location from team t \
                 JOIN permissions p ON t.id = p.row_id WHERE p.entity=? AND p.account_id=? AND t.id = ?',
-            ("Team", account_id, tourney['home_team_id']))
+            ("Team", account_id, tourney['home_team_id']), one=True)
             tourney['away_team'] = self.query_db('SELECT t.name, t.location from team t \
                 JOIN permissions p ON t.id = p.row_id WHERE p.entity=? AND p.account_id=? AND t.id = ?',
-            ("Team", account_id, tourney['away_team_id']))
+            ("Team", account_id, tourney['away_team_id']), one=True)
 
         return tourneys
 

@@ -12,7 +12,6 @@ def validateAccess(f):
         if session.get('activeuser'):
             g.user = get_db().getAccountByUsername(session.get('activeuser'))
         else:
-            print("decorated: no session")
             return redirect(url_for('login'))
 
         return f(*args, **kwargs)
@@ -122,13 +121,14 @@ def tournament():
         elif request.form.get('tid'):
             tourney_id = request.form.get('tid')
 
-
         # get active Tourney, home team, away team & matches from DB
         # save entities to context
         try:
             g.tourney = get_db().getInstanceById(Tourney, tourney_id, g.user.id)
             g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id)
             g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id)
+        except AttributeError:
+            flash("No Tournament with ID {} found".format(tourney_id))
         except PermissionsError:
             pass
 
@@ -153,7 +153,6 @@ def tournament():
                 pass
 
             try:
-                print("try end_tourney")
                 if (request.form['end_tourney']):
                     #End the Tourney
                     #TODO: set winner and prompt confirmation
@@ -210,16 +209,23 @@ def match():
         try:
             g.match = get_db().getInstanceById(Match, match_id, g.user.id)
             g.tourney = get_db().getInstanceById(Tourney, g.match.tourney_id, g.user.id)
+            g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id)
+            g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id)
             g.home_players = []
-            for player in g.match.home_player_id:
+            g.away_players = []
+            for player in g.match.home_player_ids:
                 g.home_players.append(get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id))
-            for player in g.match.away_player_id:
+            for player in g.match.away_player_ids:
                 g.away_players.append(get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id))
+        except AttributeError:
+            flash("No Match with ID {} found".format(match_id))
         except PermissionsError:
             pass
 
-        if (g.tourney == None or g.match == None or len(g.home_players) == 0 or len(g.home_players) == 0):
-            return redirect(url_for('tournament'), tid=tourney_id)
+        if g.tourney == None:
+            return redirect(url_for('tournament'))
+        if (g.match == None or len(g.home_players) == 0 or len(g.home_players) == 0):
+            return redirect(url_for('tournament', tid=g.tourney.id))
     
         #get all games for tourney
         g.games = get_db().getGamesByMatchId(g.tourney.id)
@@ -239,6 +245,10 @@ def match():
 
         try:
             g.tourney = get_db().getInstanceById(Tourney, tourney_id, g.user.id)
+            g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id)
+            g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id)
+        except AttributeError:
+            flash("No Tournament with ID {} found".format(tourney_id))
         except PermissionsError:
             pass
         if (g.tourney == None):
@@ -248,7 +258,7 @@ def match():
         g.league = {"name": "APA Eight Ball"}
 
         if request.method == 'POST':
-            '''Start new Tourney'''
+            '''Start new Match'''
             error = validate_match_start(request)
             if not error:
                 #create new match in DB
@@ -258,13 +268,11 @@ def match():
 
                 #save new match
                 m.id = get_db().storeInstance(m, g.user.id)
+                return redirect(url_for('match', tid=g.tourney.id, mid=m.id))
 
-                return redirect(url_for('match',mid=m.id))
-
-        else:
-            g.homePlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.home_team_id)
-            g.awayPlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.away_team_id)
-            g.otherPlayers = get_db().getPlayersByAccountIdNotOnTeams(g.user.id, [g.tourney.home_team_id,g.tourney.away_team_id])
+        g.homePlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.home_team_id)
+        g.awayPlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.away_team_id)
+        g.otherPlayers = get_db().getPlayersByAccountIdNotOnTeams(g.user.id, [g.tourney.home_team_id,g.tourney.away_team_id])
 
         '''Display Match start page'''
         return render_template('start_match.html', error=error )
