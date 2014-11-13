@@ -9,12 +9,13 @@
     :license: ???, see ??? for more details.
 """
 
-from flask import Flask, g, render_template
+from datetime import timedelta
+from flask import Flask, g, render_template, session
 from .database import DbManager
 
 app = Flask(__name__)
 app.config.from_object('config')
-
+app.permanent_session_lifetime = timedelta(minutes=30)
 
 ###
 # Attach DB instance to flask context

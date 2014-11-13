@@ -68,8 +68,8 @@ def login():
     if request.method == 'POST':
         error = validate_login(request)
         if not error:
+            session.permanent = True
             session['activeuser'] = request.form['username']
-#            flash('You were logged in')
             return redirect(url_for('root'))
 
     return render_template('login.html', error=error)
@@ -78,7 +78,6 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-#    flash('You were logged out')
     return redirect(url_for('root'))
 
 
