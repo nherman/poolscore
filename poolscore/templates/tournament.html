@@ -29,7 +29,13 @@
     </div>
 
     <div class="row">
-<!-- matches go here -->
+    {% if g.matches %}
+        <ul>
+        {% for match in g.matches %}
+            <li><a href="{{ url_for('match',mid=match.id)}}">Player #{{ match.home_player_ids }} (HOME) vs. Player #{{ match.away_player_ids }} (AWAY)</a></li>
+        {% endfor %}
+        </ul>
+    {% endif %}
     </div>
 
     <form action="{{ url_for('tournament') }}" method="post" role="form">

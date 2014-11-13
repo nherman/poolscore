@@ -107,7 +107,7 @@ class DbManager():
         if ('id' in inst._data):
             #check permissions
             perms = self.query_db("SELECT * FROM permissions where entity = ? and row_id = ?",
-                {'entity':inst.__class__.__name__, 'row_id':inst.id},
+                (inst.__class__.__name__, inst.id),
                 one=True)
             if (perms == None or perms['account_id'] != account_id):
                 raise permissionsError()
@@ -129,13 +129,12 @@ class DbManager():
             vals.append(inst.id)
 
             print(sql)
+            print(vals)
 
             return self.update_db(sql, vals)
 
         else:
-            print(inst)
             key_list = ",".join(inst._data.keys())
-            print(key_list)
             vals = "?,"*len(inst._data.keys())
             vals = vals[:-1]
             SQL = "INSERT into {0} ({1}) VALUES ({2})".format(inst.get_table_name(), key_list, vals)
@@ -210,3 +209,12 @@ class DbManager():
                AND tp.team_id NOT IN (?)"
 
         return self.query_db(SQL, ("Player", account_id, team_str))
+
+    def getNumMartchesForTourney(self, account_id, tourney_id):
+        SQL = "SELECT count(*) AS count from match m \
+               JOIN permissions p ON m.id = p.row_id \
+               WHERE p.entity=? AND p.account_id=? \
+               AND m.tourney_id = ?"
+
+        data = self.query_db(SQL,("Match", account_id, tourney_id),one=True)
+        return data['count']
