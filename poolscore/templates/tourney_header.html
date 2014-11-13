@@ -1,4 +1,8 @@
+    {% set headerText = "Tournament Complete" %}
+    {% if g.tourney.in_progress %}
+        {% set headerText = "Tournament in Progress" %}
+    {% endif %}
     <div class="subheader">
         <h6 class="sup">{{ g.league.name }} &mdash; {{ g.tourney.date }}</h6>
-        <h3 class="title"><a href="{{ url_for('tournament',id=g.tourney.id) }}">Tournament in Progress:<br> <small><em>{{ g.home_team.name }} vs {{ g.away_team.name }}</em></small></a></h3>
+        <h3 class="title"><a href="{{ url_for('tournament',id=g.tourney.id) }}">{{ headerText }}<br> <small><em>{{ g.home_team.name }} vs {{ g.away_team.name }}</em></small></a></h3>
     </div>

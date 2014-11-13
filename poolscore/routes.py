@@ -155,7 +155,11 @@ def tournament():
                 if (request.form['end_tourney']):
                     #End the Tourney
                     #TODO: set winner and prompt confirmation
-                    session.pop('activetourneyid', None)
+                    g.tourney.in_progress = False
+                    get_db().storeInstance(g.tourney, g.user.id)
+
+                    if (tourney_id == session["activetourneyid"]):
+                        session.pop('activetourneyid', None)
             except KeyError:
                 pass
 
@@ -176,7 +180,8 @@ def tournament():
                             home_team_id = request.form['home_team'],
                             away_team_id = request.form['away_team'],
                             ruleset = "8ball",
-                            scoring_method = "apa8ball")
+                            scoring_method = "apa8ball",
+                            in_progress = True)
 
                 #save new tourney
                 t.id = get_db().storeInstance(t, g.user.id)
