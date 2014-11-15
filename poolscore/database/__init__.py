@@ -4,7 +4,7 @@
 from datetime import datetime
 import sqlite3 as lite
 import os
-from .entities import Account
+from .entities import Account, Match
 
 LOCAL_DIR = os.path.abspath(os.path.dirname(__file__))  
 DEFAULT_DB_PATH = "/tmp/poolscore.db"
@@ -81,7 +81,7 @@ class DbManager():
         cur.close()
         return (rv[0] if rv else None) if one else rv
 
-    def update_db(self, query, args=(), one=False):
+    def update_db(self, query, args=()):
         '''upate DB and return id of last updated row'''
         cur = self.__execute_sql__(query, args)
         self.db.commit()
@@ -110,7 +110,7 @@ class DbManager():
                 (inst.__class__.__name__, inst.id),
                 one=True)
             if (perms == None or perms['account_id'] != account_id):
-                raise permissionsError()
+                raise PermissionsError()
 
             #assume row already exists and do update
             vals = []
@@ -128,9 +128,6 @@ class DbManager():
             sql += " WHERE id = ?"
             vals.append(inst.id)
 
-            print(sql)
-            print(vals)
-
             return self.update_db(sql, vals)
 
         else:
@@ -138,6 +135,11 @@ class DbManager():
             vals = "?,"*len(inst._data.keys())
             vals = vals[:-1]
             SQL = "INSERT into {0} ({1}) VALUES ({2})".format(inst.get_table_name(), key_list, vals)
+
+            if inst.__class__ == Match:
+                print(key_list)
+                print(inst._data.values())
+
             id = self.update_db(SQL,inst._data.values())
 
             #record owner in permissions table
@@ -187,7 +189,7 @@ class DbManager():
         return self.query_db('SELECT * from game m WHERE m.match_id = ?',[match_id],one=False)
 
     def getPlayersByAccountIdForTeam(self, account_id, team_id):
-        SQL = "SELECT * from player pl \
+        SQL = "SELECT pl.* from player pl \
                JOIN team_player tp ON pl.id = tp.player_id \
                JOIN permissions p ON pl.id = p.row_id \
                WHERE p.entity=? AND p.account_id=? \
@@ -202,7 +204,7 @@ class DbManager():
             if i < len(teams)-1:
                 team_str += ","
 
-        SQL = "SELECT * FROM player pl \
+        SQL = "SELECT pl.* FROM player pl \
                JOIN permissions p ON p.row_id = pl.id \
                JOIN team_player tp ON tp.player_id = pl.id \
                WHERE p.entity=? AND p.account_id=? \
@@ -210,11 +212,54 @@ class DbManager():
 
         return self.query_db(SQL, ("Player", account_id, team_str))
 
-    def getNumMartchesForTourney(self, account_id, tourney_id):
-        SQL = "SELECT count(*) AS count from match m \
-               JOIN permissions p ON m.id = p.row_id \
-               WHERE p.entity=? AND p.account_id=? \
-               AND m.tourney_id = ?"
+    def getNumMartchesForTourney(self, tourney_id):
+        SQL = "SELECT count(*) AS count from match m WHERE m.tourney_id = ?"
 
-        data = self.query_db(SQL,("Match", account_id, tourney_id),one=True)
+        data = self.query_db(SQL,[tourney_id],one=True)
         return data['count']
+
+    def setMatchPlayers(self, match_id, players, is_home_team):
+        SQL = "INSERT INTO match_player (match_id, player_id, is_home_team) VALUES (?, ?, ?)"
+        print("set match players")
+        print(match_id)
+        print(players)
+        print(is_home_team)
+
+        if isinstance(players,list):
+            for player_id in players:
+                print(player_id)
+                self.update_db(SQL,(match_id, player_id, is_home_team))
+        elif isinstance(players, int):
+            print("players not a list?")
+            self.update_db(SQL,(match_id, players, is_home_team))
+        else:
+            raise AttributeError("players must be an integer or a list of integers")
+
+
+    def getMatchPlayers(self, match_id, is_home_team, account_id):
+        #TODO: get players by match id
+        SQL2 = "SELECT mp.player_id FROM match_player mp \
+               JOIN permissions p ON mp.player_id = p.row_id \
+               WHERE p.entity = ? AND p.account_id = ? \
+               AND mp.match_id = ? AND mp.is_home_team = ?"
+
+        SQL = "SELECT pl.* FROM player pl \
+               JOIN match_player mp ON pl.id = mp.player_id \
+               JOIN permissions p ON pl.id = p.row_id \
+               WHERE p.entity = ? AND p.account_id = ? \
+               AND mp.match_id = ? AND mp.is_home_team = ?"
+
+        print("get match players")
+        print(SQL)
+        print(match_id)
+        print(is_home_team)
+        print(account_id)
+
+
+        return self.query_db(SQL,("Player", account_id, match_id, is_home_team))
+        
+
+
+
+
+

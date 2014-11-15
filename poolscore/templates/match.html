@@ -3,42 +3,32 @@
 {% block body %}
 
     {% include 'tourney_header.html' %}
-
+    <h1>Match #{{ g.match.ordinal }}</h1>
+    <p>{{ g.home_players }}</p>
     <div class="opponents">
         <div class="row">
-            <div class="col-xs-10">
-                <h4>HOME</h4>
-                {{ g.home_team.name}}
+            <div class="col-xs-6">
+                <h4>HOME {{ g.match.home_games }}</h4>
+                {{ g.home_players[0].firstname}} {{ g.home_players[0].lastname}} 
             </div>
-            <div class="col-xs-2">
-                {{ g.tourney.home_matches }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-10 vs">vs.</div>
-        </div>
-        <div class="row">
-            <div class="col-xs-10">
-                <h4>AWAY</h4>
-                {{ g.away_team.name}}
-            </div>
-            <div class="col-xs-2">
-                {{ g.tourney.away_matches }}
+            <div class="col-xs-6">
+                <h4>AWAY {{ g.match.away_games }}</h4>
+                {{ g.away_players[0].firstname}} {{ g.away_players[0].lastname}} 
             </div>
         </div>
     </div>
 
     <div class="row">
-<!-- matches go here -->
+<!-- games go here -->
     </div>
 
-    <form action="{{ url_for('match',tid=g.tourney.id) }}" method="post" role="form">
+    <form action="{{ url_for('match',mid=g.match.id) }}" method="post" role="form">
         <div class="row">
             <div class="col-xs-6 text-center">
-                <button type="submit" class="btn-new-match" name="new_match" value="start_match">Start New Match</button>
+                <button type="submit" class="btn-new-game" name="new_match" value="start_game">Start New Game</button>
             </div>
             <div class="col-xs-6 text-center">
-                <button type="submit" class="btn-end-tourney" name="end_tourney" value="end_tourney">End Tournament</button>
+                <button type="submit" class="btn-end-match" name="end_tourney" value="end_match">End Match</button>
             </div>
         </div>
     </form>

@@ -97,6 +97,12 @@ insert into player
 insert into permissions
 	(entity, row_id, account_id)
 	values ("Player", 5, 1);
+insert into player
+	(league_num, firstname, lastname, handicap)
+	values (666, "Super", "Man", 2);
+insert into permissions
+	(entity, row_id, account_id)
+	values ("Player", 6, 1);
 
 insert into team_player
 	(team_id, player_id)
@@ -113,3 +119,6 @@ insert into team_player
 insert into team_player
 	(team_id, player_id)
 	values (5,5);
+insert into team_player
+	(team_id, player_id)
+	values (1,6);

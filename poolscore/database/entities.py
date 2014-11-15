@@ -1,9 +1,12 @@
 #models
 class Base(object):
+    DEFAULT_VALUES = {}
 
-    #abstract init method
     def __init__(self, **kwargs):
         self._data = kwargs
+        for key in self.DEFAULT_VALUES:
+            if key not in self._data:
+                self._data[key] = self.DEFAULT_VALUES[key]
 
     def __getattr__(self, name):
         if not name in self._data:
@@ -23,8 +26,9 @@ class Base(object):
 
 
 class Account(Base):
-    pass
-        
+    DEFAULT_VALUES = {
+        'active':           True
+    }        
 class League(Base):
     pass
 
@@ -38,10 +42,24 @@ class Player(Base):
     pass
 
 class Tourney(Base):
-    pass
+    DEFAULT_VALUES = {
+        'home_matches':     0,
+        'away_matches':     0,
+        'in_progress':      True,
+        'locked':           False
+    }
 
 class Match(Base):
-    pass
+    DEFAULT_VALUES = {
+        'home_games':       0,
+        'away_games':       0,
+        'in_progress':      True,
+        'locked':           False
+    }
 
 class Game(Base):
-    pass
+    DEFAULT_VALUES = {
+        'innings':          0,
+        'in_progress':      True,
+        'locked':           False
+    }

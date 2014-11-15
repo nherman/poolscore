@@ -143,8 +143,7 @@ create table match (
 	date_created datetime default current_timestamp not null,
 	date_modified datetime default current_timestamp not null,
 	tourney_id integer not null,
-	home_player_ids text not null,
-	away_player_ids text not null,
+	ordinal integer,
 	home_games integer,
 	away_games integer,
 	winner integer,
@@ -152,6 +151,16 @@ create table match (
 	locked boolean,
 	data text,
 	foreign key(tourney_id) references tourney(id)
+);
+
+drop table if exists match_player;
+create table match_player (
+	id integer primary key autoincrement,
+	match_id integer not null,
+	player_id integer not null,
+	is_home_team boolean not null,
+	foreign key(match_id) references match(id),
+	foreign key(player_id) references player(id)
 );
 
 drop table if exists game;

@@ -6213,7 +6213,9 @@ footer .small {
   text-transform: uppercase;
 }
 .tourney-context .btn-new-match,
-.tourney-context .btn-end-tourney {
+.tourney-context .btn-end-tourney,
+.tourney-context .btn-new-game,
+.tourney-context .btn-end-match {
   display: inline-block;
   margin-bottom: 0;
   font-weight: normal;
@@ -6238,25 +6240,39 @@ footer .small {
 }
 .tourney-context .btn-new-match:focus,
 .tourney-context .btn-end-tourney:focus,
+.tourney-context .btn-new-game:focus,
+.tourney-context .btn-end-match:focus,
 .tourney-context .btn-new-match:active:focus,
 .tourney-context .btn-end-tourney:active:focus,
+.tourney-context .btn-new-game:active:focus,
+.tourney-context .btn-end-match:active:focus,
 .tourney-context .btn-new-match.active:focus,
-.tourney-context .btn-end-tourney.active:focus {
+.tourney-context .btn-end-tourney.active:focus,
+.tourney-context .btn-new-game.active:focus,
+.tourney-context .btn-end-match.active:focus {
   outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
 .tourney-context .btn-new-match:hover,
 .tourney-context .btn-end-tourney:hover,
+.tourney-context .btn-new-game:hover,
+.tourney-context .btn-end-match:hover,
 .tourney-context .btn-new-match:focus,
-.tourney-context .btn-end-tourney:focus {
+.tourney-context .btn-end-tourney:focus,
+.tourney-context .btn-new-game:focus,
+.tourney-context .btn-end-match:focus {
   color: #333333;
   text-decoration: none;
 }
 .tourney-context .btn-new-match:active,
 .tourney-context .btn-end-tourney:active,
+.tourney-context .btn-new-game:active,
+.tourney-context .btn-end-match:active,
 .tourney-context .btn-new-match.active,
-.tourney-context .btn-end-tourney.active {
+.tourney-context .btn-end-tourney.active,
+.tourney-context .btn-new-game.active,
+.tourney-context .btn-end-match.active {
   outline: 0;
   background-image: none;
   -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
@@ -6264,10 +6280,16 @@ footer .small {
 }
 .tourney-context .btn-new-match.disabled,
 .tourney-context .btn-end-tourney.disabled,
+.tourney-context .btn-new-game.disabled,
+.tourney-context .btn-end-match.disabled,
 .tourney-context .btn-new-match[disabled],
 .tourney-context .btn-end-tourney[disabled],
+.tourney-context .btn-new-game[disabled],
+.tourney-context .btn-end-match[disabled],
 fieldset[disabled] .tourney-context .btn-new-match,
-fieldset[disabled] .tourney-context .btn-end-tourney {
+fieldset[disabled] .tourney-context .btn-end-tourney,
+fieldset[disabled] .tourney-context .btn-new-game,
+fieldset[disabled] .tourney-context .btn-end-match {
   cursor: not-allowed;
   pointer-events: none;
   opacity: 0.65;
@@ -6277,91 +6299,143 @@ fieldset[disabled] .tourney-context .btn-end-tourney {
 }
 @media (min-width: 768px) {
   .tourney-context .btn-new-match,
-  .tourney-context .btn-end-tourney {
+  .tourney-context .btn-end-tourney,
+  .tourney-context .btn-new-game,
+  .tourney-context .btn-end-match {
     padding: 10px 16px;
     font-size: 18px;
     line-height: 1.33;
     border-radius: 6px;
   }
 }
+.tourney-context .btn-new-game,
 .tourney-context .btn-new-match {
   color: #ffffff;
   background-color: #428bca;
   border-color: #357ebd;
 }
+.tourney-context .btn-new-game:hover,
 .tourney-context .btn-new-match:hover,
+.tourney-context .btn-new-game:focus,
 .tourney-context .btn-new-match:focus,
+.tourney-context .btn-new-game:active,
 .tourney-context .btn-new-match:active,
+.tourney-context .btn-new-game.active,
 .tourney-context .btn-new-match.active,
+.open > .dropdown-toggle.tourney-context .btn-new-game,
 .open > .dropdown-toggle.tourney-context .btn-new-match {
   color: #ffffff;
   background-color: #3071a9;
   border-color: #285e8e;
 }
+.tourney-context .btn-new-game:active,
 .tourney-context .btn-new-match:active,
+.tourney-context .btn-new-game.active,
 .tourney-context .btn-new-match.active,
+.open > .dropdown-toggle.tourney-context .btn-new-game,
 .open > .dropdown-toggle.tourney-context .btn-new-match {
   background-image: none;
 }
+.tourney-context .btn-new-game.disabled,
 .tourney-context .btn-new-match.disabled,
+.tourney-context .btn-new-game[disabled],
 .tourney-context .btn-new-match[disabled],
+fieldset[disabled] .tourney-context .btn-new-game,
 fieldset[disabled] .tourney-context .btn-new-match,
+.tourney-context .btn-new-game.disabled:hover,
 .tourney-context .btn-new-match.disabled:hover,
+.tourney-context .btn-new-game[disabled]:hover,
 .tourney-context .btn-new-match[disabled]:hover,
+fieldset[disabled] .tourney-context .btn-new-game:hover,
 fieldset[disabled] .tourney-context .btn-new-match:hover,
+.tourney-context .btn-new-game.disabled:focus,
 .tourney-context .btn-new-match.disabled:focus,
+.tourney-context .btn-new-game[disabled]:focus,
 .tourney-context .btn-new-match[disabled]:focus,
+fieldset[disabled] .tourney-context .btn-new-game:focus,
 fieldset[disabled] .tourney-context .btn-new-match:focus,
+.tourney-context .btn-new-game.disabled:active,
 .tourney-context .btn-new-match.disabled:active,
+.tourney-context .btn-new-game[disabled]:active,
 .tourney-context .btn-new-match[disabled]:active,
+fieldset[disabled] .tourney-context .btn-new-game:active,
 fieldset[disabled] .tourney-context .btn-new-match:active,
+.tourney-context .btn-new-game.disabled.active,
 .tourney-context .btn-new-match.disabled.active,
+.tourney-context .btn-new-game[disabled].active,
 .tourney-context .btn-new-match[disabled].active,
+fieldset[disabled] .tourney-context .btn-new-game.active,
 fieldset[disabled] .tourney-context .btn-new-match.active {
   background-color: #428bca;
   border-color: #357ebd;
 }
+.tourney-context .btn-new-game .badge,
 .tourney-context .btn-new-match .badge {
   color: #428bca;
   background-color: #ffffff;
 }
+.tourney-context .btn-end-match,
 .tourney-context .btn-end-tourney {
   color: #ffffff;
   background-color: #5cb85c;
   border-color: #4cae4c;
 }
+.tourney-context .btn-end-match:hover,
 .tourney-context .btn-end-tourney:hover,
+.tourney-context .btn-end-match:focus,
 .tourney-context .btn-end-tourney:focus,
+.tourney-context .btn-end-match:active,
 .tourney-context .btn-end-tourney:active,
+.tourney-context .btn-end-match.active,
 .tourney-context .btn-end-tourney.active,
+.open > .dropdown-toggle.tourney-context .btn-end-match,
 .open > .dropdown-toggle.tourney-context .btn-end-tourney {
   color: #ffffff;
   background-color: #449d44;
   border-color: #398439;
 }
+.tourney-context .btn-end-match:active,
 .tourney-context .btn-end-tourney:active,
+.tourney-context .btn-end-match.active,
 .tourney-context .btn-end-tourney.active,
+.open > .dropdown-toggle.tourney-context .btn-end-match,
 .open > .dropdown-toggle.tourney-context .btn-end-tourney {
   background-image: none;
 }
+.tourney-context .btn-end-match.disabled,
 .tourney-context .btn-end-tourney.disabled,
+.tourney-context .btn-end-match[disabled],
 .tourney-context .btn-end-tourney[disabled],
+fieldset[disabled] .tourney-context .btn-end-match,
 fieldset[disabled] .tourney-context .btn-end-tourney,
+.tourney-context .btn-end-match.disabled:hover,
 .tourney-context .btn-end-tourney.disabled:hover,
+.tourney-context .btn-end-match[disabled]:hover,
 .tourney-context .btn-end-tourney[disabled]:hover,
+fieldset[disabled] .tourney-context .btn-end-match:hover,
 fieldset[disabled] .tourney-context .btn-end-tourney:hover,
+.tourney-context .btn-end-match.disabled:focus,
 .tourney-context .btn-end-tourney.disabled:focus,
+.tourney-context .btn-end-match[disabled]:focus,
 .tourney-context .btn-end-tourney[disabled]:focus,
+fieldset[disabled] .tourney-context .btn-end-match:focus,
 fieldset[disabled] .tourney-context .btn-end-tourney:focus,
+.tourney-context .btn-end-match.disabled:active,
 .tourney-context .btn-end-tourney.disabled:active,
+.tourney-context .btn-end-match[disabled]:active,
 .tourney-context .btn-end-tourney[disabled]:active,
+fieldset[disabled] .tourney-context .btn-end-match:active,
 fieldset[disabled] .tourney-context .btn-end-tourney:active,
+.tourney-context .btn-end-match.disabled.active,
 .tourney-context .btn-end-tourney.disabled.active,
+.tourney-context .btn-end-match[disabled].active,
 .tourney-context .btn-end-tourney[disabled].active,
+fieldset[disabled] .tourney-context .btn-end-match.active,
 fieldset[disabled] .tourney-context .btn-end-tourney.active {
   background-color: #5cb85c;
   border-color: #4cae4c;
 }
+.tourney-context .btn-end-match .badge,
 .tourney-context .btn-end-tourney .badge {
   color: #5cb85c;
   background-color: #ffffff;

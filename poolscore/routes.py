@@ -3,7 +3,7 @@ from functools import wraps
 from flask import g, session, render_template, request, redirect, url_for, flash
 from . import app, get_db
 from .database import PermissionsError
-from .database.entities import Tourney, Team, Match
+from .database.entities import Tourney, Team, Match, Player
 
 #decorators
 def validateAccess(f):
@@ -215,20 +215,16 @@ def match():
             g.tourney = get_db().getInstanceById(Tourney, g.match.tourney_id, g.user.id)
             g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id)
             g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id)
-            g.home_players = []
-            g.away_players = []
-            for player in g.match.home_player_ids:
-                g.home_players.append(get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id))
-            for player in g.match.away_player_ids:
-                g.away_players.append(get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id))
+            g.home_players = get_db().getMatchPlayers(g.match.id, True, g.user.id)
+            g.away_players = get_db().getMatchPlayers(g.match.id, False, g.user.id)
         except AttributeError:
             flash("No Match with ID {} found".format(match_id))
         except PermissionsError:
             pass
 
-        if g.tourney == None:
+        if g.match == None or g.tourney == None:
             return redirect(url_for('tournament'))
-        if (g.match == None or len(g.home_players) == 0 or len(g.home_players) == 0):
+        if (len(g.home_players) == 0 or len(g.home_players) == 0):
             return redirect(url_for('tournament', tid=g.tourney.id))
     
         #get all games for tourney
@@ -263,18 +259,34 @@ def match():
 
         if request.method == 'POST':
             '''Start new Match'''
+
+
+            print("home players:")
+            print(request.form.getlist('home_players'))
+            print("away players:")
+            print(request.form.getlist('away_players'))
+
             error = validate_match_start(request)
             if not error:
-                #create new match in DB
-                m = Match(tourney_id=g.tourney.id,
-                        home_player_ids = request.form['home_players'],
-                        away_player_ids = request.form['away_players'])
+                #get number of current matches
+                numMatches = get_db().getNumMartchesForTourney(g.tourney.id)
 
-                #save new match
+                #create new match entity
+                m = Match(tourney_id=g.tourney.id,
+                          ordinal=numMatches+1)
+
+                #store new match in DB
                 m.id = get_db().storeInstance(m, g.user.id)
+
+                #store match players
+                get_db().setMatchPlayers(m.id, request.form.getlist('home_players'), True)
+                get_db().setMatchPlayers(m.id, request.form.getlist('away_players'), False)
+
                 return redirect(url_for('match', tid=g.tourney.id, mid=m.id))
 
         g.homePlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.home_team_id)
+        print("home team players: ")
+        print(g.homePlayers)
         g.awayPlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.away_team_id)
         g.otherPlayers = get_db().getPlayersByAccountIdNotOnTeams(g.user.id, [g.tourney.home_team_id,g.tourney.away_team_id])
 
