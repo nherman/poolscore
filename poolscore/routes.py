@@ -3,7 +3,7 @@ from functools import wraps
 from flask import g, session, render_template, request, redirect, url_for, flash
 from . import app, get_db
 from .database import PermissionsError
-from .database.entities import Tourney, Team, Match, Player
+from .database.entities import Tourney, Match, Game, Team, Player
 
 #decorators
 def validateAccess(f):
@@ -112,13 +112,10 @@ def tournament():
 
     error = None
     # If active tourney exist then display tourney status view
-    if request.args.get('tid') or request.form.get('tid'):
+    if request.args.get('tid'):
         '''Active Tourney'''
 
-        if request.args.get('tid'):
-            tourney_id = request.args.get('tid')
-        elif request.form.get('tid'):
-            tourney_id = request.form.get('tid')
+        tourney_id = request.args.get('tid')
 
         # get active Tourney, home team, away team & matches from DB
         # save entities to context
@@ -200,13 +197,10 @@ def match():
     '''Match View'''
 
     error = None
-    if request.args.get('mid') or request.form.get('mid'):
+    if request.args.get('mid'):
         '''if a match id is passed then try to edit that match'''
 
-        if request.args.get('mid'):
-            match_id = request.args.get('mid')
-        elif request.form.get('mid'):
-            match_id = request.form.get('mid')
+        match_id = request.args.get('mid')
 
         # get active match, tourney, home team, away team, players & games from DB
         # save entities to context
@@ -230,18 +224,40 @@ def match():
         #get all games for tourney
         g.games = get_db().getGamesByMatchId(g.tourney.id)
 
+        print("Games: {}".format(len(g.games)))
+
+
         #TODO: handle league selection
         g.league = {"name": "APA Eight Ball"}
 
+        if request.method == 'POST':
+            '''Start new Match'''
+
+            for game in g.games:
+                if game['in_progress']:
+                    flash("You must end the game in progress before starting the next one.")
+                    break
+            else:
+                #get number of current games
+                numGames = get_db().getNumGamesForMatch(g.match.id)
+                breaker = get_db().getLastGameWinner(g.match.id)
+
+                #create new match entity
+                game = Game(match_id=g.match.id,
+                          ordinal=numGames+1,
+                          breaker=breaker)
+
+                #store new match in DB
+                game.id = get_db().storeInstance(game, g.user.id)
+
+
+
         return render_template('match.html')
 
-    elif request.args.get('tid') or request.form.get('tid'):
+    elif request.args.get('tid'):
         '''if a tourney id is passed then try to start a new match'''
 
-        if request.args.get('tid'):
-            tourney_id = request.args.get('tid')
-        elif request.form.get('tid'):
-            tourney_id = request.form.get('tid')
+        tourney_id = request.args.get('tid')
 
         try:
             g.tourney = get_db().getInstanceById(Tourney, tourney_id, g.user.id)
@@ -259,12 +275,6 @@ def match():
 
         if request.method == 'POST':
             '''Start new Match'''
-
-
-            print("home players:")
-            print(request.form.getlist('home_players'))
-            print("away players:")
-            print(request.form.getlist('away_players'))
 
             error = validate_match_start(request)
             if not error:
@@ -285,8 +295,6 @@ def match():
                 return redirect(url_for('match', tid=g.tourney.id, mid=m.id))
 
         g.homePlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.home_team_id)
-        print("home team players: ")
-        print(g.homePlayers)
         g.awayPlayers = get_db().getPlayersByAccountIdForTeam(g.user.id, g.tourney.away_team_id)
         g.otherPlayers = get_db().getPlayersByAccountIdNotOnTeams(g.user.id, [g.tourney.home_team_id,g.tourney.away_team_id])
 

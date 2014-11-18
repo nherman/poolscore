@@ -183,7 +183,19 @@ class DbManager():
         return tourneys
 
     def getMatchesByTourneyId(self, tourney_id):
-        return self.query_db('SELECT * from match m WHERE m.tourney_id = ?',[tourney_id],one=False)
+        MATCH_SQL = "SELECT * from match m WHERE m.tourney_id = ?"
+        PLAYER_SQL = "SELECT p.* from player p \
+               JOIN match_player mp ON p.id = mp.player_id \
+               WHERE mp.match_id = ? AND mp.is_home_team = ?"
+
+        matches = self.query_db(MATCH_SQL,[tourney_id])
+
+        for match in matches:
+            match["home_players"] = self.query_db(PLAYER_SQL,(match['id'],True))
+            match["away_players"] = self.query_db(PLAYER_SQL,(match['id'],False))
+
+        return matches
+
 
     def getGamesByMatchId(self, match_id):
         return self.query_db('SELECT * from game m WHERE m.match_id = ?',[match_id],one=False)
@@ -220,44 +232,40 @@ class DbManager():
 
     def setMatchPlayers(self, match_id, players, is_home_team):
         SQL = "INSERT INTO match_player (match_id, player_id, is_home_team) VALUES (?, ?, ?)"
-        print("set match players")
-        print(match_id)
-        print(players)
-        print(is_home_team)
 
         if isinstance(players,list):
             for player_id in players:
-                print(player_id)
                 self.update_db(SQL,(match_id, player_id, is_home_team))
         elif isinstance(players, int):
-            print("players not a list?")
             self.update_db(SQL,(match_id, players, is_home_team))
         else:
             raise AttributeError("players must be an integer or a list of integers")
 
 
     def getMatchPlayers(self, match_id, is_home_team, account_id):
-        #TODO: get players by match id
-        SQL2 = "SELECT mp.player_id FROM match_player mp \
-               JOIN permissions p ON mp.player_id = p.row_id \
-               WHERE p.entity = ? AND p.account_id = ? \
-               AND mp.match_id = ? AND mp.is_home_team = ?"
-
         SQL = "SELECT pl.* FROM player pl \
                JOIN match_player mp ON pl.id = mp.player_id \
                JOIN permissions p ON pl.id = p.row_id \
                WHERE p.entity = ? AND p.account_id = ? \
                AND mp.match_id = ? AND mp.is_home_team = ?"
 
-        print("get match players")
-        print(SQL)
-        print(match_id)
-        print(is_home_team)
-        print(account_id)
-
-
         return self.query_db(SQL,("Player", account_id, match_id, is_home_team))
         
+    def getNumGamesForMatch(self, match_id):
+        SQL = "SELECT count(*) AS count from game g WHERE g.match_id = ?"
+
+        data = self.query_db(SQL,[match_id],one=True)
+        return data['count']
+
+    def getLastGameWinner(self, match_id):
+        SQL="SELECT winner from game g WHERE g.match_id = ? ORDER BY g.ordinal DESC LIMIT 1"
+
+        data = self.query_db(SQL,[match_id],one=True)
+
+        if data != None:
+            return data['winner']
+        else:
+            return None
 
 
 

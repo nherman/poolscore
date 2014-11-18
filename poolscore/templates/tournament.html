@@ -6,40 +6,40 @@
 
     <div class="opponents">
         <div class="row">
-            <div class="col-xs-10">
-                <h4>HOME</h4>
-                {{ g.home_team.name}}
+            <div class="col-xs-5">
+                <h4>HOME<br>
+                <small>{{ g.home_team.name}}</small>
+                </h4>
             </div>
-            <div class="col-xs-2">
-                {{ g.tourney.home_matches }}
+            <div class="col-xs-1">
+                <h4>{{ g.tourney.home_matches }}</h4>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-10 vs">vs.</div>
-        </div>
-        <div class="row">
-            <div class="col-xs-10">
-                <h4>AWAY</h4>
-                {{ g.away_team.name}}
+            <div class="col-xs-5">
+                <h4>AWAY<br>
+                <small>{{ g.away_team.name}}</small>
+                </h4>
             </div>
-            <div class="col-xs-2">
-                {{ g.tourney.away_matches }}
+            <div class="col-xs-1">
+                <h4>{{ g.tourney.away_matches }}</h4>
             </div>
         </div>
     </div>
 
-    <div class="row">
+    <div class="list-group opponents">
     {% if g.matches %}
-        <ul>
         {% for match in g.matches %}
-            <li><a href="{{ url_for('match',mid=match.id)}}">Player #{{ match.home_player_ids }} (HOME) vs. Player #{{ match.away_player_ids }} (AWAY)</a></li>
+        <a href="{{ url_for('match',mid=match.id)}}" class="list-group-item ">
+            <div class="clearfix">
+                <h4 class="pull-left">Match {{ match.ordinal }}</h4>
+                <h4 class="pull-right text-right">{{ match.home_games }} &ndash; {{ match.away_games }}</h4>
+            </div>
+            <h4><small>{{ match.home_players[0].firstname }} {{ match.home_players[0].lastname }} ({{ match.home_players[0].handicap }}) vs. {{ match.away_players[0].firstname }} {{ match.away_players[0].lastname }} ({{ match.away_players[0].handicap }}){% if match.in_progress > 0 %}<br>IN PROGRESS{% endif %}</small></h4>
+        </a>
         {% endfor %}
-        </ul>
     {% endif %}
     </div>
 
-    <form action="{{ url_for('tournament') }}" method="post" role="form">
-        <input type="hidden" name="tid" value="{{ g.tourney.id }}">
+    <form action="{{ url_for('tournament', tid=g.tourney.id) }}" method="post" role="form">
         <div class="row">
             <div class="col-xs-6 text-center">
                 <button type="submit" class="btn-new-match" name="new_match" value="start_match">Start New Match</button>

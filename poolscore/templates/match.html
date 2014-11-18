@@ -3,24 +3,34 @@
 {% block body %}
 
     {% include 'tourney_header.html' %}
-    <h1>Match #{{ g.match.ordinal }}</h1>
-    <p>{{ g.home_players }}</p>
+    <h2>Match #{{ g.match.ordinal }}</h2>
     <div class="opponents">
         <div class="row">
-            <div class="col-xs-6">
-                <h4>HOME {{ g.match.home_games }}</h4>
-                {{ g.home_players[0].firstname}} {{ g.home_players[0].lastname}} 
+            <div class="col-xs-5">
+                <h4>HOME<br>
+                <small>{{ g.home_players[0].firstname}} {{ g.home_players[0].lastname}} ({{ g.home_players[0].handicap }})</small>
+                </h4>
             </div>
-            <div class="col-xs-6">
-                <h4>AWAY {{ g.match.away_games }}</h4>
-                {{ g.away_players[0].firstname}} {{ g.away_players[0].lastname}} 
+            <div class="col-xs-1">
+                <h4>{{ g.match.home_games }}</h4>
+            </div>
+            <div class="col-xs-5">
+                <h4>AWAY<br>
+                <small>{{ g.away_players[0].firstname}} {{ g.away_players[0].lastname}} ({{ g.away_players[0].handicap }})</small>
+                </h4>
+            </div>
+            <div class="col-xs-1">
+                <h4>{{ g.match.away_games }}</h4>
             </div>
         </div>
     </div>
 
-    <div class="row">
-<!-- games go here -->
-    </div>
+    {% if g.games %}
+        {% for game in g.games %}
+                <h4 class="pull-left">Game {{ game.ordinal }}</h4>
+        {% endfor %}
+    {% endif %}
+
 
     <form action="{{ url_for('match',mid=g.match.id) }}" method="post" role="form">
         <div class="row">
