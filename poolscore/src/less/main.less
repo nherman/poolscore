@@ -75,6 +75,16 @@ footer {
   }
 }
 
+.flash-message {
+  .alert;
+  .alert-info;
+  .text-center;
+  margin-top:15px;
+
+  @media (min-width: @container-sm) {
+    margin-top:0;
+  }
+}
 
 .container {
     position: relative;
@@ -156,7 +166,17 @@ footer {
 .tourney-context .btn-end-tourney {
   .btn-success;
 }
+.tourney-context .games .panel-heading {
+  position:relative;
+}
+.tourney-context .games .in-progress {
+  position: absolute;
+  right:15px;
+  top:50%;
+  margin-top:-7px;
 
+  .small;
+}
 
 //animations
 @-webkit-keyframes pulse {

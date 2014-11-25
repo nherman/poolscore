@@ -6155,6 +6155,42 @@ footer .small {
     z-index: 1000;
   }
 }
+.flash-message {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+  color: #31708f;
+  text-align: center;
+  margin-top: 15px;
+}
+.flash-message h4 {
+  margin-top: 0;
+  color: inherit;
+}
+.flash-message .alert-link {
+  font-weight: bold;
+}
+.flash-message > p,
+.flash-message > ul {
+  margin-bottom: 0;
+}
+.flash-message > p + p {
+  margin-top: 5px;
+}
+.flash-message hr {
+  border-top-color: #a6e1ec;
+}
+.flash-message .alert-link {
+  color: #245269;
+}
+@media (min-width: 750px) {
+  .flash-message {
+    margin-top: 0;
+  }
+}
 .container {
   position: relative;
   z-index: 1;
@@ -6439,6 +6475,16 @@ fieldset[disabled] .tourney-context .btn-end-tourney.active {
 .tourney-context .btn-end-tourney .badge {
   color: #5cb85c;
   background-color: #ffffff;
+}
+.tourney-context .games .panel-heading {
+  position: relative;
+}
+.tourney-context .games .in-progress {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  margin-top: -7px;
+  font-size: 85%;
 }
 @-webkit-keyframes pulse {
   0% {

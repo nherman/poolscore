@@ -1,5 +1,20 @@
 {% extends "master.html" %}
 {% set body_class = "tourney-context" %}
+
+{% block script %}
+    <script>
+        function addInningEventHandler() {
+            console.log(arguments);
+        }
+
+        $(function() {
+            $(".btn-add-inning").click(addInningEventHandler);
+        });
+            
+
+    </script>
+{% endblock %}
+
 {% block body %}
 
     {% include 'tourney_header.html' %}
@@ -25,14 +40,25 @@
         </div>
     </div>
 
+    <div class="games">
     {% if g.games %}
         {% for game in g.games %}
-                <h4 class="pull-left">Game {{ game.ordinal }}</h4>
+        <form>
+            <div class="panel {% if game.in_progress %}panel-primary{% else %}panel-default{% endif %}">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Game {{ game.ordinal }}</h3>
+                    {% if game.in_progress %}<div class="in-progress">IN PROGRESS</div>{% endif %}
+                </div>
+                <div class="panel-body">
+                <button type="button" class="btn-add-inning" value="add_inning_{{ game.id }}">Add Inning</button>
+                </div>
+            </div>
+        </form>
         {% endfor %}
     {% endif %}
+    </div>
 
-
-    <form action="{{ url_for('match',mid=g.match.id) }}" method="post" role="form">
+    <form action="{{ url_for('match', mid=g.match.id) }}" method="post" role="form">
         <div class="row">
             <div class="col-xs-6 text-center">
                 <button type="submit" class="btn-new-game" name="new_match" value="start_game">Start New Game</button>
