@@ -4,6 +4,7 @@ from flask import g, session, render_template, request, redirect, url_for, flash
 from . import app, get_db
 from .database import PermissionsError
 from .database.entities import Tourney, Match, Game, Team, Player
+import json
 
 #decorators
 def validateAccess(f):
@@ -223,15 +224,16 @@ def match():
     
         #get all games for tourney
         g.games = get_db().getGamesByMatchId(g.tourney.id)
+        g.gamesJSON = json.dumps(g.games);
 
         print("Games: {}".format(len(g.games)))
-
+        print("Games JSON: {}".format(g.gamesJSON))
 
         #TODO: handle league selection
         g.league = {"name": "APA Eight Ball"}
 
         if request.method == 'POST':
-            '''Start new Match'''
+            '''Start new Game'''
 
             for game in g.games:
                 if game['in_progress']:
