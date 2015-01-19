@@ -1,5 +1,5 @@
 app for scoring pool tounaments
 
 Init db with dev data:
-> sqlite3 apaApp.db < schema.sql
-> sqlite3 apaApp.db < bootstrap.sql
+> sqlite3 /tmp/poolscore.db < poolscore/database/schema.sql
+> sqlite3 /tmp/poolscore.db < poolscore/database/bootstrap.sql
