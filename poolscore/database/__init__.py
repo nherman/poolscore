@@ -224,7 +224,7 @@ class DbManager():
 
         return self.query_db(SQL, ("Player", account_id, team_str))
 
-    def getNumMartchesForTourney(self, tourney_id):
+    def getNumMatchesForTourney(self, tourney_id):
         SQL = "SELECT count(*) AS count from match m WHERE m.tourney_id = ?"
 
         data = self.query_db(SQL,[tourney_id],one=True)
