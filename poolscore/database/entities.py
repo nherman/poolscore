@@ -1,4 +1,5 @@
-#models
+import json
+
 class Base(object):
     DEFAULT_VALUES = {}
 
@@ -10,7 +11,7 @@ class Base(object):
 
     def __getattr__(self, name):
         if not name in self._data:
-            raise AttributeError("Cannot find attribute " + name + ".")
+            raise AttributeError("Cannot find attribute {}.".format(name))
         return self._data[name]
 
     def __setattr__(self, name, value):
@@ -19,6 +20,15 @@ class Base(object):
         else:
             if "_data" in self.__dict__:
                 self.__dict__["_data"][name] = value
+
+    def __getitem__(self, name):
+        return self.__getattr__(name)
+
+    def __setitem__(self, name, value):
+        self.__setattr__(name, value)
+
+    def toJson(self):
+        return json.dumps(self._data)
 
     @classmethod
     def get_table_name(self):
