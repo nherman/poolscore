@@ -1,6 +1,6 @@
 from datetime import date
 from functools import wraps
-from flask import g, session, render_template, request, redirect, url_for, flash
+from flask import g, session, render_template, request, redirect, url_for, flash, jsonify
 from . import app, get_db
 from .database import PermissionsError
 from .database.entities import Tourney, Match, Game, Team, Player
@@ -224,7 +224,7 @@ def match():
     
         #get all games for tourney
         g.games = get_db().getGamesByMatchId(g.tourney.id)
-        g.gamesJSON = json.dumps(g.games);
+        g.gamesJSON   = json.dumps(g.games);
 
         print("Games: {}".format(len(g.games)))
         print("Games JSON: {}".format(g.gamesJSON))
@@ -251,6 +251,10 @@ def match():
 
                 #store new match in DB
                 game.id = get_db().storeInstance(game, g.user.id)
+
+                #refresh gamesJSON
+                g.games = get_db().getGamesByMatchId(g.tourney.id)
+                g.gamesJSON   = json.dumps(g.games)
 
 
 
@@ -281,7 +285,7 @@ def match():
             error = validate_match_start(request)
             if not error:
                 #get number of current matches
-                numMatches = get_db().getNumMartchesForTourney(g.tourney.id)
+                numMatches = get_db().getNumMatchesForTourney(g.tourney.id)
 
                 #create new match entity
                 m = Match(tourney_id=g.tourney.id,
@@ -306,5 +310,24 @@ def match():
     #Something went wrong - redirect back to rooot
     return redirect(url_for('root'))
 
+@app.route('/tournament/match/game', methods=['POST'])
+@validateAccess
+def game():
+    '''Update Game
+    expects jsonified game object. returns same.'''
 
+    json = request.get_json()
+    game_id = json["id"]
+
+    game = get_db().getInstanceById(Game, game_id, g.user.id)
+
+    for key, value in game._data.items():
+        if key in json:
+            game[key] = json[key]
+
+    get_db().storeInstance(game, g.user.id)
+
+
+    return game.toJson()
+#    return ""
 

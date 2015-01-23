@@ -6,27 +6,45 @@
     <script>
         var gamesJSON = {{g.gamesJSON}};
         function matchModel() {
-            var self = this,
-                games = ko.observableArray(gamesJSON);
+            var self = this;
 
+            self.games = ko.observableArray();
+            for (var i=0;i<gamesJSON.length;i++) {
+                self.games().push(ko.mapping.fromJS(gamesJSON[i]));
+                console.log(gamesJSON[i]);
+            }
 
-        {% if g.games %}
-            {% for game in g.games %}
-            
+            self.addInning = function(game) {
+                game.innings(game.innings()+1)
+                self.saveGame(game);
+            }
+            self.subtractInning = function(game) {
+                if (game.innings() > 0) {
+                    game.innings(game.innings()-1)
+                    self.saveGame(game);
+                }
+            }
 
-
-            {% endfor %}
-        {% endif %}
+            self.saveGame = function(game) {
+                $.ajax("/tournament/match/game", {
+                    "contentType": "application/json; charset=UTF-8",
+                    "type": "POST",
+                    "data": ko.toJSON(game), 
+                    "complete": function(data) {
+                        var i=0, gameUpdate = ko.mapping.fromJSON(data.responseText)
+                        for (;i<self.games().length;i++) {
+                            if (self.games()[i].id() == gameUpdate.id()) {
+                                self.games()[i] = gameUpdate;
+                            }
+                        }
+                    }
+                })
+            }
 
         }
 
-
-        function addInningEventHandler() {
-            console.log(arguments);
-        }
 
         $(function() {
-//            $(".btn-add-inning").click(addInningEventHandler);
             ko.applyBindings(new matchModel());
         });
             
@@ -62,19 +80,18 @@
 
     <div class="games">
         <form data-bind="foreach: {data: games, as: 'game'}">
-            <span data-bind="text: game"></span>
 
-<!--
-            <div class="panel {% if game.in_progress %}panel-primary{% else %}panel-default{% endif %}">
+            <div data-bind="css: {'panel': true, 'panel-primary': game.in_progress, 'panel-default': !game.in_progress}">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Game {{ game.ordinal }}</h3>
-                    {% if game.in_progress %}<div class="in-progress">IN PROGRESS</div>{% endif %}
+                    <h3 class="panel-title">Game <span data-bind="text: game.ordinal"></span></h3>
+                    <div class="in-progress" data-bind="if: game.in_progress">IN PROGRESS</div>
                 </div>
                 <div class="panel-body">
-                <button type="button" class="btn-add-inning" value="add_inning_{{ game.id }}">Add Inning</button>
+                    <span data-bind="text: game.innings">0</span>
+                <button type="button" class="btn-add-inning" data-bind="click: $root.addInning">Add Inning</button>
                 </div>
             </div>
--->
+
         </form>
     </div>
 
