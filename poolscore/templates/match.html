@@ -14,31 +14,8 @@
                 console.log(gamesJSON[i]);
             }
 
-            self.addInning = function(game) {
-                game.innings(game.innings()+1)
-                self.saveGame(game);
-            }
-            self.subtractInning = function(game) {
-                if (game.innings() > 0) {
-                    game.innings(game.innings()-1)
-                    self.saveGame(game);
-                }
-            }
-
-            self.saveGame = function(game) {
-                $.ajax("/tournament/match/game", {
-                    "contentType": "application/json; charset=UTF-8",
-                    "type": "POST",
-                    "data": ko.toJSON(game), 
-                    "complete": function(data) {
-                        var i=0, gameUpdate = ko.mapping.fromJSON(data.responseText)
-                        for (;i<self.games().length;i++) {
-                            if (self.games()[i].id() == gameUpdate.id()) {
-                                self.games()[i] = gameUpdate;
-                            }
-                        }
-                    }
-                })
+            self.gotoGame = function(game) {
+                location.href = "match/game?gid=" + game.id();
             }
 
         }
@@ -81,14 +58,16 @@
     <div class="games">
         <form data-bind="foreach: {data: games, as: 'game'}">
 
-            <div data-bind="css: {'panel': true, 'panel-primary': game.in_progress, 'panel-default': !game.in_progress}">
+            <div data-bind="
+                css: {'panel': true, 'panel-primary': game.in_progress, 'panel-default': !game.in_progress},
+                style: {'cursor': 'pointer'},
+                click: $root.gotoGame">
                 <div class="panel-heading">
                     <h3 class="panel-title">Game <span data-bind="text: game.ordinal"></span></h3>
                     <div class="in-progress" data-bind="if: game.in_progress">IN PROGRESS</div>
                 </div>
                 <div class="panel-body">
                     <span data-bind="text: game.innings">0</span>
-                <button type="button" class="btn-add-inning" data-bind="click: $root.addInning">Add Inning</button>
                 </div>
             </div>
 

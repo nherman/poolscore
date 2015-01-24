@@ -310,9 +310,49 @@ def match():
     #Something went wrong - redirect back to rooot
     return redirect(url_for('root'))
 
-@app.route('/tournament/match/game', methods=['POST'])
+@app.route('/tournament/match/game', methods=['GET'])
 @validateAccess
 def game():
+    '''Game View'''
+
+    error = None
+    if request.args.get('gid'):
+        '''if a game id is passed then try to edit that game'''
+
+        game_id = request.args.get('gid')
+
+        # save entities to context
+        try:
+            g.game = get_db().getInstanceById(Game, game_id, g.user.id)
+            g.match = get_db().getInstanceById(Match, g.game.match_id, g.user.id)
+            g.tourney = get_db().getInstanceById(Tourney, g.match.tourney_id, g.user.id)
+            g.home_team = get_db().getInstanceById(Team, g.tourney.home_team_id, g.user.id)
+            g.away_team = get_db().getInstanceById(Team, g.tourney.away_team_id, g.user.id)
+            g.home_players = get_db().getMatchPlayers(g.match.id, True, g.user.id)
+            g.away_players = get_db().getMatchPlayers(g.match.id, False, g.user.id)
+        except AttributeError:
+            flash("No Match with ID {} found".format(match_id))
+        except PermissionsError:
+            pass
+
+        #TODO: handle league selection
+        g.league = {"name": "APA Eight Ball"}
+
+        if g.match == None or g.tourney == None or g.game == None:
+            return redirect(url_for('tournament'))
+    
+        g.gameJSON   = g.game.toJson();
+
+
+        return render_template('game.html')
+
+    #Something went wrong - redirect back to rooot
+    return redirect(url_for('root'))
+
+
+@app.route('/tournament/match/game', methods=['POST'])
+@validateAccess
+def gameUpdate():
     '''Update Game
     expects jsonified game object. returns same.'''
 

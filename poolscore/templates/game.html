@@ -1,0 +1,143 @@
+{% extends "master.html" %}
+{% set body_class = "tourney-context" %}
+
+{% block script %}
+    {% autoescape false %}
+    <script>
+        var gameJSON = {{g.gameJSON}};
+        function gameModel() {
+            var self = this;
+
+            self.game = ko.mapping.fromJS(gameJSON);
+
+            function increment(obj) {
+                if (typeof obj === "function") {
+                    obj(obj()+1);
+                }
+                self.saveGame();
+            }
+
+            function decrement(obj) {
+                if (typeof obj === "function" && obj() > 0) {
+                    obj(obj()-1);
+                }
+                self.saveGame();
+            }
+
+            self.addInning = function() { increment(self.game.innings); };
+            self.subtractInning = function() { decrement(self.game.innings) };
+            self.addCoach = function() { increment(); };
+            self.subtractCoach = function() { decrement() };
+            self.addSafe = function() { increment(); };
+            self.subtractSafe = function() { decrement() };
+
+            self.endGame = function(winner) {
+
+            };
+
+
+            self.saveGame = function() {
+                $.ajax("/tournament/match/game", {
+                    "contentType": "application/json; charset=UTF-8",
+                    "type": "POST",
+                    "data": ko.toJSON(self.game), 
+                    "complete": function(data) {
+                        /* re-map the entire game object. Ensures client viewmodel matches server-side model */
+                        ko.mapping.fromJSON(data.responseText, self.game);
+                    }
+                })
+            }
+        }
+
+        $(function() {
+            ko.applyBindings(new gameModel());
+        });
+    </script>
+    {% endautoescape %}
+{% endblock %}
+
+{% block body %}
+
+    {% include 'tourney_header.html' %}
+    <h2>Game #{{ g.game.ordinal }} <small class="in-progress" data-bind="if: game.in_progress">IN PROGRESS</small></h2>
+    <h2 class="text-center">Innings: <span data-bind="text: game.innings">0</span></h2>
+    <div class="row" style="margin-bottom:24px;">
+        <div class="col-xs-2 col-xs-offset-4 text-right">
+            <p>
+                <button type="button" class="btn btn-default" data-bind="click: subtractInning"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+            </p>
+        </div>
+        <div class="col-xs-2 text-left">
+            <p>
+                <button type="button" class="btn btn-primary" data-bind="click: addInning"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">HOME<br/><small>{{ g.home_players[0].firstname}} {{ g.home_players[0].lastname}} ({{ g.home_players[0].handicap }})</small></h3>
+                </div>
+                <div class="panel-body">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="break" id="break_home" value="break_home"/>
+                            {{ g.home_players[0].firstname}} Broke
+                        </label>
+                    </div>
+                    <h3>Coaches</h3>
+                    <p class="text-center clearfix">
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractCoach.bind('home')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addCoach.bind('home')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: 0">0</h3>
+                    </p>
+                    <h3>Safes</h3>
+                    <p class="text-center clearfix">
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractSafe.bind('home')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addSafe.bind('home')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: 0">0</h3>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6" data-bind="">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">AWAY<br/><small>{{ g.away_players[0].firstname}} {{ g.away_players[0].lastname}} ({{ g.away_players[0].handicap }})</small></h3>
+                </div>
+                <div class="panel-body">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="break" id="break_away" value="break_away"/>
+                            {{ g.away_players[0].firstname}} Broke
+                        </label>
+                    </div>
+                    <h3>Coaches</h3>
+                    <p class="text-center clearfix">
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractCoach.bind('away')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addCoach.bind('away')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: 0">0</h3>
+                    </p>
+                    <h3>Safes</h3>
+                    <p class="text-center clearfix">
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractSafe.bind('away')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addSafe.bind('away')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: 0">0</h3>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6 text-center">
+            <a class="btn-new-game" href="/tournament/match?mid={{ g.match.id }}">Return to Match</a>
+        </div>
+        <div class="col-xs-6 text-center">
+            <button type="button" class="btn-end-match" data-bind="click: endGame.bind('away')">End Game</button>
+        </div>
+    </div>
+
+{% endblock %}
+
