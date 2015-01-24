@@ -181,3 +181,16 @@ create table game (
 	foreign key(match_id) references match(id)
 );
 
+drop table if exists game_data;
+create table game_data (
+	id integer primary key autoincrement,
+	game_id integer not null,
+	player_id integer not null,
+	label text not null,
+	type text not null,
+	value blob,
+	foreign key(game_id) references game(id)
+	foreign key(player_id) references player(id)
+);
+
+
