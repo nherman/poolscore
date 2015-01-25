@@ -4,6 +4,7 @@ from flask import g, session, render_template, request, redirect, url_for, flash
 from . import app, get_db
 from .database import PermissionsError
 from .database.entities import Tourney, Match, Game, Team, Player
+import rules
 import json
 
 #decorators
@@ -177,8 +178,8 @@ def tournament():
                 t = Tourney(date=now,
                             home_team_id = request.form['home_team'],
                             away_team_id = request.form['away_team'],
-                            ruleset = "8ball",
-                            scoring_method = "apa8ball",
+                            ruleset = "APA8BALL",
+                            scoring_method = "APA8BALL_ENHANCED",
                             in_progress = True)
 
                 #save new tourney
