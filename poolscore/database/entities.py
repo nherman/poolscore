@@ -69,7 +69,6 @@ class Match(Base):
 
 class Game(Base):
     DEFAULT_VALUES = {
-        'innings':          0,
         'in_progress':      True,
         'locked':           False
     }

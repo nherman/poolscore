@@ -267,7 +267,41 @@ class DbManager():
         else:
             return None
 
+    def getGameEvents(self, game_id, events_dict):
+        SQL="SELECT * from game_events WHERE game_id = ?"
+        events = self.query_db(SQL,[game_id])
+
+        for event in events:
+            events_dict[event["name"]] = event["value"]
+
+        return events_dict
+
+    def getGameEvent(self, game_id, event_name, event_tuple):
+        SQL="SELECT value from game_events WHERE game_id = ? AND name = ?"
+
+        data = self.query_db(SQL,[game_id,event_name],one=True)
+
+        if (data == None):
+            return event_tuple[1]
+        else:
+            return data
 
 
+    def setGameEvent(self, game_id, event_name, event_tuple, value):
+        SQL1="SELECT count(*) as count from game_events WHERE game_id = ? AND name = ?"
+        data = self.query_db(SQL1,[game_id,event_name],one=True)
 
+        print("id: {} name: {} count: {}".format(game_id,event_name, data["count"]))
+
+
+        if (data["count"] > 0):
+            SQL2 = "UPDATE game_events SET value = ? WHERE game_id = ? AND name = ?"
+        else:
+            SQL2 = "INSERT INTO game_events (value, game_id, name) VALUES (?, ?, ?)"
+
+
+        if isinstance(value, event_tuple[0]) and (event_tuple[0] != int or value >= 0):
+            self.update_db(SQL2,(value, game_id, event_name))
+        else:
+            raise AttributeError("Event {} requires a value of type {}".format(event_name,event_tuple[0]))
 

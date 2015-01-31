@@ -170,10 +170,6 @@ create table game (
 	date_modified datetime default current_timestamp not null,
 	match_id integer not null,
 	ordinal integer not null,
-	breaker integer,
-	innings integer,
-	win_type text,
-	loss_type text,
 	winner text,
 	in_progress boolean,
 	locked boolean,
@@ -181,16 +177,23 @@ create table game (
 	foreign key(match_id) references match(id)
 );
 
-drop table if exists game_data;
-create table game_data (
+drop table if exists game_events;
+create table game_events (
 	id integer primary key autoincrement,
 	game_id integer not null,
-	player_id integer not null,
-	label text not null,
-	type text not null,
+	name text not null,
 	value blob,
 	foreign key(game_id) references game(id)
-	foreign key(player_id) references player(id)
 );
+
+drop table if exists tourney_events;
+create table tourney_events (
+	id integer primary key autoincrement,
+	tourney_id integer not null,
+	name text not null,
+	value blob,
+	foreign key(tourney_id) references tourney(id)
+);
+
 
 
