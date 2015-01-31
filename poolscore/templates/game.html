@@ -11,33 +11,38 @@
         function gameModel() {
             var self = this;
 
-            self.game = ko.mapping.fromJS(gameJSON);
-            self.events = ko.mapping.fromJS(eventsJSON);
+            /* create closure so subscription callback can capture the event name */
+            function subscriptionCallbackFactory(eventName) {
+                return function(newValue) {
+                    console.log(eventName);
+                    self.updateEvent(eventName,newValue);
+                }
+            }
 
+            /* Add 'x' to an int value like innings, coaches, etc */
             function stepInt(name,x) {
                 var obj = self.events[name], val;
                 if (typeof obj === "function" && typeof x === "number") {
                     val = obj()+x;
                     if (val >= 0) {
                         obj(val);
-                        self.updateEvent(name, obj());
                     }
                 }
             }
 
-            self.increment = function(name) {
-                stepInt(name,1);
+            /* game entity */
+            self.game = ko.mapping.fromJS(gameJSON);
+            /* event values for this game */
+            self.events = ko.mapping.fromJS(eventsJSON);
+
+            /* subscriptions update server when event values change */
+            for (key in self.events) {
+                if (ko.isObservable(self.events[key])) {
+                    self.events[key].subscribe(subscriptionCallbackFactory(key));
+                }
             }
 
-            self.decrement = function(name) {
-                stepInt(name,-1);
-            }
-
-            self.endGame = function(winner) {
-
-            };
-
-
+            /* sync server-side game entity values to view model values */
             self.saveGame = function() {
                 $.ajax("/tournament/match/game", {
                     "contentType": "application/json; charset=UTF-8",
@@ -50,14 +55,13 @@
                 })
             };
 
+            /* update server when a game event is recorded */
             self.updateEvent = function(eventName, eventValue) {
                 var data = {
                         "id": self.game.id(),
                         "name": eventName,
                         "value": eventValue
                     };
-
-console.log(data);
 
                 $.ajax("/tournament/match/game/event", {
                     "contentType": "application/json; charset=UTF-8",
@@ -69,6 +73,21 @@ console.log(data);
                 })
 
             };
+
+            /* add one */
+            self.increment = function(name) {
+                stepInt(name,1);
+            }
+
+            /* subtract one */
+            self.decrement = function(name) {
+                stepInt(name,-1);
+            }
+
+            self.endGame = function(winner) {
+
+            };
+
         }
 
         $(function() {
@@ -104,7 +123,7 @@ console.log(data);
                 <div class="panel-body">
                     <div class="radio">
                         <label>
-                            <input type="radio" name="break" id="break_home" value="break_home"/>
+                            <input type="radio" name="break" value="home" data-bind="checked: events.breaker, checkedValue: {{g.home_players[0].id}}"/>
                             {{ g.home_players[0].firstname}} Broke
                         </label>
                     </div>
@@ -131,8 +150,8 @@ console.log(data);
                 <div class="panel-body">
                     <div class="radio">
                         <label>
-                            <input type="radio" name="break" id="break_away" value="break_away"/>
-                            {{ g.away_players[0].firstname}} Broke
+                            <input type="radio" name="break" value="away" data-bind="checked: events.breaker, checkedValue: {{g.away_players[0].id}}"/>
+                            {{ g.away_players[0].firstname}} Broke 
                         </label>
                     </div>
                     <h3>Coaches</h3>
