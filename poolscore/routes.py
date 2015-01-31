@@ -61,7 +61,12 @@ def validate_match_start(req):
 
     return 0
 
+def get_event_defaults(event_dict):
+    event_defaults = {}
+    for key in event_dict:
+        event_defaults[key] = event_dict[key][1]
 
+    return event_defaults
 
 #routes
 @app.route('/login', methods=['GET', 'POST'])
@@ -243,15 +248,23 @@ def match():
             else:
                 #get number of current games
                 numGames = get_db().getNumGamesForMatch(g.match.id)
-                breaker = get_db().getLastGameWinner(g.match.id)
 
                 #create new match entity
                 game = Game(match_id=g.match.id,
-                          ordinal=numGames+1,
-                          breaker=breaker)
+                          ordinal=numGames+1)
 
                 #store new match in DB
                 game.id = get_db().storeInstance(game, g.user.id)
+
+                #set breaker
+                previous_winner = get_db().getLastGameWinner(g.match.id)
+                if (previous_winner != None):
+                    ruleset = rules.RULESETS[g.tourney.ruleset]
+                    if (ruleset.game_events != None and "breaker" in ruleset.game_events):
+                        get_db().setGameEvent(game.id,
+                                              "breaker",
+                                              ruleset.game_events["breaker"],
+                                              get_db().getLastGameWinner(g.match.id))
 
                 #refresh gamesJSON
                 g.games = get_db().getGamesByMatchId(g.tourney.id)
@@ -332,7 +345,8 @@ def game():
             g.home_players = get_db().getMatchPlayers(g.match.id, True, g.user.id)
             g.away_players = get_db().getMatchPlayers(g.match.id, False, g.user.id)
         except AttributeError:
-            flash("No Match with ID {} found".format(match_id))
+            flash("AttributeError.  This probably means the selected game id doesn't exist")
+            return redirect(url_for('root'))
         except PermissionsError:
             pass
 
@@ -342,7 +356,14 @@ def game():
         if g.match == None or g.tourney == None or g.game == None:
             return redirect(url_for('tournament'))
     
-        g.gameJSON   = g.game.toJson();
+        g.gameJSON   = g.game.toJson()
+
+
+        #TODO: create event JSON. returns events values from game_events. gets defaults from ruleset
+        ruleset = rules.RULESETS[g.tourney.ruleset]
+        events = get_db().getGameEvents(g.game.id, get_event_defaults(ruleset.game_events))
+
+        g.eventsJSON = json.dumps(events)
 
 
         return render_template('game.html')
@@ -370,5 +391,30 @@ def gameUpdate():
 
 
     return game.toJson()
-#    return ""
 
+
+@app.route('/tournament/match/game/event', methods=['POST'])
+@validateAccess
+def gameEventUpdate():
+    '''Record Game Event'''
+
+    json = request.get_json()
+    game_id = json["id"]
+    try:
+        g.game = get_db().getInstanceById(Game, game_id, g.user.id)
+        g.match = get_db().getInstanceById(Match, g.game.match_id, g.user.id)
+        g.tourney = get_db().getInstanceById(Tourney, g.match.tourney_id, g.user.id)
+    except AttributeError:
+        return "403"
+    except PermissionsError:
+        return "403"
+
+
+    ruleset = rules.RULESETS[g.tourney.ruleset]
+
+    try:
+        get_db().setGameEvent(game_id, json["name"], ruleset.game_events[json["name"]], json["value"])
+    except AttributeError:
+        return "400"
+
+    return "200"

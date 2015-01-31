@@ -4,32 +4,34 @@
 {% block script %}
     {% autoescape false %}
     <script>
-        var gameJSON = {{g.gameJSON}};
+        var gameJSON = {{g.gameJSON}},
+            eventsJSON = {{g.eventsJSON}};
+
+            console.log(eventsJSON);
         function gameModel() {
             var self = this;
 
             self.game = ko.mapping.fromJS(gameJSON);
+            self.events = ko.mapping.fromJS(eventsJSON);
 
-            function increment(obj) {
-                if (typeof obj === "function") {
-                    obj(obj()+1);
+            function stepInt(name,x) {
+                var obj = self.events[name], val;
+                if (typeof obj === "function" && typeof x === "number") {
+                    val = obj()+x;
+                    if (val >= 0) {
+                        obj(val);
+                        self.updateEvent(name, obj());
+                    }
                 }
-                self.saveGame();
             }
 
-            function decrement(obj) {
-                if (typeof obj === "function" && obj() > 0) {
-                    obj(obj()-1);
-                }
-                self.saveGame();
+            self.increment = function(name) {
+                stepInt(name,1);
             }
 
-            self.addInning = function() { increment(self.game.innings); };
-            self.subtractInning = function() { decrement(self.game.innings) };
-            self.addCoach = function() { increment(); };
-            self.subtractCoach = function() { decrement() };
-            self.addSafe = function() { increment(); };
-            self.subtractSafe = function() { decrement() };
+            self.decrement = function(name) {
+                stepInt(name,-1);
+            }
 
             self.endGame = function(winner) {
 
@@ -46,7 +48,27 @@
                         ko.mapping.fromJSON(data.responseText, self.game);
                     }
                 })
-            }
+            };
+
+            self.updateEvent = function(eventName, eventValue) {
+                var data = {
+                        "id": self.game.id(),
+                        "name": eventName,
+                        "value": eventValue
+                    };
+
+console.log(data);
+
+                $.ajax("/tournament/match/game/event", {
+                    "contentType": "application/json; charset=UTF-8",
+                    "type": "POST",
+                    "data": ko.toJSON(data), 
+                    "error": function(data) {
+                        console.log(data);
+                    }
+                })
+
+            };
         }
 
         $(function() {
@@ -60,16 +82,16 @@
 
     {% include 'tourney_header.html' %}
     <h2>Game #{{ g.game.ordinal }} <small class="in-progress" data-bind="if: game.in_progress">IN PROGRESS</small></h2>
-    <h2 class="text-center">Innings: <span data-bind="text: game.innings">0</span></h2>
+    <h2 class="text-center">Innings: <span data-bind="text: events.innings">0</span></h2>
     <div class="row" style="margin-bottom:24px;">
         <div class="col-xs-2 col-xs-offset-4 text-right">
             <p>
-                <button type="button" class="btn btn-default" data-bind="click: subtractInning"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                <button type="button" class="btn btn-default" data-bind="click: decrement.bind($data,'innings'), css: {'disabled':events.innings() < 1}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
             </p>
         </div>
         <div class="col-xs-2 text-left">
             <p>
-                <button type="button" class="btn btn-primary" data-bind="click: addInning"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                <button type="button" class="btn btn-primary" data-bind="click: increment.bind($data,'innings')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
             </p>
         </div>
     </div>
@@ -88,15 +110,15 @@
                     </div>
                     <h3>Coaches</h3>
                     <p class="text-center clearfix">
-                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractCoach.bind('home')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
-                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addCoach.bind('home')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-                       <span class="h3" data-bind="text: 0">0</h3>
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: decrement.bind($data,'home_coaches'), css: {'disabled':events.home_coaches() < 1}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: increment.bind($data,'home_coaches')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: events.home_coaches">0</h3>
                     </p>
                     <h3>Safes</h3>
                     <p class="text-center clearfix">
-                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractSafe.bind('home')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
-                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addSafe.bind('home')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-                       <span class="h3" data-bind="text: 0">0</h3>
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: decrement.bind($data,'home_safes'), css: {'disabled':events.home_safes() < 1}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: increment.bind($data,'home_safes')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: events.home_safes">0</h3>
                     </p>
                 </div>
             </div>
@@ -115,15 +137,15 @@
                     </div>
                     <h3>Coaches</h3>
                     <p class="text-center clearfix">
-                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractCoach.bind('away')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
-                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addCoach.bind('away')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-                       <span class="h3" data-bind="text: 0">0</h3>
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: decrement.bind($data,'away_coaches'), css: {'disabled':events.away_coaches() < 1}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: increment.bind($data,'away_coaches')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: events.away_coaches">0</h3>
                     </p>
                     <h3>Safes</h3>
                     <p class="text-center clearfix">
-                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: subtractSafe.bind('away')"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
-                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: addSafe.bind('away')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
-                       <span class="h3" data-bind="text: 0">0</h3>
+                        <button type="button" class="btn btn-default btn-sm pull-left" data-bind="click: decrement.bind($data,'away_safes'), css: {'disabled':events.away_safes() < 1}"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" data-bind="click: increment.bind($data,'away_safes')"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+                       <span class="h3" data-bind="text: events.away_safes">0</h3>
                     </p>
                 </div>
             </div>
