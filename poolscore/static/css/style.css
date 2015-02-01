@@ -6486,6 +6486,15 @@ fieldset[disabled] .tourney-context .btn-end-tourney.active {
   margin-top: -7px;
   font-size: 85%;
 }
+.game-data {
+  position: relative;
+}
+.win-icon {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  color: #f00;
+}
 @-webkit-keyframes pulse {
   0% {
     color: #428bca;

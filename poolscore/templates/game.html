@@ -7,6 +7,7 @@
         var gameJSON = {{g.gameJSON}},
             eventsJSON = {{g.eventsJSON}};
 
+            console.log(gameJSON);
             console.log(eventsJSON);
         function gameModel() {
             var self = this;
@@ -42,8 +43,15 @@
                 }
             }
 
+            /* save game when winner is selected */
+            self.game["winner"].subscribe(function(value) {
+                self.saveGame();
+            });
+
             /* sync server-side game entity values to view model values */
-            self.saveGame = function() {
+            self.saveGame = function(callback) {
+                callback = callback || function() {}
+
                 $.ajax("/tournament/match/game", {
                     "contentType": "application/json; charset=UTF-8",
                     "type": "POST",
@@ -51,6 +59,7 @@
                     "complete": function(data) {
                         /* re-map the entire game object. Ensures client viewmodel matches server-side model */
                         ko.mapping.fromJSON(data.responseText, self.game);
+                        callback();
                     }
                 })
             };
@@ -85,7 +94,12 @@
             }
 
             self.endGame = function(winner) {
-
+                if (self.game["winner"] != null) {
+                    self.game["in_progress"] = false;
+                    self.saveGame(function() {
+                        location.href = "/tournament/match?mid={{ g.match.id }}";
+                    });  
+                }
             };
 
         }
@@ -116,15 +130,22 @@
     </div>
     <div class="row">
         <div class="col-xs-6">
-            <div class="panel panel-default">
+            <div class="panel panel-default game-data">
                 <div class="panel-heading">
                     <h3 class="panel-title">HOME<br/><small>{{ g.home_players[0].firstname}} {{ g.home_players[0].lastname}} ({{ g.home_players[0].handicap }})</small></h3>
+                    <div class="win-icon" data-bind="visible: game.winner() == 'home'"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></div>
                 </div>
                 <div class="panel-body">
                     <div class="radio">
                         <label>
                             <input type="radio" name="break" value="home" data-bind="checked: events.breaker, checkedValue: {{g.home_players[0].id}}"/>
                             {{ g.home_players[0].firstname}} Broke
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="winner" value="home" data-bind="checked: game.winner"/>
+                            {{ g.home_players[0].firstname}} Won
                         </label>
                     </div>
                     <h3>Coaches</h3>
@@ -143,15 +164,22 @@
             </div>
         </div>
         <div class="col-xs-6" data-bind="">
-            <div class="panel panel-default">
+            <div class="panel panel-default game-data">
                 <div class="panel-heading">
                     <h3 class="panel-title">AWAY<br/><small>{{ g.away_players[0].firstname}} {{ g.away_players[0].lastname}} ({{ g.away_players[0].handicap }})</small></h3>
+                    <div class="win-icon" data-bind="visible: game.winner() == 'away'"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></div>
                 </div>
                 <div class="panel-body">
                     <div class="radio">
                         <label>
                             <input type="radio" name="break" value="away" data-bind="checked: events.breaker, checkedValue: {{g.away_players[0].id}}"/>
                             {{ g.away_players[0].firstname}} Broke 
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="winner" value="away" data-bind="checked: game.winner"/>
+                            {{ g.away_players[0].firstname}} Won
                         </label>
                     </div>
                     <h3>Coaches</h3>
@@ -176,7 +204,7 @@
             <a class="btn-new-game" href="/tournament/match?mid={{ g.match.id }}">Return to Match</a>
         </div>
         <div class="col-xs-6 text-center">
-            <button type="button" class="btn-end-match" data-bind="click: endGame.bind('away')">End Game</button>
+            <button type="button" class="btn-end-match" data-bind="click: endGame, css: {'disabled':game.winner() == null}">End Game</button>
         </div>
     </div>
 
