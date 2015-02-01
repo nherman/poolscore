@@ -5,13 +5,18 @@
     {% autoescape false %}
     <script>
         var gamesJSON = {{g.gamesJSON}};
+        var eventsJSON = {{g.eventsJSON}};
+        console.log(eventsJSON);
         function matchModel() {
-            var self = this;
+            var self = this, tmp;
 
             self.games = ko.observableArray();
             for (var i=0;i<gamesJSON.length;i++) {
-                self.games().push(ko.mapping.fromJS(gamesJSON[i]));
-                console.log(gamesJSON[i]);
+                tmp = ko.mapping.fromJS(gamesJSON[i]);
+                console.log(eventsJSON[tmp['id']()])
+                tmp.events = ko.mapping.fromJS(eventsJSON[tmp['id']()]);
+                self.games().push(tmp);
+                console.log(tmp);
             }
 
             self.gotoGame = function(game) {
@@ -59,15 +64,23 @@
         <form data-bind="foreach: {data: games, as: 'game'}">
 
             <div data-bind="
-                css: {'panel': true, 'panel-primary': game.in_progress, 'panel-default': !game.in_progress},
+                css: {'panel': true, 'panel-primary': game.in_progress, 'panel-default': game.in_progress != true},
                 style: {'cursor': 'pointer'},
                 click: $root.gotoGame">
                 <div class="panel-heading">
                     <h3 class="panel-title">Game <span data-bind="text: game.ordinal"></span></h3>
-                    <div class="in-progress" data-bind="if: game.in_progress">IN PROGRESS</div>
+                    <div class="in-progress" data-bind="text: game.in_progress() == 1 ? 'IN PROGRESS' : 'COMPLETE'"></div>
                 </div>
                 <div class="panel-body">
-                    <span data-bind="text: game.innings">0</span>
+                    <ul class="list-inline">
+                        <li>Innings: <strong data-bind="text: game.events.innings">0</strong></li>
+                        <li data-bind="visible: in_progress() != 1">Winner: <strong data-bind="text: game.winner"></strong></li>
+                        <li>Home Coaches: <strong data-bind="text: game.events.home_coaches">0</strong></li>
+                        <li>Away Coaches: <strong data-bind="text: game.events.away_coaches">0</strong></li>
+                        <li>Home Safes: <strong data-bind="text: game.events.home_safes">0</strong></li>
+                        <li>Away Safes: <strong data-bind="text: game.events.away_safes">0</strong></li>
+                    </ul>
+                    
                 </div>
             </div>
 

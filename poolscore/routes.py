@@ -229,11 +229,16 @@ def match():
             return redirect(url_for('tournament', tid=g.tourney.id))
     
         #get all games for tourney
-        g.games = get_db().getGamesByMatchId(g.tourney.id)
-        g.gamesJSON   = json.dumps(g.games);
+        ruleset = rules.RULESETS[g.tourney.ruleset]
+        g.games = get_db().getGamesByMatchId(g.match.id)
+        g.gamesJSON   = json.dumps(g.games)
+        gameEvents = get_db().getGameEventsByMatchId(g.match.id, get_event_defaults(ruleset.game_events))
+        g.eventsJSON = json.dumps(gameEvents)
 
         print("Games: {}".format(len(g.games)))
         print("Games JSON: {}".format(g.gamesJSON))
+        print("Events: {}".format(len(gameEvents)))
+        print("Events JSON: {}".format(g.eventsJSON))
 
         #TODO: handle league selection
         g.league = {"name": "APA Eight Ball"}
@@ -358,8 +363,6 @@ def game():
     
         g.gameJSON   = g.game.toJson()
 
-
-        #TODO: create event JSON. returns events values from game_events. gets defaults from ruleset
         ruleset = rules.RULESETS[g.tourney.ruleset]
         events = get_db().getGameEvents(g.game.id, get_event_defaults(ruleset.game_events))
 

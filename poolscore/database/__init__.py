@@ -200,6 +200,17 @@ class DbManager():
     def getGamesByMatchId(self, match_id):
         return self.query_db('SELECT * from game m WHERE m.match_id = ?',[match_id],one=False)
 
+    def getGameEventsByMatchId(self, match_id, events_dict):
+        game_ids = self.query_db('SELECT id from game m WHERE m.match_id = ?',[match_id],one=False)
+        event_list = {}
+
+        for game in game_ids:
+            event_list[game['id']] = self.getGameEvents(game['id'],events_dict)
+            print(event_list)
+
+
+        return event_list
+
     def getPlayersByAccountIdForTeam(self, account_id, team_id):
         SQL = "SELECT pl.* from player pl \
                JOIN team_player tp ON pl.id = tp.player_id \
@@ -268,13 +279,21 @@ class DbManager():
             return None
 
     def getGameEvents(self, game_id, events_dict):
+        ret = {}
         SQL="SELECT * from game_events WHERE game_id = ?"
+
+        #copy defaults
+        for key in events_dict:
+            ret[key] = events_dict[key]
+
+        #get stored events
         events = self.query_db(SQL,[game_id])
 
+        #update dict with stored values
         for event in events:
-            events_dict[event["name"]] = event["value"]
+            ret[event["name"]] = event["value"]
 
-        return events_dict
+        return ret
 
     def getGameEvent(self, game_id, event_name, event_tuple):
         SQL="SELECT value from game_events WHERE game_id = ? AND name = ?"
