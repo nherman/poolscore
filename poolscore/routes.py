@@ -4,7 +4,7 @@ from flask import g, session, render_template, request, redirect, url_for, flash
 from . import app, get_db
 from .database import PermissionsError
 from .database.entities import Tourney, Match, Game, Team, Player
-import rules
+from rules import RULESETS, SCORING
 import json
 
 #decorators
@@ -67,6 +67,26 @@ def get_event_defaults(event_dict):
         event_defaults[key] = event_dict[key][1]
 
     return event_defaults
+
+def score_match(tourney, match, home_players, away_players):
+    ruleset = RULESETS[tourney.ruleset]
+    handicaps = ruleset.handicaper(home_players[0]['handicap'], away_players[0]['handicap'])
+    games = get_db().getMatchScore(match.id)
+    print("Games: {}".format(games))
+
+    match.home_games = games['HOME']
+    match.away_games = games['AWAY']
+
+    try:
+        scores = SCORING[tourney.scoring_method](match.home_games,handicaps[0],match.away_games,handicaps[1])
+        print("Scores: {}".format(games))
+        match.home_score = scores[0]
+        match.away_score = scores[1]
+    except TypeError:
+        pass
+
+    get_db().storeInstance(match, g.user.id)
+
 
 #routes
 @app.route('/login', methods=['GET', 'POST'])
@@ -162,11 +182,8 @@ def tournament():
                     g.tourney.in_progress = False
                     get_db().storeInstance(g.tourney, g.user.id)
 
-                    try:
-                        if (tourney_id == session["activetourneyid"]):
-                            session.pop('activetourneyid', None)
-                    except KeyError:
-                        pass
+                    if (session.get("activetourneyid") == tourney_id):
+                        session.pop('activetourneyid', None)
 
                     return redirect(url_for('root'))
             except KeyError:
@@ -200,7 +217,7 @@ def tournament():
                             home_team_id = request.form['home_team'],
                             away_team_id = request.form['away_team'],
                             ruleset = "APA8BALL",
-                            scoring_method = "APA8BALL_ENHANCED",
+                            scoring_method = "APA8BALL",
                             in_progress = True)
 
                 #save new tourney
@@ -265,7 +282,7 @@ def match():
                     #set breaker
                     previous_winner = get_db().getLastGameWinner(g.match.id)
                     if (previous_winner != None):
-                        ruleset = rules.RULESETS[g.tourney.ruleset]
+                        ruleset = RULESETS[g.tourney.ruleset]
                         if (ruleset.game_events != None and "breaker" in ruleset.game_events):
                             get_db().setGameEvent(game.id,
                                                   "breaker",
@@ -296,9 +313,15 @@ def match():
             except KeyError:
                 pass
 
+        ruleset = RULESETS[g.tourney.ruleset]
+
+        #Handicaps
+        handicaps = ruleset.handicaper(g.home_players[0]['handicap'], g.away_players[0]['handicap'])
+        g.home_players[0]['games_required'] = handicaps[0]
+        g.away_players[0]['games_required'] = handicaps[1]
+
 
         #get all games for tourney
-        ruleset = rules.RULESETS[g.tourney.ruleset]
         g.games = get_db().getGamesByMatchId(g.match.id)
         g.gamesJSON   = json.dumps(g.games)
         gameEvents = get_db().getGameEventsByMatchId(g.match.id, get_event_defaults(ruleset.game_events))
@@ -361,7 +384,7 @@ def match():
     #Something went wrong - redirect back to rooot
     return redirect(url_for('root'))
 
-@app.route('/tournament/match/game', methods=['GET'])
+@app.route('/tournament/match/game', methods=['GET', 'POST'])
 @validateAccess
 def game():
     '''Game View'''
@@ -387,15 +410,33 @@ def game():
         except PermissionsError:
             pass
 
+
         #TODO: handle league selection
         g.league = {"name": "APA Eight Ball"}
 
         if g.match == None or g.tourney == None or g.game == None:
             return redirect(url_for('tournament'))
     
+
+
+        if request.method == 'POST':
+            try:
+                if (request.form['end_game']):
+                    g.game.in_progress = False
+                    get_db().storeInstance(g.game, g.user.id)
+
+                    #TODO set match score
+                    score_match(g.tourney, g.match, g.home_players, g.away_players)
+
+                    return redirect(url_for('match',mid=g.match.id))
+
+            except KeyError:
+                pass
+
+
         g.gameJSON   = g.game.toJson()
 
-        ruleset = rules.RULESETS[g.tourney.ruleset]
+        ruleset = RULESETS[g.tourney.ruleset]
         events = get_db().getGameEvents(g.game.id, get_event_defaults(ruleset.game_events))
 
         g.eventsJSON = json.dumps(events)
@@ -403,11 +444,12 @@ def game():
 
         return render_template('game.html')
 
+
     #Something went wrong - redirect back to rooot
     return redirect(url_for('root'))
 
 
-@app.route('/tournament/match/game', methods=['POST'])
+@app.route('/tournament/match/game/update', methods=['POST'])
 @validateAccess
 def gameUpdate():
     '''Update Game
@@ -445,7 +487,7 @@ def gameEventUpdate():
         return "403"
 
 
-    ruleset = rules.RULESETS[g.tourney.ruleset]
+    ruleset = RULESETS[g.tourney.ruleset]
 
     try:
         get_db().setGameEvent(game_id, json["name"], ruleset.game_events[json["name"]], json["value"])

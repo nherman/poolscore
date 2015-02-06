@@ -324,3 +324,11 @@ class DbManager():
         else:
             raise AttributeError("Event {} requires a value of type {}".format(event_name,event_tuple[0]))
 
+
+    def getMatchScore(self, match_id):
+        SQL = "SELECT count(*) as games from game WHERE match_id = ? AND winner = ?"
+
+        home = self.query_db(SQL,[match_id,"home"],one=True)
+        away = self.query_db(SQL,[match_id,"away"],one=True)
+
+        return {"HOME":home['games'],"AWAY":away['games']}

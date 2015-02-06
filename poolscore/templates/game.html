@@ -45,14 +45,14 @@
 
             /* save game when winner is selected */
             self.game["winner"].subscribe(function(value) {
+                console.log('update winner');
                 self.saveGame();
             });
 
             /* sync server-side game entity values to view model values */
             self.saveGame = function(callback) {
                 callback = callback || function() {}
-
-                $.ajax("/tournament/match/game", {
+                $.ajax("/tournament/match/game/update", {
                     "contentType": "application/json; charset=UTF-8",
                     "type": "POST",
                     "data": ko.toJSON(self.game), 
@@ -199,14 +199,16 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-xs-6 text-center">
-            <a class="btn-new-game" href="/tournament/match?mid={{ g.match.id }}">Return to Match</a>
+    <form action="{{ url_for('game', gid=g.game.id) }}" method="post" role="form">
+        <div class="row">
+            <div class="col-xs-6 text-center">
+                <a class="btn-new-game" href="/tournament/match?mid={{ g.match.id }}">Return to Match</a>
+            </div>
+            <div class="col-xs-6 text-center">
+                <button type="submit" class="btn-end-match" data-bind="css: {'disabled':game.winner() == null}" name="end_game" value="end_game">End Game</button>
+            </div>
         </div>
-        <div class="col-xs-6 text-center">
-            <button type="button" class="btn-end-match" data-bind="click: endGame, css: {'disabled':game.winner() == null}">End Game</button>
-        </div>
-    </div>
+    </form>
 
 {% endblock %}
 

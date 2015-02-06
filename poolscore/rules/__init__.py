@@ -1,2 +1,2 @@
 from rulesets import RULESETS
-import scoring
+from scoring import SCORING

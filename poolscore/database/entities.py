@@ -53,8 +53,8 @@ class Player(Base):
 
 class Tourney(Base):
     DEFAULT_VALUES = {
-        'home_matches':     0,
-        'away_matches':     0,
+        'home_score':       0,
+        'away_score':       0,
         'in_progress':      True,
         'locked':           False
     }
@@ -63,6 +63,8 @@ class Match(Base):
     DEFAULT_VALUES = {
         'home_games':       0,
         'away_games':       0,
+        'home_score':       0,
+        'away_score':       0,
         'in_progress':      True,
         'locked':           False
     }

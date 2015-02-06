@@ -44,3 +44,9 @@ def APA8BALL(**kwargs):
             p1 = 1
 
     return (p1,p2)
+
+#public
+SCORING = {
+    "STANDARD":STANDARD,
+    "APA8BALL":APA8BALL
+}

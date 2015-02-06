@@ -13,7 +13,7 @@ def APA8BALL(player1, player2):
     ]
 
     if (player1 <= 7 and player1 >=2 and player2 <= 7 and player2 >= 2):
-        return matrix[p1-2][p2-2]
+        return matrix[player1-2][player2-2]
     else:
         raise TypeError
 

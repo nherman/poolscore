@@ -34,7 +34,7 @@ insert into region
 
 insert into division
 	(name, league_id, region_id, ruleset)
-	values ("East Village", 1, 1, "8ball_classic");
+	values ("East Village", 1, 1, "APA8BALL");
 
 insert into team
 	(name, location, league_num, account_id, league_id, division_id)
