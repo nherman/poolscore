@@ -162,12 +162,28 @@ def tournament():
                     g.tourney.in_progress = False
                     get_db().storeInstance(g.tourney, g.user.id)
 
-                    if (tourney_id == session["activetourneyid"]):
-                        session.pop('activetourneyid', None)
+                    try:
+                        if (tourney_id == session["activetourneyid"]):
+                            session.pop('activetourneyid', None)
+                    except KeyError:
+                        pass
+
+                    return redirect(url_for('root'))
             except KeyError:
                 pass
 
-            return redirect(url_for('root'))
+            try:
+                if (request.form['resume_tourney']):
+                    #End the Tourney
+                    #TODO: set winner and prompt confirmation
+                    g.tourney.in_progress = True
+                    get_db().storeInstance(g.tourney, g.user.id)
+
+                    if (tourney_id == None):
+                        session.pop('activetourneyid', str(t.id))
+            except KeyError:
+                pass
+
 
         return render_template('tournament.html')
 
@@ -227,7 +243,60 @@ def match():
             return redirect(url_for('tournament'))
         if (len(g.home_players) == 0 or len(g.home_players) == 0):
             return redirect(url_for('tournament', tid=g.tourney.id))
-    
+
+        #TODO: handle league selection
+        g.league = {"name": "APA Eight Ball"}
+
+        if request.method == 'POST':
+            try:
+                if (request.form['new_game']):
+                    '''Start new Game'''
+
+                    #get number of current games
+                    numGames = get_db().getNumGamesForMatch(g.match.id)
+
+                    #create new match entity
+                    game = Game(match_id=g.match.id,
+                              ordinal=numGames+1)
+
+                    #store new match in DB
+                    game.id = get_db().storeInstance(game, g.user.id)
+
+                    #set breaker
+                    previous_winner = get_db().getLastGameWinner(g.match.id)
+                    if (previous_winner != None):
+                        ruleset = rules.RULESETS[g.tourney.ruleset]
+                        if (ruleset.game_events != None and "breaker" in ruleset.game_events):
+                            get_db().setGameEvent(game.id,
+                                                  "breaker",
+                                                  ruleset.game_events["breaker"],
+                                                  get_db().getLastGameWinner(g.match.id))
+
+                    return redirect(url_for('game', gid=game.id))
+            except KeyError:
+                pass
+
+            try:
+                if (request.form['end_match']):
+                    #TODO: set the winner and in_progress flags
+                    g.match.in_progress = False
+                    get_db().storeInstance(g.match, g.user.id)
+                    return redirect(url_for('tournament',tid=g.tourney.id))
+
+            except KeyError:
+                pass
+
+            try:
+                if (request.form['resume_match']):
+                    #TODO: set the winner and in_progress flags
+                    g.match.in_progress = True
+                    g.match.winner = None
+                    get_db().storeInstance(g.match, g.user.id)
+
+            except KeyError:
+                pass
+
+
         #get all games for tourney
         ruleset = rules.RULESETS[g.tourney.ruleset]
         g.games = get_db().getGamesByMatchId(g.match.id)
@@ -239,43 +308,6 @@ def match():
         print("Games JSON: {}".format(g.gamesJSON))
         print("Events: {}".format(len(gameEvents)))
         print("Events JSON: {}".format(g.eventsJSON))
-
-        #TODO: handle league selection
-        g.league = {"name": "APA Eight Ball"}
-
-        if request.method == 'POST':
-            '''Start new Game'''
-
-            for game in g.games:
-                if game['in_progress']:
-                    flash("You must end the game in progress before starting the next one.")
-                    break
-            else:
-                #get number of current games
-                numGames = get_db().getNumGamesForMatch(g.match.id)
-
-                #create new match entity
-                game = Game(match_id=g.match.id,
-                          ordinal=numGames+1)
-
-                #store new match in DB
-                game.id = get_db().storeInstance(game, g.user.id)
-
-                #set breaker
-                previous_winner = get_db().getLastGameWinner(g.match.id)
-                if (previous_winner != None):
-                    ruleset = rules.RULESETS[g.tourney.ruleset]
-                    if (ruleset.game_events != None and "breaker" in ruleset.game_events):
-                        get_db().setGameEvent(game.id,
-                                              "breaker",
-                                              ruleset.game_events["breaker"],
-                                              get_db().getLastGameWinner(g.match.id))
-
-                #refresh gamesJSON
-                g.games = get_db().getGamesByMatchId(g.tourney.id)
-                g.gamesJSON   = json.dumps(g.games)
-
-
 
         return render_template('match.html')
 

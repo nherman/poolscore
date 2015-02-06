@@ -45,7 +45,11 @@
                 <button type="submit" class="btn-new-match" name="new_match" value="start_match">Start New Match</button>
             </div>
             <div class="col-xs-6 text-center">
+                {% if g.tourney.in_progress %}
                 <button type="submit" class="btn-end-tourney" name="end_tourney" value="end_tourney">End Tournament</button>
+                {% else %}
+                <button type="submit" class="btn-end-tourney" name="resume_tourney" value="resume_tourney">Resume Tournament</button>
+                {% endif %}
             </div>
         </div>
     </form>
