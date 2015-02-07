@@ -136,10 +136,6 @@ class DbManager():
             vals = vals[:-1]
             SQL = "INSERT into {0} ({1}) VALUES ({2})".format(inst.get_table_name(), key_list, vals)
 
-            if inst.__class__ == Match:
-                print(key_list)
-                print(inst._data.values())
-
             id = self.update_db(SQL,inst._data.values())
 
             #record owner in permissions table
