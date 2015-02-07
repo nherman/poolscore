@@ -433,6 +433,18 @@ def game():
             except KeyError:
                 pass
 
+            try:
+                if (request.form['resume_game']):
+                    g.game.in_progress = True
+                    g.game.winner = None
+                    get_db().storeInstance(g.game, g.user.id)
+
+                    #TODO set match score
+                    score_match(g.tourney, g.match, g.home_players, g.away_players)
+
+            except KeyError:
+                pass
+
 
         g.gameJSON   = g.game.toJson()
 
