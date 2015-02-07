@@ -37,7 +37,7 @@ class Base(object):
 
 class Account(Base):
     DEFAULT_VALUES = {
-        'active':           True
+        'active':           1
     }        
 class League(Base):
     pass
@@ -55,8 +55,8 @@ class Tourney(Base):
     DEFAULT_VALUES = {
         'home_score':       0,
         'away_score':       0,
-        'in_progress':      True,
-        'locked':           False
+        'in_progress':      1,
+        'locked':           0
     }
 
 class Match(Base):
@@ -65,12 +65,12 @@ class Match(Base):
         'away_games':       0,
         'home_score':       0,
         'away_score':       0,
-        'in_progress':      True,
-        'locked':           False
+        'in_progress':      1,
+        'locked':           0
     }
 
 class Game(Base):
     DEFAULT_VALUES = {
-        'in_progress':      True,
-        'locked':           False
+        'in_progress':      1,
+        'locked':           0
     }

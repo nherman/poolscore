@@ -179,7 +179,7 @@ def tournament():
                 if (request.form['end_tourney']):
                     #End the Tourney
                     #TODO: set winner and prompt confirmation
-                    g.tourney.in_progress = False
+                    g.tourney.in_progress = 0
                     get_db().storeInstance(g.tourney, g.user.id)
 
                     if (session.get("activetourneyid") == tourney_id):
@@ -193,7 +193,7 @@ def tournament():
                 if (request.form['resume_tourney']):
                     #End the Tourney
                     #TODO: set winner and prompt confirmation
-                    g.tourney.in_progress = True
+                    g.tourney.in_progress = 1
                     get_db().storeInstance(g.tourney, g.user.id)
 
                     if (tourney_id == None):
@@ -218,7 +218,7 @@ def tournament():
                             away_team_id = request.form['away_team'],
                             ruleset = "APA8BALL",
                             scoring_method = "APA8BALL",
-                            in_progress = True)
+                            in_progress = 1)
 
                 #save new tourney
                 t.id = get_db().storeInstance(t, g.user.id)
@@ -296,7 +296,7 @@ def match():
             try:
                 if (request.form['end_match']):
                     #TODO: set the winner and in_progress flags
-                    g.match.in_progress = False
+                    g.match.in_progress = 0
                     get_db().storeInstance(g.match, g.user.id)
                     return redirect(url_for('tournament',tid=g.tourney.id))
 
@@ -306,7 +306,7 @@ def match():
             try:
                 if (request.form['resume_match']):
                     #TODO: set the winner and in_progress flags
-                    g.match.in_progress = True
+                    g.match.in_progress = 1
                     g.match.winner = None
                     get_db().storeInstance(g.match, g.user.id)
 
@@ -422,7 +422,7 @@ def game():
         if request.method == 'POST':
             try:
                 if (request.form['end_game']):
-                    g.game.in_progress = False
+                    g.game.in_progress = 0
                     get_db().storeInstance(g.game, g.user.id)
 
                     #TODO set match score
@@ -435,7 +435,7 @@ def game():
 
             try:
                 if (request.form['resume_game']):
-                    g.game.in_progress = True
+                    g.game.in_progress = 1
                     g.game.winner = None
                     get_db().storeInstance(g.game, g.user.id)
 
