@@ -179,19 +179,16 @@ class DbManager():
         return tourneys
 
     def getMatchesByTourneyId(self, tourney_id):
-        MATCH_SQL = "SELECT * from match m WHERE m.tourney_id = ?"
-        PLAYER_SQL = "SELECT p.* from player p \
+        SQL = "SELECT * from match m WHERE m.tourney_id = ? ORDER BY m.id ASC"
+
+        return self.query_db(SQL,[tourney_id])
+
+    def getPlayersByMatchId(self, match_id, is_home_team):
+        SQL = "SELECT p.* from player p \
                JOIN match_player mp ON p.id = mp.player_id \
                WHERE mp.match_id = ? AND mp.is_home_team = ?"
 
-        matches = self.query_db(MATCH_SQL,[tourney_id])
-
-        for match in matches:
-            match["home_players"] = self.query_db(PLAYER_SQL,(match['id'],True))
-            match["away_players"] = self.query_db(PLAYER_SQL,(match['id'],False))
-
-        return matches
-
+        return self.query_db(SQL,(match_id,is_home_team))
 
     def getGamesByMatchId(self, match_id):
         return self.query_db('SELECT * from game m WHERE m.match_id = ?',[match_id],one=False)

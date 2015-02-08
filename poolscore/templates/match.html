@@ -92,7 +92,7 @@
     </div>
 
     <form action="{{ url_for('match', mid=g.match.id) }}" method="post" role="form">
-        <div class="row">
+        <div class="row" style="margin-bottom:50px;">
             <div class="col-xs-6 text-center">
                 <button type="submit" class="btn-new-game" name="new_game" value="new_game">Start New Game</button>
             </div>
@@ -102,6 +102,11 @@
                 {% else %}
                 <button type="submit" class="btn-end-match" name="resume_match" value="resume_match">Resume Match</button>
                 {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 text-center col-xs-offset-3">
+                <button type="submit" class="btn-delete-game" name="delete_match" value="delete_match">Warning! Delete Match</button>
             </div>
         </div>
     </form>

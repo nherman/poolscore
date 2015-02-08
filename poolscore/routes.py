@@ -164,6 +164,12 @@ def tournament():
         #get all matches for tourney
         g.matches = get_db().getMatchesByTourneyId(g.tourney.id)
 
+        #get players
+        for match in g.matches:
+            match["home_players"] = get_db().getPlayersByMatchId(match['id'],True)
+            match["away_players"] = get_db().getPlayersByMatchId(match['id'],False)
+
+
         #TODO: handle league selection
         g.league = {"name": "APA Eight Ball"}
 
@@ -313,6 +319,26 @@ def match():
             except KeyError:
                 pass
 
+            try:
+                if (request.form['delete_match']):
+                    g.match.tourney_id = -1
+                    get_db().storeInstance(g.match, g.user.id)
+
+                    matches = get_db().getMatchesByTourneyId(g.tourney.id)
+                    ord = 1
+                    for match in matches:
+                        print(match)
+                        match_entity = Match(**match)
+                        print(match_entity)        
+                        match_entity.ordinal = ord
+                        get_db().storeInstance(match_entity, g.user.id)
+                        ord += 1
+
+                    return redirect(url_for('tournament',tid=g.tourney.id))
+
+            except KeyError:
+                pass
+
         ruleset = RULESETS[g.tourney.ruleset]
 
         #Handicaps
@@ -439,8 +465,18 @@ def game():
                     g.game.winner = None
                     get_db().storeInstance(g.game, g.user.id)
 
-                    #TODO set match score
                     score_match(g.tourney, g.match, g.home_players, g.away_players)
+
+            except KeyError:
+                pass
+
+            try:
+                if (request.form['delete_game']):
+                    g.game.match_id = -1
+                    get_db().storeInstance(g.game, g.user.id)
+
+                    score_match(g.tourney, g.match, g.home_players, g.away_players)
+                    return redirect(url_for('match',mid=g.match.id))
 
             except KeyError:
                 pass
