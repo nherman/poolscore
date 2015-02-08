@@ -99,7 +99,7 @@ class DbManager():
             data = self.query_db(statement, (cls.__name__, account_id, id), one=True)
             if (data == None):
                 return None
-            print("Getting {} for ID: {}".format(cls.__name__, id))
+            #print("Getting {} for ID: {}".format(cls.__name__, id))
 
             return cls(**data)
 
@@ -206,8 +206,6 @@ class DbManager():
 
         for game in game_ids:
             event_list[game['id']] = self.getGameEvents(game['id'],events_dict)
-            print(event_list)
-
 
         return event_list
 
@@ -272,7 +270,7 @@ class DbManager():
         SQL="SELECT winner from game g WHERE g.match_id = ? ORDER BY g.ordinal DESC LIMIT 1"
 
         data = self.query_db(SQL,[match_id],one=True)
-
+        print("data['winner']: {}".format(data['winner']))
         if data != None:
             return data['winner']
         else:
@@ -309,9 +307,6 @@ class DbManager():
     def setGameEvent(self, game_id, event_name, event_tuple, value):
         SQL1="SELECT count(*) as count from game_events WHERE game_id = ? AND name = ?"
         data = self.query_db(SQL1,[game_id,event_name],one=True)
-
-        print("id: {} name: {} count: {}".format(game_id,event_name, data["count"]))
-
 
         if (data["count"] > 0):
             SQL2 = "UPDATE game_events SET value = ? WHERE game_id = ? AND name = ?"

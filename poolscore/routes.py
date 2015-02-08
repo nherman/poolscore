@@ -72,14 +72,14 @@ def score_match(tourney, match, home_players, away_players):
     ruleset = RULESETS[tourney.ruleset]
     handicaps = ruleset.handicaper(home_players[0]['handicap'], away_players[0]['handicap'])
     games = get_db().getMatchScore(match.id)
-    print("Games: {}".format(games))
 
     match.home_games = games['HOME']
     match.away_games = games['AWAY']
 
     try:
         scores = SCORING[tourney.scoring_method](match.home_games,handicaps[0],match.away_games,handicaps[1])
-        print("Scores: {}".format(games))
+        print("Scores: {}".format(scores))
+        print(match.home_games,handicaps[0],match.away_games,handicaps[1])
         match.home_score = scores[0]
         match.away_score = scores[1]
     except TypeError:
@@ -290,10 +290,14 @@ def match():
                     if (previous_winner != None):
                         ruleset = RULESETS[g.tourney.ruleset]
                         if (ruleset.game_events != None and "breaker" in ruleset.game_events):
+                            if (previous_winner == 'home'):
+                                breaker_id = g.home_players[0]['id']
+                            else:
+                                breaker_id = g.away_players[0]['id']
                             get_db().setGameEvent(game.id,
                                                   "breaker",
                                                   ruleset.game_events["breaker"],
-                                                  get_db().getLastGameWinner(g.match.id))
+                                                  breaker_id)
 
                     return redirect(url_for('game', gid=game.id))
             except KeyError:
@@ -327,9 +331,7 @@ def match():
                     matches = get_db().getMatchesByTourneyId(g.tourney.id)
                     ord = 1
                     for match in matches:
-                        print(match)
                         match_entity = Match(**match)
-                        print(match_entity)        
                         match_entity.ordinal = ord
                         get_db().storeInstance(match_entity, g.user.id)
                         ord += 1
@@ -352,11 +354,6 @@ def match():
         g.gamesJSON   = json.dumps(g.games)
         gameEvents = get_db().getGameEventsByMatchId(g.match.id, get_event_defaults(ruleset.game_events))
         g.eventsJSON = json.dumps(gameEvents)
-
-        print("Games: {}".format(len(g.games)))
-        print("Games JSON: {}".format(g.gamesJSON))
-        print("Events: {}".format(len(gameEvents)))
-        print("Events JSON: {}".format(g.eventsJSON))
 
         return render_template('match.html')
 
