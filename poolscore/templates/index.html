@@ -12,7 +12,10 @@
             </p>
             {% if tourneys %}
             <p class="text-center">
-                <a href="/tournaments" class="btn btn-primary btn-block btn-lg">Show all Tournaments <span class="badge">{{ tourneys }}</span></a>
+                <a href="/tournaments" class="btn btn-primary btn-block btn-lg">Show all Tournaments 
+                {% if activeTourneys > 0 %}
+                    <span class="badge">{{ activeTourneys }}</span>
+                {% endif %}</a>
             </p>
             {% endif %}
             <p class="text-center">

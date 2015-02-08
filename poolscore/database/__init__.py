@@ -158,8 +158,15 @@ class DbManager():
         return self.query_db('SELECT * from team t WHERE t.account_id = ?',[account_id],one=False)
 
     def getTourneyCountByAccountId(self, account_id):
-        return self.query_db('SELECT count(*) as count from permissions p WHERE p.entity=? AND p.account_id=?',
-            ("Tourney", account_id), one=True)
+        tourney_SQL = "SELECT count(*) as count from permissions p WHERE p.entity=? AND p.account_id=?"
+        total = self.query_db(tourney_SQL, ("Tourney", account_id), one=True)
+
+        active_SQL = "SELECT count(*) as count from tourney t \
+               JOIN permissions p ON t.id = p.row_id \
+               WHERE p.entity=? AND p.account_id=? AND t.in_progress = ?"
+        active = self.query_db(active_SQL, ("Tourney", account_id, 1), one=True)
+
+        return(total['count'], active['count'])
 
     def getTourneyListByAccountId(self, account_id):
         # get tourneys

@@ -116,8 +116,8 @@ def signup():
 @app.route('/')
 @validateAccess
 def root():
-    tourneyCount = get_db().getTourneyCountByAccountId(g.user.id)
-    return render_template('index.html', tourneys = tourneyCount['count'])
+    tourneyCount, activeTourneyCount = get_db().getTourneyCountByAccountId(g.user.id)
+    return render_template('index.html', tourneys = tourneyCount, activeTourneys = activeTourneyCount)
 
 
 @app.route('/account')
