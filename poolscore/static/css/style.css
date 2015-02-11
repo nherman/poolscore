@@ -6548,6 +6548,12 @@ fieldset[disabled] .tourney-context .btn-delete-game.active {
   top: 10px;
   color: #f00;
 }
+.tourney_active_1 a {
+  font-weight: bold;
+}
+.tourney_active_1 span.glyphicon-star {
+  color: #c00;
+}
 @-webkit-keyframes pulse {
   0% {
     color: #428bca;

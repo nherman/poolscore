@@ -171,7 +171,8 @@ class DbManager():
     def getTourneyListByAccountId(self, account_id):
         # get tourneys
         tourneys = self.query_db('SELECT t.id, t.date, t.home_team_id, t.away_team_id, t.in_progress, t.locked \
-            from tourney t JOIN permissions p ON t.id = p.row_id WHERE p.entity=? AND p.account_id=?',
+            from tourney t JOIN permissions p ON t.id = p.row_id WHERE p.entity=? AND p.account_id=? \
+            ORDER BY date DESC',
             ("Tourney", account_id))
 
         # get team names

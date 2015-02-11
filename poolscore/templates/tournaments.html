@@ -7,7 +7,13 @@
     {% if tourneys %}
     <ul>
         {% for tourney in tourneys %}
-        <li><a href="/tournament?tid={{ tourney.id }}">{{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</a><br>{{ tourney.date }}</li>
+        <li class="tourney_active_{{ tourney.in_progress }}">
+            {% if tourney.in_progress == 1 %}
+            <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+            {% endif %}
+            <a href="/tournament?tid={{ tourney.id }}">{{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</a>
+            <br>{{ tourney.date }}
+        </li>
         {% endfor %}
     </ul>
     {% else %}
