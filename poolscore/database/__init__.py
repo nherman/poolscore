@@ -198,11 +198,22 @@ class DbManager():
 
         return self.query_db(SQL,(match_id,is_home_team))
 
-    def getGamesByMatchId(self, match_id):
-        return self.query_db('SELECT * from game m WHERE m.match_id = ?',[match_id],one=False)
+    def getGamesByMatchId(self, account_id, match_id):
+        SQL = "SELECT g.* from game g \
+               JOIN permissions p ON g.id = p.row_id \
+               WHERE p.entity=? AND p.account_id=? \
+               AND g.match_id = ? \
+               ORDER BY g.ordinal DESC"
 
-    def getGameEventsByMatchId(self, match_id, events_dict):
-        game_ids = self.query_db('SELECT id from game m WHERE m.match_id = ?',[match_id],one=False)
+        return self.query_db(SQL,("Game", account_id, match_id),one=False)
+
+    def getGameEventsByMatchId(self, account_id, match_id, events_dict):
+        SQL = "SELECT g.id from game g \
+               JOIN permissions p ON g.id = p.row_id \
+               WHERE p.entity=? AND p.account_id=? \
+               AND g.match_id = ?"
+
+        game_ids = self.query_db(SQL,("Game", account_id, match_id),one=False)
         event_list = {}
 
         for game in game_ids:

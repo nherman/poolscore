@@ -350,9 +350,9 @@ def match():
 
 
         #get all games for tourney
-        g.games = get_db().getGamesByMatchId(g.match.id)
+        g.games = get_db().getGamesByMatchId(g.user.id, g.match.id)
         g.gamesJSON   = json.dumps(g.games)
-        gameEvents = get_db().getGameEventsByMatchId(g.match.id, get_event_defaults(ruleset.game_events))
+        gameEvents = get_db().getGameEventsByMatchId(g.user.id, g.match.id, get_event_defaults(ruleset.game_events))
         g.eventsJSON = json.dumps(gameEvents)
 
         return render_template('match.html')
