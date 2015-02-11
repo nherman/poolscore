@@ -186,10 +186,13 @@ class DbManager():
 
         return tourneys
 
-    def getMatchesByTourneyId(self, tourney_id):
-        SQL = "SELECT * from match m WHERE m.tourney_id = ? ORDER BY m.id ASC"
+    def getMatchesByTourneyId(self, account_id, tourney_id):
+        SQL = "SELECT m.* from match m \
+               JOIN permissions p ON m.id = p.row_id \
+               WHERE p.entity=? AND p.account_id=? \
+               AND m.tourney_id = ? ORDER BY m.id ASC"
 
-        return self.query_db(SQL,[tourney_id])
+        return self.query_db(SQL,("Match", account_id, tourney_id))
 
     def getPlayersByMatchId(self, match_id, is_home_team):
         SQL = "SELECT p.* from player p \

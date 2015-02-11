@@ -82,10 +82,32 @@ def score_match(tourney, match, home_players, away_players):
         print(match.home_games,handicaps[0],match.away_games,handicaps[1])
         match.home_score = scores[0]
         match.away_score = scores[1]
+
+        if(match.home_score > match.away_score):
+            match.winner = 'home'
+        else:
+            match.winner = 'away'
     except TypeError:
+        # no winner yet
         pass
 
     get_db().storeInstance(match, g.user.id)
+
+def score_tourney(tourney, matches=None):
+    h_score = 0
+    a_score = 0
+    if (matches == None):
+        matches = get_db().getMatchesByTourneyId(g.user.id, tourney.id)
+
+    for match in matches:
+        if (match['in_progress'] != 1):
+            h_score += match['home_score']
+            a_score += match['away_score']
+
+    if(tourney.home_score != h_score or tourney.away_score != a_score):
+        tourney.home_score = h_score
+        tourney.away_score = a_score
+        get_db().storeInstance(tourney, g.user.id)
 
 
 #routes
@@ -161,18 +183,6 @@ def tournament():
             return redirect(url_for('tournament'))
     
 
-        #get all matches for tourney
-        g.matches = get_db().getMatchesByTourneyId(g.tourney.id)
-
-        #get players
-        for match in g.matches:
-            match["home_players"] = get_db().getPlayersByMatchId(match['id'],True)
-            match["away_players"] = get_db().getPlayersByMatchId(match['id'],False)
-
-
-        #TODO: handle league selection
-        g.league = {"name": "APA Eight Ball"}
-
         if request.method == 'POST':
             try:
                 if (request.form['new_match']):
@@ -207,6 +217,20 @@ def tournament():
             except KeyError:
                 pass
 
+
+        #get all matches for tourney
+        g.matches = get_db().getMatchesByTourneyId(g.user.id, g.tourney.id)
+
+        score_tourney(g.tourney, g.matches)
+
+        #get players
+        for match in g.matches:
+            match["home_players"] = get_db().getPlayersByMatchId(match['id'],True)
+            match["away_players"] = get_db().getPlayersByMatchId(match['id'],False)
+
+
+        #TODO: handle league selection
+        g.league = {"name": "APA Eight Ball"}
 
         return render_template('tournament.html')
 
@@ -308,6 +332,9 @@ def match():
                     #TODO: set the winner and in_progress flags
                     g.match.in_progress = 0
                     get_db().storeInstance(g.match, g.user.id)
+
+                    score_tourney(g.tourney)
+
                     return redirect(url_for('tournament',tid=g.tourney.id))
 
             except KeyError:
@@ -328,7 +355,7 @@ def match():
                     g.match.tourney_id = -1
                     get_db().storeInstance(g.match, g.user.id)
 
-                    matches = get_db().getMatchesByTourneyId(g.tourney.id)
+                    matches = get_db().getMatchesByTourneyId(g.user.id, g.tourney.id)
                     ord = 1
                     for match in matches:
                         match_entity = Match(**match)
