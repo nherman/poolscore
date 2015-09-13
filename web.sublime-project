@@ -1,0 +1,19 @@
+{
+    "folders":[{
+            "path": ".",
+            "name": "PoolScore",
+            "folder_exclude_patterns": ["out", "dist", "*.egg-info"],
+            "file_exclude_patterns": ["*.sublime-workspace", ".gitignore"]
+        }
+    ],
+    "settings":{
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true
+    },
+    "build_systems":[{
+            "name": "Compile Style.less",
+            "cmd": ["python", "build-less.py"],
+            "working_dir": "${project_path:${folder}}/poolscore"
+        }
+    ]
+}
