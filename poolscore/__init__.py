@@ -9,12 +9,15 @@
     :license: ???, see ??? for more details.
 """
 
+import os
 from datetime import timedelta
 from flask import Flask, g, render_template, session
 from .database import DbManager
 
 app = Flask(__name__)
-app.config.from_object('config')
+#app.config.from_object('config')
+ps_env = os.getenv('PS_ENV', 'Dev') + 'Config'
+app.config.from_object('config.' + ps_env)
 app.permanent_session_lifetime = timedelta(minutes=30)
 
 ###
