@@ -11,7 +11,8 @@
 
 import os
 from datetime import timedelta
-from flask import Flask, g, render_template, session
+from flask import Flask, g, render_template, redirect, url_for, session
+from flask.ext.sqlalchemy import SQLAlchemy
 from .database import DbManager
 
 app = Flask(__name__)
@@ -19,6 +20,10 @@ app = Flask(__name__)
 ps_env = os.getenv('PS_ENV', 'Dev') + 'Config'
 app.config.from_object('config.' + ps_env)
 app.permanent_session_lifetime = timedelta(minutes=30)
+
+# Define the database object which is imported
+# by modules and controllers
+db = SQLAlchemy(app)
 
 ###
 # Attach DB instance to flask context
@@ -52,11 +57,28 @@ def teardown_request(exception):
 # Routes
 ###
 
-# handle 404s
+# HTTP error handling
 @app.errorhandler(404)
 def not_found(error):
     return render_template('404.html'), 404
 
+@app.errorhandler(403)
+def not_found(error):
+    return render_template('403.html'), 403
+
+# Global index page (redirect to the home index)
+@app.route('/', methods = ['GET'])
+def index():
+    return redirect(url_for('home.index'), code = 301)
+
+
+# Import a module using its blueprint handler variable
+from mod_home.controllers import mod_home as home_module
+
+# Register blueprints
+app.register_blueprint(home_module)
+
+
 
 #initialize routes
-from . import routes
+#from . import routes
