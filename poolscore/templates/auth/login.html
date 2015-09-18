@@ -1,11 +1,12 @@
 {% extends "master.html" %}
 {% set body_class = "login-context" %}
 {% block body %}
-  <form action="{{ url_for('login') }}" method=post class="form-horizontal" role="form">
+  <form method="POST" action="." accept-charset="UTF-8" role="form" class="form-horizontal">
+    <span class="hidden">{{ form.csrf_token }}</span>
     <h2>Login</h2>
     {% if error %}<div class="form-group alert alert-danger text-center">{{ error }}</div>{% endif %}
 
-    <div class="form-group form-group-lg">
+    <div class="form-group form-group-lg {%- if form.email.errors or form.email.flags.error %} has-error{% endif %}">
       <label for="username" class="control-label sr-only">Email</label>
       <input type="text"
         class="form-control input-lg"
@@ -14,7 +15,7 @@
         placeholder="Email Address"
         required/>
     </div>
-    <div class="form-group form-group-lg">
+    <div class="form-group form-group- {%- if form.password.errors or form.password.flags.error %} has-error{% endif %}">
       <label for="password" class="control-label sr-only">Password</label>
       <input type="password"
       class="form-control input-lg"
