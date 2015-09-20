@@ -5,7 +5,7 @@ from wtforms.validators import Required
 
 # Define the login form (WTForms)
 class LoginForm(Form):
-    email = TextField('Email Address', [
-        Required(message = 'Forgot your email address?')])
+    username = TextField('Username', [
+        Required(message = 'Forgot your username?')])
     password = PasswordField('Password', [
         Required(message = 'Must provide a password.')])

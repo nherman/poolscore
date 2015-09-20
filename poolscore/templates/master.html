@@ -20,7 +20,17 @@
         <header>
             <div class="container">
                 <a href="/" class="logo">PoolScore</a>
-            </div>
+                <nav>
+                    {% if session.activetourneyid %}
+                    <a href="/tournament?tid={{ session.activetourneyid }}" title="Active Tournament" class="tourney-pulse"><span class="glyphicon glyphicon-exclamation-sign"></span></a>
+                    {% endif %}
+                    <a href="/account" title="Account"><span class="glyphicon glyphicon-cog"></span></a>
+                    {% if not session.activeuser %}
+                    <a href="{{ url_for('auth.login') }}" title="Log in"><span class="glyphicon glyphicon-off"></span></a>
+                    {% else %}
+                    <a href="{{ url_for('auth.logout') }}" title="Log out"><span class="glyphicon glyphicon-off"></span></a>
+                    {% endif %}
+                </nav>            </div>
         </header>
     <div class="container main">
 

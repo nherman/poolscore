@@ -6,13 +6,13 @@
     <h2>Login</h2>
     {% if error %}<div class="form-group alert alert-danger text-center">{{ error }}</div>{% endif %}
 
-    <div class="form-group form-group-lg {%- if form.email.errors or form.email.flags.error %} has-error{% endif %}">
-      <label for="username" class="control-label sr-only">Email</label>
+    <div class="form-group form-group-lg {%- if form.username.errors or form.username.flags.error %} has-error{% endif %}">
+      <label for="username" class="control-label sr-only">Username</label>
       <input type="text"
         class="form-control input-lg"
         id="username"
         name="username" 
-        placeholder="Email Address"
+        placeholder="Username"
         required/>
     </div>
     <div class="form-group form-group- {%- if form.password.errors or form.password.flags.error %} has-error{% endif %}">

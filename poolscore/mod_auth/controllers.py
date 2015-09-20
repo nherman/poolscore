@@ -21,7 +21,7 @@ def remove_if_invalid(response):
 def login():
     form = LoginForm(request.form)
     if form.validate_on_submit():
-        username = form.email.data
+        username = form.username.data
         user = User.query.filter(User.username == username).first()
 
         if user and user.active and user.check_password(form.password.data):
