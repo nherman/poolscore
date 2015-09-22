@@ -1,4 +1,4 @@
-#from poolscore.mod_common.utils import Util
+from poolscore.mod_common.utils import Util
 from poolscore import db
 from poolscore import app
 
@@ -39,8 +39,8 @@ class Session(Base):
 
     def __repr__(self):
         return '<Session %r, %r>' % (self.id, self.session_id)
-'''
+
     @property
     def serialize(self):
         return Util.to_serializable_dict(self, self.__class__)
-'''
+

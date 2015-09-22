@@ -97,3 +97,11 @@ class User(common_models.Base):
             email = self.email,
             username = self.username,
             vcard = self.vcard)
+
+# helper table assigns owner to each entity
+permissions = db.Table('permissions', common_models.Base.metadata,
+    db.Column('entity', db.Text, primary_key = True),
+    db.Column('row_id', db.Integer, primary_key = True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key = True)
+)
+
