@@ -12,6 +12,23 @@ from pytz.exceptions import UnknownTimeZoneError
 from poolscore import app
 from poolscore import db
 
+class ApiError(Exception):
+
+    status_code = 400
+
+    def __init__(self, message, status_code = None, payload = None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        if self.message:
+            rv['message'] = self.message
+        return rv
+
 class SecurityUtil(object):
 
     PASSWORD_HASH_METHOD = 'pbkdf2:sha1'
@@ -131,6 +148,95 @@ class Util(object):
                 else:
                     d[c.name] = v
         return d
+
+    @staticmethod
+    def parse_integer(val, default = 1):
+        try:
+            return int(val)
+        except ValueError:
+            return default
+
+    @staticmethod
+    def build_pager(request):
+        default_page = app.config['PAGER_DEFAULT_PAGE']
+        page = max(Util.parse_integer(request.args.get('page',
+            default_page), default_page), default_page)
+        default_limit = app.config['PAGER_DEFAULT_LIMIT']
+        limit = Util.parse_integer(request.args.get('limit', default_limit), default_limit)
+        if limit > app.config['PAGER_DEFAULT_LIMIT_MAX']:
+            limit = app.config['PAGER_DEFAULT_LIMIT_MAX']
+        order = request.args.get('order', app.config['PAGER_DEFAULT_ORDER_BY_FIELD'])
+        order_fields = order.split(',')
+        order_list = []
+        for field in order_fields:
+            item = field.strip()
+            # Lets see if field ends with desc or asc (name+asc or name+desc).
+            if any(c in item for c in '+ '):
+                name = item[:item.index('+' if '+' in item else ' ')]
+            else:
+                name = item
+            if re.match('^[a-zA-Z0-9_]+$', name):
+                order_list.append(item)
+        if not order_list:
+            order_list.append(app.config['PAGER_DEFAULT_ORDER_BY_FIELD'])
+        return_fields = request.args.get('return_fields', None)
+        return_fields_list = None
+        if return_fields:
+            return_fields_list = return_fields.split(',')
+        search = request.args.get('search', None, type = str)
+        return PagerDict({
+            "page": page,
+            "limit": limit,
+            "offset": (page - 1) * limit,
+            "start": (page - 1) * limit,
+            "stop": (page - 1) * limit + limit - 1,
+            "order": order_list,
+            "search": search,
+            "is_search_request": True if search else False,
+            "return_fields": return_fields_list
+        })
+
+    @staticmethod
+    def paginate_with_pager(klass = None, query = None, pager = None, error_out = False):
+        return Util.paginate(klass, query, pager.page, pager.offset,
+            pager.limit, pager.order, error_out)
+
+    @staticmethod
+    def paginate(klass = None, query = None, page = 1, offset = 0, limit = 10, order = None, error_out = False):
+        if error_out and page < 1:
+            return None
+        order_by_exprs = []
+        if order:
+            if not isinstance(order, list):
+                order = [order]
+            for item in order:
+                order_items = item.split('+' if '+' in item else ' ')
+                name = order_items[0]
+                is_desc = True if len(order_items) == 2 and \
+                    order_items[1].lower() == 'desc' else False
+                for column in inspect(klass).columns:
+                    if column.name == name:
+                        try:
+                            expr = getattr(klass, name)
+                        except AttributeError:
+                            break
+                        if is_desc:
+                            order_by_exprs.append(desc_expr(expr))
+                        else:
+                            order_by_exprs.append(asc_expr(expr))
+                        break
+
+        items = query.order_by(*order_by_exprs).limit(
+            limit).offset(offset).all()
+        if not items and page != 1 and error_out:
+            return None
+
+        if page == 1 and len(items) < limit:
+            total = len(items)
+        else:
+            total = query.count()
+        return Pagination(query, page, limit, total, items)
+
 
 # Code blatantly stolen from pyactiveresource and Rails' Inflector
 # https://github.com/rails/activeresource
