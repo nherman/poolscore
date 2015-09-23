@@ -76,11 +76,13 @@ def index():
 from mod_auth.controllers import mod_auth as auth_module
 from mod_home.controllers import mod_home as home_module
 from mod_team.controllers import mod_team as team_module
+from mod_play.controllers import mod_play as play_module
 
 # Register blueprints
 app.register_blueprint(auth_module)
 app.register_blueprint(home_module)
 app.register_blueprint(team_module)
+app.register_blueprint(play_module)
 
 
 

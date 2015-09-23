@@ -36,32 +36,79 @@ class Tourney(common_models.Base):
         return '<Tourney %r, %r, home: %r, away: %r>' % (self.id, self.date, self.home_team_id, self.away_team_id)
 
 
-class Player(common_models.Base):
-    __tablename__ = 'player'
+class Match(common_models.Base):
+    __tablename__ = 'match'
    
-    # First Name
-    first_name = db.Column(db.String(128), nullable = False)
-    # Last Name
-    last_name = db.Column(db.String(128), nullable = True)
-    # Player ID
-    player_id = db.Column(db.String(32), nullable = True)
-    # handicap
-    handicap = db.Column(db.Integer, nullable = False)
+    # Tourney ID
+    tourney_id = db.Column(db.Integer, db.ForeignKey('tourney.id'), nullable = False)
+    # Ordinal - position in touney order that this match occured
+    ordinal = db.Column(db.Integer, nullable = False)
+    # Home Games
+    home_games = db.Column(db.Integer, nullable = False)
+    #Away Games
+    away_games = db.Column(db.Integer, nullable = False)
+    #Home Score
+    home_score = db.Column(db.Integer, nullable = False)
+    #Away Score
+    away_score = db.Column(db.Integer, nullable = False)
+    # Winner (team id)
+    winner_id = db.Column(db.Integer, nullable = True)
+    # Data (?)
+    data = db.Column(db.Text, nullable = True)
 
     # New instance instantiation procedure
-    def __init__(self, first_name = None, last_name = None,
-        player_id = None, handicap = None):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.player_id = player_id
-        self.handicap = handicap
+    def __init__(self, tourney_id = None, ordinal = None):
+        self.tourney_id = tourney_id
+        self.ordinal = ordinal
+        self.home_games = 0
+        self.away_games = 0
+        self.home_score = 0
+        self.away_score = 0
 
     def __repr__(self):
-        return '<Player %r, %r %r>' % (self.id, self.first_name, self.last_name or "")
+        return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
 
-
-# assign players to teams
-team_player = db.Table('team_player', common_models.Base.metadata,
-    db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key = True),
-    db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key = True)
+# assign players to matches
+match_player = db.Table('match_player', common_models.Base.metadata,
+    db.Column('match_id', db.Integer, db.ForeignKey('match.id'), primary_key = True),
+    db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key = True),
+    db.Column('is_home_team', db.Boolean, nullable = False)
 )
+
+class Game(common_models.Base):
+    __tablename__ = 'game'
+
+    #Match ID
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable = False)
+    # Ordinal - position in match order that this game occured
+    ordinal = db.Column(db.Integer, nullable = False)
+    # Winner (team id)
+    winner_id = db.Column(db.Integer, nullable = True)
+    # Data (?)
+    data = db.Column(db.Text, nullable = True)
+
+# record game events
+game_events = db.Table('game_events', common_models.Base.metadata,
+    db.Column('id', db.Integer, primary_key = True),
+    db.Column('game_id', db.Integer, db.ForeignKey('game.id'), nullable = False),
+    db.Column('name', db.Text, nullable = False),
+    db.Column('value', db.Text, nullable = True)
+)
+
+# record match events
+match_events = db.Table('match_events', common_models.Base.metadata,
+    db.Column('id', db.Integer, primary_key = True),
+    db.Column('match_id', db.Integer, db.ForeignKey('match.id'), nullable = False),
+    db.Column('name', db.Text, nullable = False),
+    db.Column('value', db.Text, nullable = True)
+)
+
+# record tourney events
+tourney_events = db.Table('tourney_events', common_models.Base.metadata,
+    db.Column('id', db.Integer, primary_key = True),
+    db.Column('tourney_id', db.Integer, db.ForeignKey('tourney.id'), nullable = False),
+    db.Column('name', db.Text, nullable = False),
+    db.Column('value', db.Text, nullable = True)
+)
+
+
