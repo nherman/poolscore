@@ -20,7 +20,7 @@ def index():
 
 @mod_team.route('/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
-def add_user():
+def add():
     form = TeamForm(request.form)
     if form.validate_on_submit():
         team = Team.query.filter(Team.name == form.name.data).first()
@@ -32,10 +32,41 @@ def add_user():
                 name = form.name.data, 
                 location = form.location.data,
                 team_id = form.team_id.data)
-            team.user_id = session.user_id
+            team.user_id = session["user_id"]
 
             db.session.add(team)
             db.session.commit()
             flash('Team %s has been added' % (team.name), 'success')
             return redirect(url_for('team.index'))
     return render_template("team/add.html", form = form)
+
+@mod_team.route('/<int:id>/', methods = ['GET', 'POST'])
+@SecurityUtil.requires_auth()
+def edit(id):
+    team = Team.query.filter_by(id = id).first()
+    if not team:
+        return render_template('404.html'), 404
+
+    form = TeamForm(request.form)
+    if form.validate_on_submit():
+        existing_team = Team.query.filter(Team.id != id).filter(Team.name == form.name.data).first()
+        if existing_team:
+            flash('A team with name \"%s\"" already exists at location \"%s\"' % existing_team.name, existing_team.location, 'error')
+            return redirect(url_for('team.edit_team', id = id))
+        else:
+            team.name = form.name.data
+            team.location = form.location.data
+            team.team_id = form.team_id.data
+            team.active = True
+
+            db.session.merge(team)
+            db.session.commit()
+
+            flash('Team %s has been saved' % team.name, 'success')
+            return redirect(url_for('team.index'))
+    if request.method == 'GET':
+        form.name.data = team.name
+        form.location.data = team.location
+        form.team_id.data = team.team_id
+
+    return render_template("team/edit.html", form = form, team = team)

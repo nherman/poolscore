@@ -1,10 +1,11 @@
+from sqlalchemy import event
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug import check_password_hash, generate_password_hash
 
 from poolscore import db
 from poolscore.mod_common import models as common_models
-from poolscore.mod_common.utils import Util, ModelUtil
+from poolscore.mod_common.utils import SecurityUtil, Util, ModelUtil
 
 
 def _extract_profile_dict(klass, attributes):
@@ -97,6 +98,22 @@ class User(common_models.Base):
             email = self.email,
             username = self.username,
             vcard = self.vcard)
+
+def _apply_user_model_rules(target):
+    # Rule enforcements
+    if not SecurityUtil.username_allowed(target.username):
+        raise SQLAlchemyError("Username %s not allowed" % target.username)
+    if target.password and not SecurityUtil.is_user_password_hashed(target.password):
+        target.password = generate_password_hash(
+            target.password, method = SecurityUtil.PASSWORD_HASH_METHOD)
+
+@event.listens_for(User, 'before_update')
+def user_before_update_listener(mapper, connection, target):
+    _apply_user_model_rules(target)
+
+@event.listens_for(User, 'before_insert')
+def user_before_update_listener(mapper, connection, target):
+    _apply_user_model_rules(target)
 
 # helper table assigns owner to each entity
 permissions = db.Table('permissions', common_models.Base.metadata,

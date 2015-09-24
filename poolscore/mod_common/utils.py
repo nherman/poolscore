@@ -34,6 +34,20 @@ class SecurityUtil(object):
     PASSWORD_HASH_METHOD = 'pbkdf2:sha1'
 
     @staticmethod
+    def username_allowed(username = None):
+        reserved_usernames = app.config.get('RESERVED_USERNAMES', None)
+        if reserved_usernames and username in reserved_usernames:
+            return False
+        return True
+
+    @staticmethod
+    def is_user_password_hashed(password):
+        if not password:
+            return False
+        return True if password.startswith(SecurityUtil.PASSWORD_HASH_METHOD) and \
+            password.count('$') >= 2 else False
+
+    @staticmethod
     def create_session(user):
         session["user_id"] = user.id
         session["user_name"] = user.first_name

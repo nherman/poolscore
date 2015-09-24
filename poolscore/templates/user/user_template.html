@@ -1,0 +1,50 @@
+{% extends "master.html" %}
+{% set body_class = "root-context" %}
+{% block body %}
+
+    <h1 class="text-center">Users</h1>  
+
+        <h2>{% if user_action == 'edit' %}Edit User {{user.name }}{% else %}Add New User{% endif %}</h2>
+        {% if form.errors %}
+        <div class="alert alert-warning" role="alert">
+            <h5>Please fix the following errors and re-submit:</h5>
+            <ul>
+                {% for field, error in form.errors.items() %}
+                    {% for e in error %}
+                        <li>{{ e }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('user.edit', id = user.id) }}{% else %}.{% endif %}" class="">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                <label for="name">First Name:</label>
+                {{ form.first_name(class = 'form-control', placeholder = 'First Name') }}
+            </div>
+            <div class="form-group">
+                <label for="name">Last Name:</label>
+                {{ form.last_name(class = 'form-control', placeholder = 'Last Name') }}
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                {{ form.email(class = 'form-control', placeholder = "Your Email Address", autofocus = "", type="email") }}
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                {{ form.username(class = 'form-control', placeholder = "Username", autofocus = "") }}
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                {{ form.password(class = 'form-control', placeholder = "Password") }}
+            </div>
+            <div class="form-group">
+                <div class="checkbox">
+                    <label>{{ form.active() }} Active</label>
+                </div>
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
+        </form>
+{% endblock %}

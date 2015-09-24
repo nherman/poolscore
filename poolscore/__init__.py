@@ -79,6 +79,7 @@ from mod_team.controllers import mod_team as team_module
 from mod_play.controllers import mod_play as play_module
 from mod_api.controllers import mod_api as api_module
 from mod_admin.controllers import mod_admin as admin_module
+from mod_user.controllers import mod_user as user_module
 
 # Register blueprints
 app.register_blueprint(auth_module)
@@ -87,6 +88,7 @@ app.register_blueprint(team_module)
 app.register_blueprint(play_module)
 app.register_blueprint(api_module)
 app.register_blueprint(admin_module)
+app.register_blueprint(user_module)
 
 
 

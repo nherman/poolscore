@@ -24,6 +24,14 @@
                 <label for="name">Team Name:</label>
                 {{ form.name(class = 'form-control', placeholder = 'Team Name') }}
             </div>
+            <div class="form-group">
+                <label for="name">Team ID:</label>
+                {{ form.team_id(class = 'form-control', placeholder = 'Team ID') }}
+            </div>
+            <div class="form-group">
+                <label for="name">Location:</label>
+                {{ form.location(class = 'form-control', placeholder = 'Location') }}
+            </div>
             <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
         </form>
 {% endblock %}
