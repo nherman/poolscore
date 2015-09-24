@@ -2,6 +2,21 @@
 {% set body_class = "root-context" %}
 {% block body %}
 
-    <h1 class="text-center">Your Teams</h1>  
+    <h3 class="text-center">All Teams</h3>
+    <a href="add">Add Teams</a>
+
+    {% if teams %}
+    <ul>
+        {% for team in teams %}
+        <li>
+            <a href="/team/{{ team.id }}">{{ team.name }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-center">
+        No Teams Found
+    </p>
+    {% endif %}
 
 {% endblock %}

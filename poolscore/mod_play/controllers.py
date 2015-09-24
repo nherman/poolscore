@@ -14,3 +14,8 @@ mod_play = Blueprint('play', __name__, url_prefix = '/play')
 @SecurityUtil.requires_auth()
 def index():
     return render_template('play/index.html')
+
+@mod_play.route('/<int:id>', methods = ['GET'])
+@SecurityUtil.requires_auth()
+def tournies():
+    return render_template('play/tourney.html')

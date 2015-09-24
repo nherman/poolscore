@@ -15,8 +15,9 @@ class Team(common_models.Base):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     # New instance instantiation procedure
-    def __init__(self, name = None,
+    def __init__(self, user_id = None, name = None,
         team_id = None, location = None):
+        self.user_id = user_id
         self.name = name
         self.team_id = team_id
         self.location = location
