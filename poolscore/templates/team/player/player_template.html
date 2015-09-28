@@ -2,9 +2,9 @@
 {% set body_class = "root-context" %}
 {% block body %}
 
-    <h1 class="text-center">Your Teams</h1>  
+    <h1 class="text-center">Your Players</h1>  
 
-        <h2>{% if user_action == 'edit' %}Edit Team {{team.name }}{% else %}Add New Team{% endif %}</h2>
+        <h2>{% if user_action == 'edit' %}Edit Player {{player.first_name }} {{player.last_name }}{% else %}Add New Player{% endif %}</h2>
         {% if form.errors %}
         <div class="alert alert-warning" role="alert">
             <h5>Please fix the following errors and re-submit:</h5>
@@ -18,23 +18,23 @@
         </div>
         {% endif %}
 
-        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('team.edit', id = team.id) }}{% else %}.{% endif %}" class="">
+        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('team.edit_player', id = player.id) }}{% else %}.{% endif %}" class="">
             {{ form.csrf_token }}
             <div class="form-group">
-                <label for="name">Team Name:</label>
-                {{ form.name(class = 'form-control', placeholder = 'Team Name') }}
+                <label for="first_name">First Name:</label>
+                {{ form.first_name(class = 'form-control', placeholder = 'First Name') }}
             </div>
             <div class="form-group">
-                <label for="name">Team ID:</label>
-                {{ form.team_id(class = 'form-control', placeholder = 'Team ID') }}
+                <label for="last_name">Last Name:</label>
+                {{ form.last_name(class = 'form-control', placeholder = 'Last Name') }}
             </div>
             <div class="form-group">
-                <label for="name">Location:</label>
-                {{ form.location(class = 'form-control', placeholder = 'Location') }}
+                <label for="player_id">Team ID:</label>
+                {{ form.player_id(class = 'form-control', placeholder = 'Player ID') }}
             </div>
             <div class="form-group">
-                <label for="name">Players:</label>
-                {{ form.players(class = 'form-control', placeholder = 'Select Players') }}
+                <label for="handicap">Handicap:</label>
+                {{ form.handicap(class = 'form-control', placeholder = 'Handicap') }}
             </div>
             <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
         </form>

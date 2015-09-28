@@ -2,6 +2,12 @@ from poolscore import db
 from poolscore.mod_common import models as common_models
 from poolscore.mod_common.utils import Util, ModelUtil
 
+# assign players to teams
+team_player = db.Table('team_player', common_models.Base.metadata,
+    db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key = True),
+    db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key = True)
+)
+
 class Team(common_models.Base):
     __tablename__ = 'team'
    
@@ -13,6 +19,9 @@ class Team(common_models.Base):
     location = db.Column(db.String(128), nullable = True)
     # Team owner
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # Team Players
+    players = db.relationship('Player', secondary=team_player,
+        backref=db.backref('teams'))
 
     # New instance instantiation procedure
     def __init__(self, user_id = None, name = None,
@@ -36,6 +45,8 @@ class Player(common_models.Base):
     player_id = db.Column(db.String(32), nullable = True)
     # handicap
     handicap = db.Column(db.Integer, nullable = False)
+    # Player Teams
+    # "teams" (see backref in Team)
 
     # New instance instantiation procedure
     def __init__(self, first_name = None, last_name = None,
@@ -48,9 +59,3 @@ class Player(common_models.Base):
     def __repr__(self):
         return '<Player %r, %r %r>' % (self.id, self.first_name, self.last_name or "")
 
-
-# assign players to teams
-team_player = db.Table('team_player', common_models.Base.metadata,
-    db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key = True),
-    db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key = True)
-)

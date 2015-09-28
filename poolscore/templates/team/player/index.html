@@ -1,0 +1,22 @@
+{% extends "master.html" %}
+{% set body_class = "root-context" %}
+{% block body %}
+
+    <h3 class="text-center">All Players</h3>
+    <a href="add">Add Player</a>
+
+    {% if players %}
+    <ul>
+        {% for player in players %}
+        <li>
+            <a href="/team/player/{{ player.id }}">{{ player.first_name }} {{ player.last_name }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-center">
+        No Players Found
+    </p>
+    {% endif %}
+
+{% endblock %}
