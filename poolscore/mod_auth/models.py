@@ -115,10 +115,3 @@ def user_before_update_listener(mapper, connection, target):
 def user_before_update_listener(mapper, connection, target):
     _apply_user_model_rules(target)
 
-# helper table assigns owner to each entity
-permissions = db.Table('permissions', common_models.Base.metadata,
-    db.Column('entity', db.Text, primary_key = True),
-    db.Column('row_id', db.Integer, primary_key = True),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key = True)
-)
-

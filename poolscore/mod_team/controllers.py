@@ -22,6 +22,8 @@ def index():
 @SecurityUtil.requires_auth()
 def add():
     form = TeamForm(request.form)
+    form.players.choices = [(p.id, "{}, {} ({})".format(p.last_name, p.first_name, p.player_id)) for p in Player.query.all()]
+
     if form.validate_on_submit():
         team = Team.query.filter(Team.name == form.name.data).first()
         if team:
@@ -34,6 +36,13 @@ def add():
                 team_id = form.team_id.data)
             team.user_id = session["user_id"]
 
+            #assign players
+            for player_id in form.players.data:
+                q = Player.query.filter_by(id=player_id)
+                p = q.first()
+                if p:
+                    team.players.append(p)
+
             db.session.add(team)
             db.session.commit()
             flash('Team %s has been added' % (team.name), 'success')
@@ -44,7 +53,6 @@ def add():
 @SecurityUtil.requires_auth()
 def edit(id):
     team = Team.query.filter_by(id = id).first()
-    players = []
 
     if not team:
         return render_template('404.html'), 404
@@ -57,11 +65,20 @@ def edit(id):
             flash('A team with name \"%s\"" already exists at location \"%s\"' % existing_team.name, existing_team.location, 'error')
             return redirect(url_for('team.edit_team', id = id))
         else:
+
             team.name = form.name.data
             team.location = form.location.data
             team.team_id = form.team_id.data
-            #team.players = form.players.data
             team.active = True
+
+            #assign players
+            while team.players:
+                del team.players[0]
+            for player_id in form.players.data:
+                q = Player.query.filter_by(id=player_id)
+                p = q.first()
+                if p:
+                    team.players.append(p)
 
             db.session.merge(team)
             db.session.commit()
@@ -69,10 +86,6 @@ def edit(id):
             flash('Team %s has been saved' % team.name, 'success')
             return redirect(url_for('team.index'))
     if request.method == 'GET':
-
-        print form.players.data
-        #TODO: figure out why selected players aren't being added to team
-
         form.name.data = team.name
         form.location.data = team.location
         form.team_id.data = team.team_id
@@ -92,6 +105,8 @@ def players():
 @SecurityUtil.requires_auth()
 def add_player():
     form = PlayerForm(request.form)
+    form.teams.choices = [(t.id, "{} ({})".format(t.name, t.team_id)) for t in Team.query.all()]
+
     if form.validate_on_submit():
         player = Player.query.filter(Player.player_id == form.player_id.data).first()
         if player:
@@ -103,8 +118,13 @@ def add_player():
                 last_name = form.last_name.data, 
                 player_id = form.player_id.data,
                 handicap = form.handicap.data)
-            #team.user_id = session["user_id"]
-            #create player/team relationship
+
+            #assign teams
+            for team_id in form.teams.data:
+                q = Team.query.filter_by(id=team_id)
+                t = q.first()
+                if t:
+                    player.teams.append(t)
 
             db.session.add(player)
             db.session.commit()
@@ -121,6 +141,7 @@ def edit_player(id):
         return render_template('404.html'), 404
 
     form = PlayerForm(request.form)
+    form.teams.choices = [(t.id, "{} ({})".format(t.name, t.team_id)) for t in Team.query.all()]
     if form.validate_on_submit():
         existing_player = Player.query.filter(Player.id != id).filter(Player.player_id == form.player_id.data).first()
         if existing_player:
@@ -133,6 +154,15 @@ def edit_player(id):
             player.player_id = form.player_id.data
             player.active = True
 
+            #assign teams
+            while player.teams:
+                del player.teams[0]
+            for team_id in form.teams.data:
+                q = Team.query.filter_by(id=team_id)
+                t = q.first()
+                if t:
+                    player.teams.append(t)
+
             db.session.merge(player)
             db.session.commit()
 
@@ -143,5 +173,6 @@ def edit_player(id):
         form.last_name.data = player.last_name
         form.handicap.data = player.handicap
         form.player_id.data = player.player_id
+        form.teams.data = [t.id for t in player.teams]
 
     return render_template("team/player/edit.html", form = form, player = player)

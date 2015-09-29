@@ -14,7 +14,7 @@ mod_user = Blueprint('user', __name__, url_prefix = '/user')
 @mod_user.route('/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def index():
-    users = User.query.all()
+    users = User._all()
 
     return render_template('user/index.html', users = users)
 

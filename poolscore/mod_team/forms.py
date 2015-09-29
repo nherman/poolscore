@@ -15,3 +15,5 @@ class PlayerForm(Form):
     last_name = TextField('Last Name', [Required(message = 'A player needs a Last name.')])
     player_id = TextField('Player ID', [Required(message = 'APA Player ID required.')])
     handicap = TextField('Handicap', [Required(message = 'Handicap required')])
+    teams = SelectMultipleField('Teams', coerce=int)
+
