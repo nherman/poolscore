@@ -14,7 +14,7 @@ mod_team = Blueprint('team', __name__, url_prefix = '/team')
 @mod_team.route('/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def index():
-    teams = Team.query.all()
+    teams = Team._all()
 
     return render_template('team/index.html', teams = teams)
 
@@ -22,7 +22,7 @@ def index():
 @SecurityUtil.requires_auth()
 def add():
     form = TeamForm(request.form)
-    form.players.choices = [(p.id, "{}, {} ({})".format(p.last_name, p.first_name, p.player_id)) for p in Player.query.all()]
+    form.players.choices = [(p.id, "{}, {} ({})".format(p.last_name, p.first_name, p.player_id)) for p in Player._all()]
 
     if form.validate_on_submit():
         team = Team.query.filter(Team.name == form.name.data).first()
@@ -58,7 +58,7 @@ def edit(id):
         return render_template('404.html'), 404
 
     form = TeamForm(request.form)
-    form.players.choices = [(p.id, "{}, {} ({})".format(p.last_name, p.first_name, p.player_id)) for p in Player.query.all()]
+    form.players.choices = [(p.id, "{}, {} ({})".format(p.last_name, p.first_name, p.player_id)) for p in Player._all()]
     if form.validate_on_submit():
         existing_team = Team.query.filter(Team.id != id).filter(Team.name == form.name.data).first()
         if existing_team:
@@ -97,7 +97,7 @@ def edit(id):
 @mod_team.route('/player/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def players():
-    players = Player.query.all()
+    players = Player._all()
 
     return render_template('team/player/index.html', players = players)
 
@@ -105,7 +105,7 @@ def players():
 @SecurityUtil.requires_auth()
 def add_player():
     form = PlayerForm(request.form)
-    form.teams.choices = [(t.id, "{} ({})".format(t.name, t.team_id)) for t in Team.query.all()]
+    form.teams.choices = [(t.id, "{} ({})".format(t.name, t.team_id)) for t in Team._all()]
 
     if form.validate_on_submit():
         player = Player.query.filter(Player.player_id == form.player_id.data).first()
@@ -141,7 +141,7 @@ def edit_player(id):
         return render_template('404.html'), 404
 
     form = PlayerForm(request.form)
-    form.teams.choices = [(t.id, "{} ({})".format(t.name, t.team_id)) for t in Team.query.all()]
+    form.teams.choices = [(t.id, "{} ({})".format(t.name, t.team_id)) for t in Team._all()]
     if form.validate_on_submit():
         existing_player = Player.query.filter(Player.id != id).filter(Player.player_id == form.player_id.data).first()
         if existing_player:

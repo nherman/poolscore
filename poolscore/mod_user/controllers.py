@@ -5,7 +5,8 @@ from poolscore import app
 
 from poolscore.mod_auth.models import User
 from poolscore.mod_user.forms import UserForm
-from poolscore.mod_common.utils import SecurityUtil
+from poolscore.mod_common.models import EntityUser
+from poolscore.mod_common.utils import SecurityUtil, Util
 
 
 
@@ -14,7 +15,8 @@ mod_user = Blueprint('user', __name__, url_prefix = '/user')
 @mod_user.route('/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def index():
-    users = User._all()
+    s = Util.secure_query(User, User.query.order_by(User.last_name))
+    users = s.all()
 
     return render_template('user/index.html', users = users)
 

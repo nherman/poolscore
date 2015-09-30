@@ -251,6 +251,12 @@ class Util(object):
             total = query.count()
         return Pagination(query, page, limit, total, items)
 
+    @staticmethod
+    def secure_query(entityClass = None, query = None):
+        from poolscore.mod_common.models import EntityUser
+        return query.join(EntityUser, entityClass.id == EntityUser.row_id).\
+            filter(entityClass.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id)
+
 
 # Code blatantly stolen from pyactiveresource and Rails' Inflector
 # https://github.com/rails/activeresource

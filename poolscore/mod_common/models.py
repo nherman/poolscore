@@ -31,8 +31,8 @@ class Base(db.Model):
     @classmethod
     def _all(cls):
         '''return all objects the user has permission to view'''
-        return cls.query.join(EntityUser, cls.id == EntityUser.row_id).filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id).all()
-
+        return cls.query.join(EntityUser, cls.id == EntityUser.row_id).\
+            filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id).all()
 
 
 @event.listens_for(Base, 'before_update', propagate=True)
