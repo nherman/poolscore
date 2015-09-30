@@ -29,10 +29,21 @@ class Base(db.Model):
     active = db.Column(db.Boolean, nullable = False, default = True)
 
     @classmethod
-    def _all(cls):
+    def secure_all(cls):
         '''return all objects the user has permission to view'''
+        return cls.secure_query().all()
+
+    @classmethod
+    def secure_query(cls):
+        '''return modified query to filter results based on user permissions'''
+
+        if g._user_auth_token["user_id"] == None:
+            raise PermissionsError
+
         return cls.query.join(EntityUser, cls.id == EntityUser.row_id).\
-            filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id).all()
+            filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id)
+
+
 
 
 @event.listens_for(Base, 'before_update', propagate=True)
