@@ -6082,21 +6082,18 @@ header {
   padding: 0 20px;
   z-index: 1000;
 }
+header .navbar {
+  background-color: transparent;
+}
 header .container {
   top: auto;
   padding: 0;
 }
-header nav {
-  position: absolute;
-  right: 0;
-  top: 6px;
-  font-size: 175%;
-}
-header nav a {
+header .navbar-nav > li > a {
   display: inline-block;
   line-height: 44px;
-  padding: 0 5px;
-  margin-left: 5px;
+  padding: 5px 10px;
+  font-size: 175%;
 }
 header nav a.pulse {
   -webkit-animation: pulse 8s infinite;

@@ -90,6 +90,10 @@ app.register_blueprint(api_module)
 app.register_blueprint(admin_module)
 app.register_blueprint(user_module)
 
+# Register Jinja Globals
+from mod_common.jinja_globals import globals
+for key, fn in globals.items():
+    app.jinja_env.globals[key] = fn
 
 
 #initialize routes

@@ -12,19 +12,29 @@
 </head>
 <body class="{{ body_class }}">
         <header>
-            <div class="container">
-                <a href="/" class="logo">PoolScore</a>
-                <nav>
-                    {% if session.activetourneyid %}
-                    <a href="/tournament?tid={{ session.activetourneyid }}" title="Active Tournament" class="tourney-pulse"><span class="glyphicon glyphicon-exclamation-sign"></span></a>
-                    {% endif %}
-                    <a href="/account" title="Account"><span class="glyphicon glyphicon-cog"></span></a>
-                    {% if not session.activeuser %}
-                    <a href="{{ url_for('auth.login') }}" title="Log in"><span class="glyphicon glyphicon-off"></span></a>
-                    {% else %}
-                    <a href="{{ url_for('auth.logout') }}" title="Log out"><span class="glyphicon glyphicon-off"></span></a>
-                    {% endif %}
-                </nav>            </div>
+            <nav class="navbar">
+                <div class="container">
+                    <div class="navbar-header">
+                        <a class="navbar-brand logo" href="/">PoolScore</a>
+                    </div>
+                    <ul class="nav navbar-nav navbar-right">
+                        <p class="navbar-text">Welcome, {{ session.user_name }}</p>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/team" title="Teams">Teams</a></li>
+                                <li><a href="/team/player" title="Players">Players</a></li>
+                                <li><a href="/user" title="Account">Account</a></li>
+                            </ul>
+                        </li>
+                        {% if not session.logged_in %}
+                        <li><a href="{{ url_for('auth.login') }}" title="Log in"><span class="glyphicon glyphicon-off"></span></a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('auth.logout') }}" title="Log out"><span class="glyphicon glyphicon-off"></span></a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
         </header>
     <div class="container main">
 

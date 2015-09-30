@@ -13,7 +13,7 @@
     "build_systems":[{
             "name": "Compile Style.less",
             "cmd": ["python", "build-less.py"],
-            "working_dir": "${project_path:${folder}}/poolscore"
+            "working_dir": "${project_path:${folder}}/"
         }
     ]
 }
