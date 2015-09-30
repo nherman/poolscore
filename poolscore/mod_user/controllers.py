@@ -8,17 +8,22 @@ from poolscore.mod_user.forms import UserForm
 from poolscore.mod_common.utils import SecurityUtil
 
 
-
 mod_user = Blueprint('user', __name__, url_prefix = '/user')
 
 @mod_user.route('/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def index():
-    users = User.secure_all()
-    return render_template('user/index.html', users = users)
+    if SecurityUtil.is_admin():
+        users = User.query.all()
+        return render_template('user/index.html', users = users)
+    else:
+        id = session.get('user_id', None)
+        return redirect(url_for('user.edit', id = id))
+
 
 @mod_user.route('/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
+@SecurityUtil.requires_admin()
 def add():
     form = UserForm(request.form)
     if form.validate_on_submit():
@@ -39,6 +44,8 @@ def add():
             db.session.add(user)
             db.session.commit()
 
+            user.grant_permission(user.id)
+
             flash('User %s %s has been added' % (user.first_name, user.last_name), 'success')
             return redirect(url_for('user.index'))
     return render_template("user/add.html", form = form)
@@ -46,7 +53,7 @@ def add():
 @mod_user.route('/<int:id>', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 def edit(id):
-    user = User.query.filter_by(id = id).first()
+    user = User.secure_query().filter(User.id == id).first()
     if not user:
         return render_template('404.html'), 404
     form = UserForm(request.form)

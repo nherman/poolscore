@@ -2,9 +2,9 @@ import json
 import re
 from functools import wraps
 
-from flask import request, Response, redirect, \
-                g, url_for, session, abort, jsonify, \
-                json, current_app, make_response
+from flask import request, redirect, \
+                g, url_for, session, \
+                render_template
 from sqlalchemy.sql import text
 from pytz import timezone, utc, all_timezones_set
 from pytz.exceptions import UnknownTimeZoneError
@@ -97,9 +97,22 @@ class SecurityUtil(object):
         return valid
 
     @staticmethod
+    def is_admin(id = None):
+        '''Too lazy to implement roles so let's just make user #1 the default admin'''
+        valid = False
+        if id == None:
+            id = session.get('user_id', None)
+        if id:
+            valid = (id == 1)
+        return valid
+
+    @staticmethod
     def not_authenticated_error_response():
         return redirect(url_for('auth.login'))
 
+    @staticmethod
+    def not_admin_error_response():
+        return render_template('403.html'), 403
 
     @staticmethod
     def requires_auth(**options):
@@ -112,6 +125,17 @@ class SecurityUtil(object):
                 return fn(*args, **kwargs)
             return wrapped
         return requires_auth_decorator
+
+    @staticmethod
+    def requires_admin(**options):
+        def requires_admin_decorator(fn):
+            @wraps(fn)
+            def wrapped(*args, **kwargs):
+                if not SecurityUtil.is_admin():
+                    return SecurityUtil.not_admin_error_response()
+                return fn(*args, **kwargs)
+            return wrapped
+        return requires_admin_decorator
 
 
 class Util(object):

@@ -43,23 +43,33 @@ class Base(db.Model):
         return cls.query.join(EntityUser, cls.id == EntityUser.row_id).\
             filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id)
 
+    def grant_permission(self, user_id, connection = None):
+        if user_id != None:
+            statement = insert(EntityUser).values(entity=self.__class__.__name__, row_id=self.id, user_id=user_id)
 
+            if connection != None:
+                connection.execute(statement)
+            else:
+                connection = db.engine.connect()
+                connection.execute(statement)
+                connection.close()
+
+    def has_permission(self, user_id):
+        if (user_id != None):
+            perms = EntityUser.query.filter_by(entity = self.__class__.__name__, row_id = self.id, user_id = user_id).count()
+            return (perms > 0)
+        return False
 
 
 @event.listens_for(Base, 'before_update', propagate=True)
 def before_update_listener(mapper, connection, target):
-    if (g._user_auth_token["user_id"]):
-        perms = EntityUser.query.filter_by(entity = target.__class__.__name__, row_id = target.id)
-        for p in perms:
-            if p.user_id == g._user_auth_token["user_id"]:
-                return
-    raise PermissionsError()
+    if not target.has_permission(g._user_auth_token["user_id"]):
+        raise PermissionsError()
 
 
 @event.listens_for(Base, 'after_insert', propagate=True)
 def after_insert_listener(mapper, connection, target):
-    statement = insert(EntityUser).values(entity=target.__class__.__name__, row_id=target.id, user_id=g._user_auth_token["user_id"])
-    connection.execute(statement)
+    target.grant_permission(g._user_auth_token["user_id"], connection)
 
 
 class EntityUser(db.Model):

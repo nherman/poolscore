@@ -52,7 +52,7 @@ def add():
 @mod_team.route('/<int:id>/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 def edit(id):
-    team = Team.query.filter_by(id = id).first()
+    team = Team.secure_query().filter(Team.id == id).first()
 
     if not team:
         return render_template('404.html'), 404
@@ -135,7 +135,7 @@ def add_player():
 @mod_team.route('/player/<int:id>/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 def edit_player(id):
-    player = Player.query.filter_by(id = id).first()
+    player = Player.secure_query().filter(Player.id == id).first()
 
     if not player:
         return render_template('404.html'), 404
