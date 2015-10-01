@@ -1,0 +1,24 @@
+{% extends "master.html" %}
+{% set body_class = "tourney-context" %}
+{% block body %}
+
+    {% include "admin/header.html" %}
+
+    <p>
+        <a href="{{ url_for('.tourney_add') }}" class="btn btn-default">Add Tourney</a>
+    </p>
+    {% if tourneys %}
+    <p>
+        <div class="list-group">
+        {% for tourney in tourneys %}
+            <a class="list-group-item{% if tourney.in_progress == 1 %} active{% endif %}" href="{{ url_for('admin.tourney', id = tourney.id) }}">{{ tourney.date }}</a>
+        {% endfor %}
+        </div>
+    </p>
+    {% else %}
+    <p class="text-center">
+        No Tourneys Found
+    </p>
+    {% endif %}
+
+{% endblock %}

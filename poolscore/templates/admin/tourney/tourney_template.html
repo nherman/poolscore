@@ -1,0 +1,85 @@
+{% extends "master.html" %}
+{% set body_class = "root-context" %}
+{% block body %}
+
+    {% include "admin/header.html" %}
+
+    {% if user_action == 'edit' %}
+        <h4>Edit Tourney</h4>
+    {% else %}
+        <h4>Add Tourney</h4>
+    {% endif %}
+
+
+        {% if form.errors %}
+        <p>
+            <div class="alert alert-warning" role="alert">
+                <h5>Please fix the following errors and re-submit:</h5>
+                <ul>
+                    {% for field, error in form.errors.items() %}
+                        {% for e in error %}
+                            <li>{{ e }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </p>
+        {% endif %}
+
+        <p>
+            <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('.tourney', tourney_id = tourney.id) }}{% else %}.{% endif %}" class="">
+                {{ form.csrf_token }}
+                {% if user_action == 'edit' %}
+                <div class="form-group">
+                    <label for="name">Tourney ID: {{ tourney.id }}</label>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="name">Date:</label>
+                    {{ form.date(class = 'form-control', placeholder = 'Date') }}
+                </div>
+                {% if user_action == 'add' %}
+                <div class="form-group">
+                    <label for="name">Home Team:</label>
+                    {{ form.home_team(class = 'form-control', placeholder = 'Home Team') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Away Team:</label>
+                    {{ form.away_team(class = 'form-control', placeholder = 'Away Team') }}
+                </div>
+                {% endif %}
+                {% if user_action == 'edit' %}
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label>{{ form.active() }} Active</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="name">Home Score:</label>
+                    {{ form.home_score(class = 'form-control', placeholder = 'Home Score') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Away Score:</label>
+                    {{ form.away_score(class = 'form-control', placeholder = 'Away Score') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Winner:</label>
+                    {{ form.winner(class = 'form-control', placeholder = 'Winner') }}
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="name">Ruleset:</label>
+                    {{ form.ruleset(class = 'form-control', placeholder = 'Ruleset') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Scoring Method:</label>
+                    {{ form.scoring_method(class = 'form-control', placeholder = 'Scoring Method') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Data:</label>
+                    {{ form.data(class = 'form-control', placeholder = 'data') }}
+                </div>
+                <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
+            </form>
+        </p>
+{% endblock %}

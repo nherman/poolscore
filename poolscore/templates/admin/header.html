@@ -1,0 +1,15 @@
+    <h1 class="text-center">Tourney/Match/Game</h1>
+    <p>
+        <ol class="breadcrumb">
+            <li><a href="{{ url_for('.tourneys') }}">All</a></li>
+            {% if tourney %}
+            <li><a href="{{ url_for('.tourney', tourney_id = tourney.id) }}">Tourney</a></li>
+            {% endif %}
+            {% if match %}
+            <li><a href="{{ url_for('.match', match_id = match.id) }}">Match</a></li>
+            {% endif %}
+            {% if game %}
+            <li><a href="{{ url_for('.game', game_id = game.id) }}">Game</a></li>
+            {% endif %}
+        </ol>
+    </p>
