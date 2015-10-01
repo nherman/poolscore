@@ -2,17 +2,21 @@
 {% set body_class = "root-context" %}
 {% block body %}
 
-    <h3 class="text-center">Users</h3>
-    <a href="add">Add User</a>
-
+    <h1 class="text-center">Users</h1>
+    <p>
+        <ul class="nav nav-tabs">
+            <li role="presentation" class="active"><a href="{{ url_for('user.index') }}">All Users</a></li>
+            <li role="presentation"><a href="{{ url_for('user.add') }}">Add User</a></li>
+        </ul>
+    </p>
     {% if users %}
-    <ul>
+    <p>
+        <div class="list-group">
         {% for user in users %}
-        <li>
-            <a href="/user/{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.id }})</a>
-        </li>
+            <a class="list-group-item" href="/user/{{ user.id }}">{{ user.username }}  ({{ user.id }})<br/>{{ user.last_name }}</a>
         {% endfor %}
-    </ul>
+        </div>
+    </p>
     {% else %}
     <p class="text-center">
         No Users Found

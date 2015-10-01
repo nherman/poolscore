@@ -2,44 +2,63 @@
 {% set body_class = "root-context" %}
 {% block body %}
 
-    <h1 class="text-center">Your Players</h1>  
+    <h1 class="text-center">Teams & Players</h1>  
+    <p>
+        <ul class="nav nav-tabs">
+            <li role="presentation"><a href="{{ url_for('team.index') }}">All Teams</a></li>
+            <li role="presentation"><a href="{{ url_for('team.add') }}">Add Team</a></li>
+            <li role="presentation"{% if user_action == 'add' %} class="active"{% endif %}><a href="{{ url_for('team.players') }}">All Players</a></li>
+            <li role="presentation"><a href="{{ url_for('team.add_player') }}">Add Player</a></li>
+            {% if user_action == 'edit' %}
+            <li role="presentation" class="active"><a href="{{ url_for('team.edit_player',id=player.id) }}">Edit Team</a></li>
+            {% endif %}
+        </ul>
+    </p>
 
-        <h2>{% if user_action == 'edit' %}Edit Player {{player.first_name }} {{player.last_name }}{% else %}Add New Player{% endif %}</h2>
         {% if form.errors %}
-        <div class="alert alert-warning" role="alert">
-            <h5>Please fix the following errors and re-submit:</h5>
-            <ul>
-                {% for field, error in form.errors.items() %}
-                    {% for e in error %}
-                        <li>{{ e }}</li>
+        <p>
+            <div class="alert alert-warning" role="alert">
+                <h5>Please fix the following errors and re-submit:</h5>
+                <ul>
+                    {% for field, error in form.errors.items() %}
+                        {% for e in error %}
+                            <li>{{ e }}</li>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
+                </ul>
+            </div>
+        </p>
         {% endif %}
 
-        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('team.edit_player', id = player.id) }}{% else %}.{% endif %}" class="">
-            {{ form.csrf_token }}
-            <div class="form-group">
-                <label for="first_name">First Name:</label>
-                {{ form.first_name(class = 'form-control', placeholder = 'First Name') }}
-            </div>
-            <div class="form-group">
-                <label for="last_name">Last Name:</label>
-                {{ form.last_name(class = 'form-control', placeholder = 'Last Name') }}
-            </div>
-            <div class="form-group">
-                <label for="player_id">Team ID:</label>
-                {{ form.player_id(class = 'form-control', placeholder = 'Player ID') }}
-            </div>
-            <div class="form-group">
-                <label for="handicap">Handicap:</label>
-                {{ form.handicap(class = 'form-control', placeholder = 'Handicap') }}
-            </div>
-            <div class="form-group">
-                <label for="name">Teams:</label>
-                {{ form.teams(class = 'form-control', placeholder = 'Select Teams') }}
-            </div>
-            <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
-        </form>
+        <p>
+            <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('team.edit_player', id = player.id) }}{% else %}.{% endif %}" class="">
+                {{ form.csrf_token }}
+                {% if user_action == 'edit' %}
+                <div class="form-group">
+                    <label for="name">Player ID: {{ player.id }}</label>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="first_name">First Name:</label>
+                    {{ form.first_name(class = 'form-control', placeholder = 'First Name') }}
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name:</label>
+                    {{ form.last_name(class = 'form-control', placeholder = 'Last Name') }}
+                </div>
+                <div class="form-group">
+                    <label for="player_id">Player ID:</label>
+                    {{ form.player_id(class = 'form-control', placeholder = 'Player ID') }}
+                </div>
+                <div class="form-group">
+                    <label for="handicap">Handicap:</label>
+                    {{ form.handicap(class = 'form-control', placeholder = 'Handicap') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Teams:</label>
+                    {{ form.teams(class = 'form-control', placeholder = 'Select Teams') }}
+                </div>
+                <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
+            </form>
+        </p>
 {% endblock %}

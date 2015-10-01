@@ -2,40 +2,60 @@
 {% set body_class = "root-context" %}
 {% block body %}
 
-    <h1 class="text-center">Your Teams</h1>  
+    <h1 class="text-center">Teams & Players</h1>  
+    <p>
+        <ul class="nav nav-tabs">
+            <li role="presentation"><a href="{{ url_for('team.index') }}">All Teams</a></li>
+            <li role="presentation"{% if user_action == 'add' %} class="active"{% endif %}><a href="{{ url_for('team.add') }}">Add Team</a></li>
+            {% if user_action == 'edit' %}
+            <li role="presentation" class="active"><a href="{{ url_for('team.edit',id=team.id) }}">Edit Team</a></li>
+            {% endif %}
+            <li role="presentation"><a href="{{ url_for('team.players') }}">All Players</a></li>
+            <li role="presentation"><a href="{{ url_for('team.add_player') }}">Add Player</a></li>
 
-        <h2>{% if user_action == 'edit' %}Edit Team {{team.name }}{% else %}Add New Team{% endif %}</h2>
+        </ul>
+    </p>
+
         {% if form.errors %}
-        <div class="alert alert-warning" role="alert">
-            <h5>Please fix the following errors and re-submit:</h5>
-            <ul>
-                {% for field, error in form.errors.items() %}
-                    {% for e in error %}
-                        <li>{{ e }}</li>
+        <p>
+            <div class="alert alert-warning" role="alert">
+                <h5>Please fix the following errors and re-submit:</h5>
+                <ul>
+                    {% for field, error in form.errors.items() %}
+                        {% for e in error %}
+                            <li>{{ e }}</li>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
+                </ul>
+            </div>
+        </p>
         {% endif %}
 
-        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('team.edit', id = team.id) }}{% else %}.{% endif %}" class="">
-            {{ form.csrf_token }}
-            <div class="form-group">
-                <label for="name">Team Name:</label>
-                {{ form.name(class = 'form-control', placeholder = 'Team Name') }}
-            </div>
-            <div class="form-group">
-                <label for="name">Team ID:</label>
-                {{ form.team_id(class = 'form-control', placeholder = 'Team ID') }}
-            </div>
-            <div class="form-group">
-                <label for="name">Location:</label>
-                {{ form.location(class = 'form-control', placeholder = 'Location') }}
-            </div>
-            <div class="form-group">
-                <label for="name">Players:</label>
-                {{ form.players(class = 'form-control', placeholder = 'Select Players') }}
-            </div>
-            <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
-        </form>
+        <p>
+            <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('team.edit', id = team.id) }}{% else %}.{% endif %}" class="">
+                {{ form.csrf_token }}
+                {% if user_action == 'edit' %}
+                <div class="form-group">
+                    <label for="name">Team ID: {{ team.id }}</label>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="name">Team Name:</label>
+                    {{ form.name(class = 'form-control', placeholder = 'Team Name') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Team ID:</label>
+                    {{ form.team_id(class = 'form-control', placeholder = 'Team ID') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Location:</label>
+                    {{ form.location(class = 'form-control', placeholder = 'Location') }}
+                </div>
+                <div class="form-group">
+                    <label for="name">Players:</label>
+                    {{ form.players(class = 'form-control', placeholder = 'Select Players') }}
+                </div>
+                <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
+            </form>
+        </p>
 {% endblock %}

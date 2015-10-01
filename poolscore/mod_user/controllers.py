@@ -63,7 +63,7 @@ def edit(id):
         existing_user = User.query.filter(User.id != id).filter(
             (User.email == form.email.data) | (User.username == form.username.data)).first()
         if existing_user:
-            flash('User with username %s already exists' % existing_user.email, 'error')
+            flash('User with username \'%s\' or email \'%s\' already exists' % existing_user.username, existing_user.email, 'error')
             return redirect(url_for('user.edit', id = id))
         else:
             user.first_name = form.first_name.data

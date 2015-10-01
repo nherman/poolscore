@@ -2,18 +2,23 @@
 {% set body_class = "root-context" %}
 {% block body %}
 
-    <h3 class="text-center">All Teams</h3>
-    <a href="add">Add Teams</a>
-    <a href="player">View players</a>
-
+    <h1 class="text-center">Teams & Players</h1>
+    <p>
+        <ul class="nav nav-tabs">
+            <li role="presentation" class="active"><a href="{{ url_for('team.index') }}">All Teams</a></li>
+            <li role="presentation"><a href="{{ url_for('team.add') }}">Add Team</a></li>
+            <li role="presentation"><a href="{{ url_for('team.players') }}">All Players</a></li>
+            <li role="presentation"><a href="{{ url_for('team.add_player') }}">Add Player</a></li>
+        </ul>
+    </p>
     {% if teams %}
-    <ul>
+    <p>
+        <div class="list-group">
         {% for team in teams %}
-        <li>
-            <a href="/team/{{ team.id }}">{{ team.name }}</a>
-        </li>
+            <a class="list-group-item" href="/team/{{ team.id }}">{{ team.name }}</a>
         {% endfor %}
-    </ul>
+        </div>
+    </p>
     {% else %}
     <p class="text-center">
         No Teams Found
