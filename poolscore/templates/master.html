@@ -25,6 +25,9 @@
                                 <li><a href="/team" title="Teams">Teams</a></li>
                                 <li><a href="/team/player" title="Players">Players</a></li>
                                 <li><a href="/user" title="Account">Account</a></li>
+                                {% if is_admin %}
+                                <li><a href="/admin" title="Admin">Admin</a></li>
+                                {% endif %}
                             </ul>
                         </li>
                         {% if not session.logged_in %}
