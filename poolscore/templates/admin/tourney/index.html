@@ -11,7 +11,7 @@
     <p>
         <div class="list-group">
         {% for tourney in tourneys %}
-            <a class="list-group-item{% if tourney.active == 1 %} active{% endif %}" href="{{ url_for('admin.tourney', tourney_id = tourney.id) }}">{{ tourney.date }}</a>
+            <a class="list-group-item{% if tourney.active == 1 %} active{% endif %}" href="{{ url_for('admin.tourney', tourney_id = tourney.id) }}">{{ tourney.date|datetime }} {{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</a>
         {% endfor %}
         </div>
     </p>

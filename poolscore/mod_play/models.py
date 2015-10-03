@@ -24,6 +24,9 @@ class Tourney(common_models.Base):
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
+    home_team = db.relationship("Team", foreign_keys = [home_team_id])
+    away_team = db.relationship("Team", foreign_keys = [away_team_id])
+
     # New instance instantiation procedure
     def __init__(self, date = None, home_team_id = None, away_team_id = None, ruleset = None, scoring_method = False):
         self.date = date

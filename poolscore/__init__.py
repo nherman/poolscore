@@ -90,10 +90,12 @@ app.register_blueprint(api_module)
 app.register_blueprint(admin_module)
 app.register_blueprint(user_module)
 
-# Register Jinja Globals
-from mod_common.jinja_globals import globals
+# Register Jinja Globals & Custom Filters
+from mod_common.jinja_globals import globals, filters
 for key, fn in globals.items():
     app.jinja_env.globals[key] = fn
+for key, fn in filters.items():
+    app.jinja_env.filters[key] = fn
 
 
 #initialize routes

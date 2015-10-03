@@ -24,6 +24,12 @@ def index():
 def tourneys():
     tourneys = Tourney.query.order_by(Tourney.date_created).all()
 
+    # # get team names
+    # for tourney_obj in tourney_objs:
+    #     tourneys.append((tourney_obj,
+    #         Team.query.filter_by(id=tourney.home_team_id).first()))
+
+
     return render_template('admin/tourney/index.html',
         tourneys = tourneys)
 
