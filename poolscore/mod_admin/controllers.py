@@ -3,6 +3,7 @@ from flask import Blueprint, request, render_template, \
 from poolscore import db
 from poolscore import app
 
+from poolscore.mod_auth.models import User
 from poolscore.mod_team.models import Team, Player
 from poolscore.mod_play.models import Tourney, Match, Game
 from poolscore.mod_common.utils import SecurityUtil
@@ -17,7 +18,7 @@ mod_admin = Blueprint('admin', __name__, url_prefix = '/admin')
 def index():
     return redirect(url_for('.tourneys'))
 
-@mod_admin.route('/tourney', methods = ['GET'])
+@mod_admin.route('/tourney/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def tourneys():
@@ -26,7 +27,7 @@ def tourneys():
     return render_template('admin/tourney/index.html',
         tourneys = tourneys)
 
-@mod_admin.route('/tourney/<int:tourney_id>', methods = ['GET'])
+@mod_admin.route('/tourney/<int:tourney_id>/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def tourney(tourney_id):
@@ -36,20 +37,45 @@ def tourney(tourney_id):
 
     return render_template('admin/tourney/edit.html', tourney = tourney)
 
-@mod_admin.route('/tourney/add', methods = ['GET'])
+@mod_admin.route('/tourney/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def tourney_add():
+    print "tourney_add"
     form = TourneyAddForm(request.form)
-    team_choices = [(t.id, "{} ({})".format(t.name, t.id)) for t in Team.query.all()]
-    form.home_team.choices = team_choices
-    form.away_team.choices = team_choices
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    team_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in Team.query.all()]
+    form.owner_id.choices = user_choices
+    form.home_team_id.choices = team_choices
+    form.away_team_id.choices = team_choices
 
+    if form.validate_on_submit():
+        print "passed validator"
+        tourney = Tourney(
+            date = form.date.data,
+            home_team_id = form.home_team_id.data,
+            away_team_id = form.away_team_id.data,
+            scoring_method = form.scoring_method.data,
+            ruleset = form.ruleset.data)
+
+        if (form.data.data != None):
+            tourney.data = form.data.data
+
+        db.session.add(tourney)
+        db.session.commit()
+
+        if form.owner_id.data != session["user_id"]:
+            owner = User.query.filter_by(id=form.owner_id.data).first()
+            if owner != None:
+                tourney.grant_permission(owner.id)
+
+        flash('Tourney %s vs. %s has been added' % (tourney.home_team_id, tourney.away_team_id), 'success')
+        return redirect(url_for('admin.index'))
 
     return render_template('admin/tourney/add.html', form = form)
 
 
-@mod_admin.route('/tourney/<int:tourney_id>/matches', methods = ['GET'])
+@mod_admin.route('/tourney/<int:tourney_id>/matches/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def matches(tourney_id):
@@ -61,7 +87,7 @@ def matches(tourney_id):
 
     return render_template('admin/match/index.html', tourney = tourney, matches = matches)
 
-@mod_admin.route('/tourney/<int:tourney_id>/add', methods = ['GET'])
+@mod_admin.route('/tourney/<int:tourney_id>/add/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def match_add(tourney_id):
@@ -71,7 +97,7 @@ def match_add(tourney_id):
 
     return render_template('admin/match/add.html', tourney = tourney)
 
-@mod_admin.route('/match/<int:match_id>', methods = ['GET'])
+@mod_admin.route('/match/<int:match_id>/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def match(match_id):

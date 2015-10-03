@@ -6198,6 +6198,9 @@ footer .small {
     top: 25px;
   }
 }
+.container.main {
+  margin-bottom: 50px;
+}
 .login-context .main {
   max-width: 390px;
 }

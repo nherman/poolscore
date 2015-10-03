@@ -1,6 +1,6 @@
 from flask.ext.wtf import Form
 from wtforms import TextField, SelectField, DateField, IntegerField, BooleanField
-from wtforms.validators import Required
+from wtforms.validators import Required, NumberRange
 
 from poolscore import app
 
@@ -11,10 +11,11 @@ class TourneyForm(Form):
     ruleset = TextField('Ruleset', [Required(message = 'Ruleset required')], default="APA8BALL")
     scoring_method = TextField('Scoring Method', [Required(message = 'Scoring method required')], default="APA8BALL")
     data = TextField('Data')
+    owner_id = SelectField('Owner',[Required(message = 'Select Tourney Owner.')], coerce=int, default = 1)
 
 class TourneyAddForm(TourneyForm):
-    home_team = IntegerField('Home Team', [Required(message = 'Select Home Team.')])
-    away_team = IntegerField('Away Team', [Required(message = 'Select Away Team.')])
+    home_team_id = SelectField('Home Team', [NumberRange(min=1,message = 'Select Home Team.')], coerce=int)
+    away_team_id = SelectField('Away Team', [NumberRange(min=1,message = 'Select Away Team.')], coerce=int)
 
 class TourneyEditForm(TourneyForm):
     home_score = IntegerField('Home Score')

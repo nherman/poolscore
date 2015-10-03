@@ -41,11 +41,11 @@
                 {% if user_action == 'add' %}
                 <div class="form-group">
                     <label for="name">Home Team:</label>
-                    {{ form.home_team(class = 'form-control', placeholder = 'Home Team') }}
+                    {{ form.home_team_id(class = 'form-control', placeholder = 'Home Team') }}
                 </div>
                 <div class="form-group">
                     <label for="name">Away Team:</label>
-                    {{ form.away_team(class = 'form-control', placeholder = 'Away Team') }}
+                    {{ form.away_team_id(class = 'form-control', placeholder = 'Away Team') }}
                 </div>
                 {% endif %}
                 {% if user_action == 'edit' %}
@@ -76,8 +76,12 @@
                     {{ form.scoring_method(class = 'form-control', placeholder = 'Scoring Method') }}
                 </div>
                 <div class="form-group">
+                    <label for="name">Owner:</label>
+                    {{ form.owner_id(class = 'form-control', placeholder = 'Owner') }}
+                </div>
+                <div class="form-group">
                     <label for="name">Data:</label>
-                    {{ form.data(class = 'form-control', placeholder = 'data') }}
+                    {{ form.data(class = 'form-control', placeholder = 'Data') }}
                 </div>
                 <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
             </form>

@@ -43,22 +43,32 @@ class Base(db.Model):
         return cls.query.join(EntityUser, cls.id == EntityUser.row_id).\
             filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id)
 
-    def grant_permission(self, user_id, connection = None):
-        if user_id != None:
-            statement = insert(EntityUser).values(entity=self.__class__.__name__, row_id=self.id, user_id=user_id)
-
-            if connection != None:
-                connection.execute(statement)
-            else:
-                connection = db.engine.connect()
-                connection.execute(statement)
-                connection.close()
-
     def has_permission(self, user_id):
         if (user_id != None):
             perms = EntityUser.query.filter_by(entity = self.__class__.__name__, row_id = self.id, user_id = user_id).count()
             return (perms > 0)
         return False
+
+    def grant_permission(self, user_id, connection = None):
+        if user_id != None:
+            existing_permission = EntityUser.query.filter_by(entity=self.__class__.__name__, row_id=self.id, user_id=user_id).first()
+
+            if existing_permission == None:
+                statement = insert(EntityUser).values(entity=self.__class__.__name__, row_id=self.id, user_id=user_id)
+
+                if connection != None:
+                    connection.execute(statement)
+                else:
+                    connection = db.engine.connect()
+                    connection.execute(statement)
+                    connection.close()
+
+    def revoke_permission(self, user_id):
+        if user_id != None and user_id != g._user_auth_token["user_id"]:
+            entityuser = EntityUser.query.filter_by(entity=self.__class__.__name__, row_id=self.id, user_id=user_id).first()
+
+            if entityuser != None:
+                db.session.delete(entityuser)
 
 
 @event.listens_for(Base, 'before_update', propagate=True)
