@@ -28,12 +28,14 @@ class Tourney(common_models.Base):
     away_team = db.relationship("Team", foreign_keys = [away_team_id])
 
     # New instance instantiation procedure
-    def __init__(self, date = None, home_team_id = None, away_team_id = None, ruleset = None, scoring_method = False):
+    def __init__(self, active = True, date = None, home_team_id = None, away_team_id = None, ruleset = None, scoring_method = False, data = None):
+        self.active = active
         self.date = date
         self.home_team_id = home_team_id
         self.away_team_id = away_team_id
         self.ruleset = ruleset
         self.scoring_method = scoring_method
+        self.data = None
 
     def __repr__(self):
         return '<Tourney %r, %r, home: %r, away: %r>' % (self.id, self.date, self.home_team_id, self.away_team_id)
