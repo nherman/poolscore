@@ -50,6 +50,8 @@ def tourney(tourney_id):
     winner_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in teams]
     form.winner.choices = winner_choices
 
+    matches = Match.query.filter_by(tourney_id = tourney.id).all()
+
     if form.validate_on_submit():
         tourney.date = form.date.data
         tourney.ruleset = form.ruleset.data
@@ -85,7 +87,7 @@ def tourney(tourney_id):
         form.active.data = tourney.active
 
 
-    return render_template('admin/tourney/edit.html', tourney = tourney, form = form)
+    return render_template('admin/tourney/edit.html', tourney = tourney, matches = matches, form = form)
 
 @mod_admin.route('/tourney/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()

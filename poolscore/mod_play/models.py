@@ -61,6 +61,12 @@ class Match(common_models.Base):
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
+    home_players = db.relationship('MatchPlayer', \
+                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == True)")
+    away_players = db.relationship('MatchPlayer', \
+                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == False)")
+
+
     # New instance instantiation procedure
     def __init__(self, tourney_id = None, ordinal = None):
         self.tourney_id = tourney_id
@@ -74,11 +80,19 @@ class Match(common_models.Base):
         return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
 
 # assign players to matches
-match_player = db.Table('match_player', common_models.Base.metadata,
-    db.Column('match_id', db.Integer, db.ForeignKey('match.id'), primary_key = True),
-    db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key = True),
-    db.Column('is_home_team', db.Boolean, nullable = False)
-)
+# match_player = db.Table('match_player', common_models.Base.metadata,
+#     db.Column('match_id', db.Integer, db.ForeignKey('match.id'), primary_key = True),
+#     db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key = True),
+#     db.Column('is_home_team', db.Boolean, nullable = False)
+# )
+
+class MatchPlayer(common_models.Base):
+    __tablename__ = 'matchplayer'
+
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
+    is_home_team = db.Column(db.Boolean, nullable = False)
+    player = db.relationship("Player")
 
 class Game(common_models.Base):
     __tablename__ = 'game'

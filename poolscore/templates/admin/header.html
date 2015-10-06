@@ -3,7 +3,7 @@
         <ol class="breadcrumb">
             <li><a href="{{ url_for('.tourneys') }}">All</a></li>
             {% if tourney %}
-            <li><a href="{{ url_for('.tourney', tourney_id = tourney.id) }}">Tourney</a></li>
+            <li><a href="{{ url_for('.tourney', tourney_id = tourney.id) }}">Tourney ({{ tourney.id }})</a></li>
             {% endif %}
             {% if match %}
             <li><a href="{{ url_for('.match', match_id = match.id) }}">Match</a></li>
