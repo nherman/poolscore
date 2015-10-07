@@ -16,7 +16,7 @@ class Tourney(common_models.Base):
     # Scoring Method Name
     scoring_method = db.Column(db.String(128), nullable = False)
     # Winning Team ID
-    winner =  db.Column(db.Integer, nullable = True)
+    winner_id =  db.Column(db.Integer, nullable = True)
     # Home Team Score
     home_score =  db.Column(db.Integer, nullable = True)
     # Away Team Score
@@ -27,6 +27,8 @@ class Tourney(common_models.Base):
     home_team = db.relationship("Team", foreign_keys = [home_team_id])
     away_team = db.relationship("Team", foreign_keys = [away_team_id])
 
+    matches = db.relationship("Match", backref = db.backref("tourney"))
+
     # New instance instantiation procedure
     def __init__(self, active = True, date = None, home_team_id = None, away_team_id = None, ruleset = None, scoring_method = False, data = None):
         self.active = active
@@ -35,7 +37,7 @@ class Tourney(common_models.Base):
         self.away_team_id = away_team_id
         self.ruleset = ruleset
         self.scoring_method = scoring_method
-        self.data = None
+        self.data = data
 
     def __repr__(self):
         return '<Tourney %r, %r, home: %r, away: %r>' % (self.id, self.date, self.home_team_id, self.away_team_id)
@@ -48,10 +50,6 @@ class Match(common_models.Base):
     tourney_id = db.Column(db.Integer, db.ForeignKey('tourney.id'), nullable = False)
     # Ordinal - position in touney order that this match occured
     ordinal = db.Column(db.Integer, nullable = False)
-    # Home Games
-    home_games = db.Column(db.Integer, nullable = False)
-    #Away Games
-    away_games = db.Column(db.Integer, nullable = False)
     #Home Score
     home_score = db.Column(db.Integer, nullable = False)
     #Away Score
@@ -62,19 +60,31 @@ class Match(common_models.Base):
     data = db.Column(db.Text, nullable = True)
 
     home_players = db.relationship('MatchPlayer', \
-                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == True)")
+                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == True)", \
+                   lazy = "dynamic")
     away_players = db.relationship('MatchPlayer', \
-                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == False)")
+                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == False)", \
+                   lazy = "dynamic")
+
+    games = db.relationship("Game", backref = db.backref("match"), lazy = "dynamic")
+
+    # Home Games
+    home_games = db.relationship("Game", \
+                 primaryjoin = "and_(Match.id == Game.match_id, Match.tourney_id == Game.winner_id)", \
+                 lazy = "dynamic")
+    #Away Games
+    home_games = db.relationship("Game", \
+                 primaryjoin = "and_(Match.id == Game.match_id, Match.tourney_id == Game.winner_id)", \
+                 lazy = "dynamic")
 
 
     # New instance instantiation procedure
-    def __init__(self, tourney_id = None, ordinal = None):
+    def __init__(self, tourney_id = None, ordinal = None, data = None):
         self.tourney_id = tourney_id
         self.ordinal = ordinal
-        self.home_games = 0
-        self.away_games = 0
         self.home_score = 0
         self.away_score = 0
+        self.data = None
 
     def __repr__(self):
         return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
@@ -93,6 +103,15 @@ class MatchPlayer(common_models.Base):
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
     is_home_team = db.Column(db.Boolean, nullable = False)
     player = db.relationship("Player")
+
+    # New instance instantiation procedure
+    def __init__(self, match_id = None, player_id = None, is_home_team = None):
+        self.match_id = match_id
+        self.player_id = player_id
+        self.is_home_team = is_home_team
+
+    def __repr__(self):
+        return '<MatchPlayer match: %r, player: %r, home: %r>' % (self.match_id, self.player_id, self.is_home_team)
 
 class Game(common_models.Base):
     __tablename__ = 'game'

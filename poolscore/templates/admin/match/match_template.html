@@ -4,7 +4,7 @@
 
     {% include "admin/header.html" %}
 
-    {% block tourney_header %}{% endblock %}
+    {% block match_header %}{% endblock %}
 
 
     {% if form.errors %}
@@ -23,22 +23,18 @@
     {% endif %}
 
     <p>
-        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('.tourney', tourney_id = tourney.id) }}{% else %}.{% endif %}" class="">
+        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('.match', match_id = match.id) }}{% else %}.{% endif %}" class="">
             {{ form.csrf_token }}
             {% if user_action == 'add' %}
             <div class="form-group">
-                <label for="name">Home Team:</label>
-                {{ form.home_team_id(class = 'form-control', placeholder = 'Home Team') }}
+                <label for="name">Home Player(s):</label>
+                {{ form.home_players(class = 'form-control', placeholder = 'Home Player(s)') }}
             </div>
             <div class="form-group">
-                <label for="name">Away Team:</label>
-                {{ form.away_team_id(class = 'form-control', placeholder = 'Away Team') }}
+                <label for="name">Away Player(s):</label>
+                {{ form.away_players(class = 'form-control', placeholder = 'Away Player(s)') }}
             </div>
             {% endif %}
-            <div class="form-group">
-                <label for="name">Date:</label>
-                {{ form.date(class = 'form-control', placeholder = 'Date') }}
-            </div>
             {% if user_action == 'edit' %}
             <div class="form-group">
                 <div class="checkbox">
@@ -55,17 +51,9 @@
             </div>
             <div class="form-group">
                 <label for="name">Winner:</label>
-                {{ form.winner_id(class = 'form-control', placeholder = 'Winner') }}
+                {{ form.winner(class = 'form-control', placeholder = 'Winner') }}
             </div>
             {% endif %}
-            <div class="form-group">
-                <label for="name">Ruleset:</label>
-                {{ form.ruleset(class = 'form-control', placeholder = 'Ruleset') }}
-            </div>
-            <div class="form-group">
-                <label for="name">Scoring Method:</label>
-                {{ form.scoring_method(class = 'form-control', placeholder = 'Scoring Method') }}
-            </div>
             <div class="form-group">
                 <label for="name">Owner:</label>
                 {{ form.owner_id(class = 'form-control', placeholder = 'Owner') }}

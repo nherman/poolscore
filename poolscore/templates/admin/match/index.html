@@ -1,0 +1,32 @@
+{% extends "master.html" %}
+{% set body_class = "tourney-context" %}
+{% block body %}
+
+    {% include "admin/header.html" %}
+
+    <p>
+        <a href="{{ url_for('.match_add') }}" class="btn btn-default">Add Match</a>
+    </p>
+    {% if tourney.matches %}
+    <p>
+        <div class="list-group">
+        {% for match in tourney.matches %}
+            <a class="list-group-item{% if match.active == 1 %} active{% endif %}" href="{{ url_for('admin.matches', tourney_id = tourney.id) }}">{
+            {% for player in match.home_players %}
+                { player.first_name }} {{ player.last_name }}
+            {% endfor %}
+             vs.
+            {% for player in match.away_players %}
+                { player.first_name }} {{ player.last_name }}
+            {% endfor %}
+        {% endfor %}
+        </div>
+    </p>
+    {% else %}
+    <p class="text-center">
+        No Matches Found
+    </p>
+    {% endif %}
+
+
+{% endblock %}

@@ -6,24 +6,11 @@
     <h5>{{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</h5>
 
     <p>
+    {% if has_matches %}
+        <a href="{{ url_for('.matches', tourney_id = tourney.id) }}" class="btn btn-default">View Matches</a>
+    {% endif %}
         <a href="{{ url_for('.match_add', tourney_id = tourney.id) }}" class="btn btn-default">Add Match</a>
     </p>
-    {% if matches %}
-    <p>
-        <div class="list-group">
-        {% for match in matches %}
-            <a class="list-group-item{% if match.active == 1 %} active{% endif %}" href="{{ url_for('admin.matches', tourney_id = tourney.id) }}">{
-            {% for player in matches.home_players %}
-                { player.first_name }} {{ player.last_name }}
-            {% endfor %}
-             vs.
-            {% for player in matches.away_players %}
-                { player.first_name }} {{ player.last_name }}
-            {% endfor %}
-        {% endfor %}
-        </div>
-    </p>
-    {% endif %}
 
 
 {% endblock %}

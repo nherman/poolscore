@@ -1,0 +1,22 @@
+{% extends "admin/match/match_template.html" %}
+{% set user_action = "edit" %}
+
+{% block match_header %}
+    <h4>Edit Match ({{ match.ordinal }})</h4>
+    <h5>{% for player in match.home_players %}
+            { player.first_name }} {{ player.last_name }}
+        {% endfor %}
+         vs.
+        {% for player in match.away_players %}
+            { player.first_name }} {{ player.last_name }}
+        {% endfor %}</h5>
+
+    <p>
+    {% if has_games %}
+        <a href="{{ url_for('.games', match_id = match.id) }}" class="btn btn-default">View Games</a>
+    {% endif %}
+        <a href="{{ url_for('.game_add', match_id = match.id) }}" class="btn btn-default">Add Game</a>
+    </p>
+
+
+{% endblock %}
