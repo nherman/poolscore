@@ -166,11 +166,6 @@ def match_add(tourney_id):
 
     if form.validate_on_submit():
 
-        print "passed validation"
-        # TODO: this is passing validation even when players not selected
-        # TODO: DB locked error on submit caused by invalid data or poor transation handling (or both)?
-
-
         ordinal = len(tourney.matches) + 1
         match = Match(
             tourney_id = tourney.id,
@@ -179,13 +174,13 @@ def match_add(tourney_id):
         db.session.add(match)
         db.session.commit()
 
-        def assign_players(players, is_home_team):
-            for player in players:
+        def assign_players(player_ids, is_home_team):
+            for pid in player_ids:
                 matchplayer = MatchPlayer(
                     match_id = match.id,
-                    player_id = player.id,
+                    player_id = pid,
                     is_home_team = is_home_team)
-                db.session.add(player)
+                db.session.add(matchplayer)
 
         #Assign Home Player(s)
         assign_players(form.home_players.data, True)
@@ -203,7 +198,7 @@ def match_add(tourney_id):
                 match.grant_permission(new_owner.id)
 
         flash('Match %s vs. %s has been added' % (match.home_players[0].id, match.away_players[0].id), 'success')
-        return redirect(url_for('admin.matches'))
+        return redirect(url_for('admin.matches', tourney_id = tourney.id))
 
 
     return render_template('admin/match/add.html', tourney = tourney, form = form)

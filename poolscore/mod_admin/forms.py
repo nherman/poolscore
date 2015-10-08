@@ -30,8 +30,8 @@ class MatchForm(Form):
     owner_id = SelectField('Owner',[Required(message = 'Select Match Owner.')], coerce=int, default = 1)
 
 class MatchAddForm(MatchForm):
-    home_players = SelectMultipleField('Home Players', [NumberRange(min=1,message = 'Select Home Players.')], coerce=int)
-    away_players = SelectMultipleField('Away Players', [NumberRange(min=1,message = 'Select Away Players.')], coerce=int)
+    home_players = SelectMultipleField('Home Players', [Required(message = 'Select Home Players.')], coerce=int)
+    away_players = SelectMultipleField('Away Players', [Required(message = 'Select Away Players.')], coerce=int)
 
 class MatchEditForm(MatchForm):
     home_score = IntegerField('Home Score', [Optional(strip_whitespace = True)])

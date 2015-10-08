@@ -59,23 +59,14 @@ class Match(common_models.Base):
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
+    #TODO: home_players and away_players are returning matchplayer objects. They should return Player obejcts. Secondary join?
+
     home_players = db.relationship('MatchPlayer', \
-                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == True)", \
-                   lazy = "dynamic")
+                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == True)")
     away_players = db.relationship('MatchPlayer', \
-                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == False)", \
-                   lazy = "dynamic")
+                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == False)")
 
-    games = db.relationship("Game", backref = db.backref("match"), lazy = "dynamic")
-
-    # Home Games
-    home_games = db.relationship("Game", \
-                 primaryjoin = "and_(Match.id == Game.match_id, Match.tourney_id == Game.winner_id)", \
-                 lazy = "dynamic")
-    #Away Games
-    home_games = db.relationship("Game", \
-                 primaryjoin = "and_(Match.id == Game.match_id, Match.tourney_id == Game.winner_id)", \
-                 lazy = "dynamic")
+    games = db.relationship("Game", backref = db.backref("match"))
 
 
     # New instance instantiation procedure
@@ -96,8 +87,16 @@ class Match(common_models.Base):
 #     db.Column('is_home_team', db.Boolean, nullable = False)
 # )
 
-class MatchPlayer(common_models.Base):
+class MatchPlayer(db.Model):
+    #note: matchplayer does not inherit from Base
     __tablename__ = 'matchplayer'
+
+    __table_args__ = common_models.Base.__table_args__
+    IGNORE_ATTRIBUTES_ON_UPDATE = common_models.Base.IGNORE_ATTRIBUTES_ON_UPDATE
+
+    date_created = db.Column(db.DateTime, default = db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default = db.func.current_timestamp(),
+        onupdate = db.func.current_timestamp())
 
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
