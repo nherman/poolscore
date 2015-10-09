@@ -75,6 +75,7 @@ def tourney(tourney_id):
 
         # TODO: add home_games and home_games as count of games where winner_id == home | away
         #       update home_score automatically on game save if winner_id != None and scoring_method exists
+        #       allow tourney delete - remember to cascade properly and delete matches, matchplayers, and games
 
 
 
@@ -160,10 +161,6 @@ def match_add(tourney_id):
     form.owner_id.choices = user_choices
     form.owner_id.data = tourney_entityuser.user_id or 1
 
-    print "HOME PLAYERS"
-    print form.home_players
-    print form.home_players.data
-
     if form.validate_on_submit():
 
         ordinal = len(tourney.matches) + 1
@@ -197,7 +194,10 @@ def match_add(tourney_id):
                     tourney.revoke_permission(tourney_entityuser.user_id)
                 match.grant_permission(new_owner.id)
 
-        flash('Match %s vs. %s has been added' % (match.home_players[0].id, match.away_players[0].id), 'success')
+        for p in match.players:
+            print p
+
+        flash('Match %s vs. %s has been added' % (match.get_home_players()[0].first_name, match.get_away_players()[0].first_name), 'success')
         return redirect(url_for('admin.matches', tourney_id = tourney.id))
 
 

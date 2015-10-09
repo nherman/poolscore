@@ -59,12 +59,22 @@ class Match(common_models.Base):
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
-    #TODO: home_players and away_players are returning matchplayer objects. They should return Player obejcts. Secondary join?
+    players = db.relationship('MatchPlayer', cascade = "all, delete-orphan")
 
-    home_players = db.relationship('MatchPlayer', \
-                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == True)")
-    away_players = db.relationship('MatchPlayer', \
-                   primaryjoin = "and_(Match.id == MatchPlayer.match_id, MatchPlayer.is_home_team == False)")
+    def _get_players(self, is_home_team):
+        players = []
+        for mp in self.players:
+            if(mp.is_home_team == is_home_team):
+                players.append(mp.player)
+
+        return players
+
+
+    def get_home_players(self):
+        return self._get_players(True)
+
+    def get_away_players(self):
+        return self._get_players(False)
 
     games = db.relationship("Game", backref = db.backref("match"))
 
@@ -88,16 +98,6 @@ class Match(common_models.Base):
 # )
 
 class MatchPlayer(db.Model):
-    #note: matchplayer does not inherit from Base
-    __tablename__ = 'matchplayer'
-
-    __table_args__ = common_models.Base.__table_args__
-    IGNORE_ATTRIBUTES_ON_UPDATE = common_models.Base.IGNORE_ATTRIBUTES_ON_UPDATE
-
-    date_created = db.Column(db.DateTime, default = db.func.current_timestamp())
-    date_modified = db.Column(db.DateTime, default = db.func.current_timestamp(),
-        onupdate = db.func.current_timestamp())
-
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
     is_home_team = db.Column(db.Boolean, nullable = False)

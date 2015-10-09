@@ -11,12 +11,12 @@
     <p>
         <div class="list-group">
         {% for match in tourney.matches %}
-            <a class="list-group-item{% if match.active == 1 %} active{% endif %}" href="{{ url_for('admin.matches', tourney_id = tourney.id) }}">
-            {% for player in match.home_players %}
+            <a class="list-group-item{% if match.active == 1 %} active{% endif %}" href="{{ url_for('admin.match', match_id = match.id) }}">
+            {% for player in match.get_home_players() %}
                 {{ player.first_name }} {{ player.last_name }}
             {% endfor %}
              vs.
-            {% for player in match.away_players %}
+            {% for player in match.get_away_players() %}
                 {{ player.first_name }} {{ player.last_name }}
             {% endfor %}</a>    
         {% endfor %}
