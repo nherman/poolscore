@@ -33,6 +33,40 @@ def tourneys():
     return render_template('admin/tourney/index.html',
         tourneys = tourneys)
 
+@mod_admin.route('/tourney/add/', methods = ['GET', 'POST'])
+@SecurityUtil.requires_auth()
+@SecurityUtil.requires_admin()
+def tourney_add():
+    form = TourneyAddForm(request.form)
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    team_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in Team.query.all()]
+    form.owner_id.choices = user_choices
+    form.home_team_id.choices = team_choices
+    form.away_team_id.choices = team_choices
+    form.date.data = date.today()
+
+    if form.validate_on_submit():
+        tourney = Tourney(
+            date = form.date.data,
+            home_team_id = form.home_team_id.data,
+            away_team_id = form.away_team_id.data,
+            scoring_method = form.scoring_method.data,
+            ruleset = form.ruleset.data,
+            data = form.data.data)
+
+        db.session.add(tourney)
+        db.session.commit()
+
+        if form.owner_id.data != session["user_id"]:
+            new_owner = User.query.filter_by(id=form.owner_id.data).first()
+            if new_owner != None:
+                tourney.grant_permission(new_owner.id)
+
+        flash('Tourney %s vs. %s has been added' % (tourney.home_team_id, tourney.away_team_id), 'success')
+        return redirect(url_for('admin.index'))
+
+    return render_template('admin/tourney/add.html', form = form)
+
 @mod_admin.route('/tourney/<int:tourney_id>/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
@@ -73,7 +107,7 @@ def tourney(tourney_id):
                 tourney.grant_permission(new_owner.id)
 
 
-        # TODO: add home_games and home_games as count of games where winner_id == home | away
+        # TODO: add home_games and away_games as count of games where winner_id == home | away
         #       update home_score automatically on game save if winner_id != None and scoring_method exists
         #       allow tourney delete - remember to cascade properly and delete matches, matchplayers, and games
 
@@ -98,52 +132,7 @@ def tourney(tourney_id):
 
     return render_template('admin/tourney/edit.html', tourney = tourney, has_matches = has_matches, form = form)
 
-@mod_admin.route('/tourney/add/', methods = ['GET', 'POST'])
-@SecurityUtil.requires_auth()
-@SecurityUtil.requires_admin()
-def tourney_add():
-    form = TourneyAddForm(request.form)
-    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
-    team_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in Team.query.all()]
-    form.owner_id.choices = user_choices
-    form.home_team_id.choices = team_choices
-    form.away_team_id.choices = team_choices
-    form.date.data = date.today()
-
-    if form.validate_on_submit():
-        tourney = Tourney(
-            date = form.date.data,
-            home_team_id = form.home_team_id.data,
-            away_team_id = form.away_team_id.data,
-            scoring_method = form.scoring_method.data,
-            ruleset = form.ruleset.data,
-            data = form.data.data)
-
-        db.session.add(tourney)
-        db.session.commit()
-
-        if form.owner_id.data != session["user_id"]:
-            new_owner = User.query.filter_by(id=form.owner_id.data).first()
-            if new_owner != None:
-                tourney.grant_permission(new_owner.id)
-
-        flash('Tourney %s vs. %s has been added' % (tourney.home_team_id, tourney.away_team_id), 'success')
-        return redirect(url_for('admin.index'))
-
-    return render_template('admin/tourney/add.html', form = form)
-
-
-@mod_admin.route('/tourney/<int:tourney_id>/matches/', methods = ['GET'])
-@SecurityUtil.requires_auth()
-@SecurityUtil.requires_admin()
-def matches(tourney_id):
-    tourney = Tourney.query.filter_by(id=tourney_id).first()
-    if not tourney:
-        return render_template('404.html'), 404
-
-    return render_template('admin/match/index.html', tourney = tourney)
-
-@mod_admin.route('/tourney/<int:tourney_id>/matches/add/', methods = ['GET', 'POST'])
+@mod_admin.route('/tourney/<int:tourney_id>/match/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def match_add(tourney_id):
@@ -198,12 +187,12 @@ def match_add(tourney_id):
             print p
 
         flash('Match %s vs. %s has been added' % (match.get_home_players()[0].first_name, match.get_away_players()[0].first_name), 'success')
-        return redirect(url_for('admin.matches', tourney_id = tourney.id))
+        return redirect(url_for('admin.match', match_id = match.id))
 
 
     return render_template('admin/match/add.html', tourney = tourney, form = form)
 
-@mod_admin.route('/match/<int:match_id>/', methods = ['GET'])
+@mod_admin.route('/match/<int:match_id>/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def match(match_id):
@@ -211,10 +200,50 @@ def match(match_id):
     if not match:
         return render_template('404.html'), 404
 
-    tourney_entityuser = EntityUser.query.filter_by(entity = "Tourney", row_id = tourney.id).order_by(EntityUser.user_id.desc()).first()
+    match_entityuser = EntityUser.query.filter_by(entity = "Match", row_id = match.id).order_by(EntityUser.user_id.desc()).first()
     # TODO: assign owner
+    form = MatchEditForm(request.form)
 
-    return render_template('admin/match/edit.html', match = match, tourney = match.tourney)
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    form.owner_id.choices = user_choices
+
+    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match.get_players()]
+    form.winner_id.choices = winner_choices
+
+    has_games = Game.query.filter_by(match_id = match.id).count() > 0
+
+    if form.validate_on_submit():
+        match.home_score = form.home_score.data
+        match.away_score = form.away_score.data
+        match.data = form.data.data
+        match.active = form.active.data
+
+        if match.winner_id > 0:
+            match.winner_id = form.winner_id.data
+
+        if form.owner_id.data != match_entityuser.user_id:
+            new_owner = User.query.filter_by(id=form.owner_id.data).first()
+            if new_owner != None:
+                match.grant_permission(new_owner.id)
+                if (match_entityuser.user_id > 1):
+                    match.revoke_permission(match_entityuser.user_id)
+
+
+        db.session.merge(match)
+        db.session.commit()
+
+        flash('Match %s vs. %s has been saved' % (match.get_home_players()[0].first_name, match.get_away_players()[0].first_name), 'success')
+
+    if request.method == 'GET':
+        form.winner_id.data = match.winner_id
+        form.home_score.data = match.home_score
+        form.away_score.data = match.away_score
+        form.data.data = match.data
+        form.owner_id.data = match_entityuser.user_id or 1
+        form.active.data = match.active
+
+
+    return render_template('admin/match/edit.html', match = match, tourney = match.tourney, form = form)
 
 @mod_admin.route('/match/<int:match_id>/games', methods = ['GET'])
 @SecurityUtil.requires_auth()

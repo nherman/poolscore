@@ -61,20 +61,20 @@ class Match(common_models.Base):
 
     players = db.relationship('MatchPlayer', cascade = "all, delete-orphan")
 
-    def _get_players(self, is_home_team):
+    def get_players(self, is_home_team = None):
         players = []
         for mp in self.players:
-            if(mp.is_home_team == is_home_team):
+            if(mp.is_home_team == is_home_team or is_home_team == None):
                 players.append(mp.player)
 
         return players
 
 
     def get_home_players(self):
-        return self._get_players(True)
+        return self.get_players(is_home_team = True)
 
     def get_away_players(self):
-        return self._get_players(False)
+        return self.get_players(is_home_team = False)
 
     games = db.relationship("Game", backref = db.backref("match"))
 
@@ -89,13 +89,6 @@ class Match(common_models.Base):
 
     def __repr__(self):
         return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
-
-# assign players to matches
-# match_player = db.Table('match_player', common_models.Base.metadata,
-#     db.Column('match_id', db.Integer, db.ForeignKey('match.id'), primary_key = True),
-#     db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key = True),
-#     db.Column('is_home_team', db.Boolean, nullable = False)
-# )
 
 class MatchPlayer(db.Model):
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
@@ -119,10 +112,12 @@ class Game(common_models.Base):
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable = False)
     # Ordinal - position in match order that this game occured
     ordinal = db.Column(db.Integer, nullable = False)
-    # Winner (team id)
-    winner_id = db.Column(db.Integer, nullable = True)
+    # Winner (player id)
+    winner_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable = True)
     # Data (?)
     data = db.Column(db.Text, nullable = True)
+
+    winner = db.relationship("Player")
 
 # record game events
 game_events = db.Table('game_events', common_models.Base.metadata,

@@ -2,15 +2,31 @@
 {% set user_action = "edit" %}
 
 {% block tourney_header %}
-    <h4>Edit Tourney ({{ tourney.id }})</h4>
-    <h5>{{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</h5>
+    <h4>Tourney: {{ tourney.home_team.name }} vs. {{ tourney.away_team.name }} ({{tourney.id}})</h4>
+    <h5>Matches</h5>
 
     <p>
-    {% if has_matches %}
-        <a href="{{ url_for('.matches', tourney_id = tourney.id) }}" class="btn btn-default">View Matches</a>
-    {% endif %}
         <a href="{{ url_for('.match_add', tourney_id = tourney.id) }}" class="btn btn-default">Add Match</a>
     </p>
+
+    {% if tourney.matches %}
+    <p>
+        <div class="list-group">
+        {% for match in tourney.matches %}
+            <a class="list-group-item{% if match.active == 1 %} active{% endif %}" href="{{ url_for('admin.match', match_id = match.id) }}">
+            {% for player in match.get_home_players() %}
+                {{ player.first_name }} {{ player.last_name }}
+            {% endfor %}
+             vs.
+            {% for player in match.get_away_players() %}
+                {{ player.first_name }} {{ player.last_name }}
+            {% endfor %}</a>    
+        {% endfor %}
+        </div>
+    </p>
+    {% endif %}
+
+    <h4>Edit Tourney ({{ tourney.id }})</h4>
 
 
 {% endblock %}
