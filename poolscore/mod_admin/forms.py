@@ -39,13 +39,8 @@ class MatchEditForm(MatchForm):
     winner_id = SelectField('Winner', coerce=int)
     active = BooleanField('Active')
 
-
 class GameForm(Form):
-    __abstract__ = True
-
-
-class GameAddForm(GameForm):
-    pass
-
-class GameEditForm(GameForm):
-    pass
+    winner_id = SelectField('Winner', coerce=int)
+    data = TextField('Data')
+    active = BooleanField('Active')
+    owner_id = SelectField('Owner',[Required(message = 'Select Game Owner.')], coerce=int, default = 1)

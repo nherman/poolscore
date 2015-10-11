@@ -119,6 +119,16 @@ class Game(common_models.Base):
 
     winner = db.relationship("Player")
 
+    def __init__(self, match_id = None, ordinal = None, winner_id = None, data = None):
+        self.match_id = match_id
+        self.ordinal = ordinal
+        self.winner_id = 0
+        self.data = None
+
+    def __repr__(self):
+        return '<Game %r, (match %r, tourney %r)>' % (self.id, self.match.id, self.match.tourney.id)
+
+
 # record game events
 game_events = db.Table('game_events', common_models.Base.metadata,
     db.Column('id', db.Integer, primary_key = True),

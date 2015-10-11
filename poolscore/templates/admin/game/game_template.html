@@ -1,0 +1,48 @@
+{% extends "master.html" %}
+{% set body_class = "root-context" %}
+{% block body %}
+
+    {% include "admin/header.html" %}
+
+    {% block game_header %}{% endblock %}
+
+
+    {% if form.errors %}
+    <p>
+        <div class="alert alert-warning" role="alert">
+            <h5>Please fix the following errors and re-submit:</h5>
+            <ul>
+                {% for field, error in form.errors.items() %}
+                    {% for e in error %}
+                        <li>{{ e }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    </p>
+    {% endif %}
+
+    <p>
+        <form method="POST" action="{% if user_action == 'edit' %}{{ url_for('.game', game_id = game.id) }}{% else %}.{% endif %}" class="">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                <div class="checkbox">
+                    <label>{{ form.active() }} Active</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="name">Winner:</label>
+                {{ form.winner_id(class = 'form-control', placeholder = 'Winner') }}
+            </div>
+            <div class="form-group">
+                <label for="name">Owner:</label>
+                {{ form.owner_id(class = 'form-control', placeholder = 'Owner') }}
+            </div>
+            <div class="form-group">
+                <label for="name">Data:</label>
+                {{ form.data(class = 'form-control', placeholder = 'Data') }}
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
+        </form>
+    </p>
+{% endblock %}

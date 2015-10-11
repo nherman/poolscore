@@ -1,0 +1,12 @@
+{% extends "admin/game/game_template.html" %}
+{% set user_action = "edit" %}
+
+{% block game_header %}
+    <h4>Game {{ game.ordinal }}: {% for player in game.match.get_home_players() %}
+            {{ player.first_name }} {{ player.last_name }}
+        {% endfor %}
+         vs.
+        {% for player in game.match.get_away_players() %}
+            {{ player.first_name }} {{ player.last_name }}
+        {% endfor %}</h4>
+{% endblock %}
