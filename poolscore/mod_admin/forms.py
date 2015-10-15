@@ -42,5 +42,5 @@ class MatchEditForm(MatchForm):
 class GameForm(Form):
     winner_id = SelectField('Winner', coerce=int)
     data = TextField('Data')
-    active = BooleanField('Active')
+    active = BooleanField('Active', default = True)
     owner_id = SelectField('Owner',[Required(message = 'Select Game Owner.')], coerce=int, default = 1)
