@@ -2,6 +2,7 @@ from datetime import date
 
 from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for
+from sqlalchemy import exc
 
 from poolscore import db
 from poolscore import app
@@ -282,7 +283,7 @@ def game_add(match_id):
 
     return render_template('admin/game/add.html', tourney = match.tourney, match = match, form = form)
 
-@mod_admin.route('/game/<int:game_id>/', methods = ['GET', 'POST'])
+@mod_admin.route('/game/<int:game_id>/', methods = ['GET', 'POST', 'DELETE'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def game(game_id):
@@ -317,7 +318,7 @@ def game(game_id):
         db.session.merge(game)
         db.session.commit()
 
-        flash('Gane %s' % (game.ordinal), 'success')
+        flash('Game %s' % (game.ordinal), 'success')
 
     if request.method == 'GET':
         form.winner_id.data = game.winner_id
@@ -327,4 +328,29 @@ def game(game_id):
 
 
     return render_template('admin/game/edit.html', tourney = game.match.tourney, match = game.match, game = game, form = form)
+
+@mod_admin.route('/game/<int:game_id>/delete', methods = ['GET', 'POST', 'DELETE'])
+@SecurityUtil.requires_auth()
+@SecurityUtil.requires_admin()
+def game_delete(game_id):
+    game = Game.query.filter_by(id=game_id).first()
+    if not game:
+        return render_template('404.html'), 404
+
+    game_entityusers = EntityUser.query.filter_by(entity = "Game", row_id = game.id).all()
+    match_id = game.match_id
+    ordinal = game.ordinal
+
+    with db.session.no_autoflush:
+        try:
+            count =  game.delete()
+            for eu in game_entityusers:
+                eu.delete()
+            db.session.commit()
+            flash('Game %s deleted' % (ordinal), 'success')
+            return redirect(url_for('.match', match_id = match.id))
+        except exc.SQLAlchemyError as ex:
+            db.session.rollback()
+            flash('Error: %s' % (ex), 'error')
+            return redirect(url_for('.game', game_id = game.id))
 

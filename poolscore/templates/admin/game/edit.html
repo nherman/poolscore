@@ -10,3 +10,8 @@
             {{ player.first_name }} {{ player.last_name }}
         {% endfor %}</h4>
 {% endblock %}
+
+{% block game_footer %}
+        <a href="{{ url_for('.game_delete', game_id = game.id) }}" class="btn btn-danger">Delete Game</a>
+
+{% endblock %}
