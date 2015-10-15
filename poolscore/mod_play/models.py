@@ -42,6 +42,9 @@ class Tourney(common_models.Base):
     def __repr__(self):
         return '<Tourney %r, %r, home: %r, away: %r>' % (self.id, self.date, self.home_team_id, self.away_team_id)
 
+    @property
+    def serialize(self):
+        return Util.to_serializable_dict(self, self.__class__)
 
 class Match(common_models.Base):
     __tablename__ = 'match'
@@ -90,6 +93,11 @@ class Match(common_models.Base):
     def __repr__(self):
         return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
 
+    @property
+    def serialize(self):
+        return Util.to_serializable_dict(self, self.__class__)
+
+
 class MatchPlayer(db.Model):
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
@@ -127,6 +135,10 @@ class Game(common_models.Base):
 
     def __repr__(self):
         return '<Game %r, (match %r, tourney %r)>' % (self.id, self.match.id, self.match.tourney.id)
+
+    @property
+    def serialize(self):
+        return Util.to_serializable_dict(self, self.__class__)
 
 
 # record game events

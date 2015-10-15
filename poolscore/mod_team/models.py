@@ -34,6 +34,10 @@ class Team(common_models.Base):
     def __repr__(self):
         return '<Team %r, %r>' % (self.id, self.name)
 
+    @property
+    def serialize(self):
+        return Util.to_serializable_dict(self, self.__class__)
+
 class Player(common_models.Base):
     __tablename__ = 'player'
    
@@ -58,4 +62,8 @@ class Player(common_models.Base):
 
     def __repr__(self):
         return '<Player %r, %r %r>' % (self.id, self.first_name, self.last_name or "")
+
+    @property
+    def serialize(self):
+        return Util.to_serializable_dict(self, self.__class__)
 

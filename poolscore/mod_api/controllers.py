@@ -56,15 +56,22 @@ def _process_request(klass = None, query = None,
     additional_attributes = None, 
     before_http_action_callback = None, 
     after_http_action_callback = None,
-    pre_commit_action_callback = None):
+    pre_commit_action_callback = None,
+    json_serializer_property = None):
     if not method:
         method = request.method
     if not before_http_action_callback:
         before_http_action_callback = _void_action_callback
     if not pre_commit_action_callback:
         pre_commit_action_callback = _void_action_callback
+    if not json_serializer_property:
+        json_serializer_property = 'serialize'
     http_resp = None
     callback_kwargs = {}
+
+    def _serialize_json(item):
+        return getattr(item, json_serializer_property)
+
     if method == 'GET':
         before_http_action_callback(klass, id, method)
         if id or single_fetch:
@@ -74,14 +81,14 @@ def _process_request(klass = None, query = None,
                 item = klass.query.filter_by(id = id).first()
             if not item:
                 raise ApiError('Resource not found for id %s' % id, status_code = 404)
-            http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): item.serialize})
+            http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): _serialize_json(item)})
         else:
             if query:
                 pagination = Util.paginate_with_pager(klass, query, g._pager, False)
             else:
                 pagination = Util.paginate_with_pager(klass, klass.query, g._pager, False)
             http_resp = jsonify({ModelUtil.pluralize(klass.__tablename__): [
-                item.serialize for item in pagination.items] if pagination else []})
+                _serialize_json(item) for item in pagination.items] if pagination else []})
     elif method == 'POST':
         attributes = request.get_json(force = True, silent = True, cache = False)
         if not attributes:
@@ -105,7 +112,7 @@ def _process_request(klass = None, query = None,
                 db.session.rollback()
                 app.logger.error("Resource cannot be created", exc_info = ex)
                 raise ApiError('Resource cannot be created - [%s]' % ex.message, status_code = 400)
-            http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): item.serialize})
+            http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): _serialize_json(item)})
             http_resp.status_code = 201
     elif method == 'PUT':
         attributes = request.get_json(force = True, silent = True, cache = False)
@@ -132,7 +139,7 @@ def _process_request(klass = None, query = None,
                 db.session.rollback()
                 app.logger.error("Resource cannot be updated", exc_info = ex)
                 raise ApiError('Resource cannot be updated - [%s]' % ex.message, status_code = 400)
-            http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): item.serialize})
+            http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): _serialize_json(item)})
     elif method == 'DELETE':
         before_http_action_callback(klass, id, method)
         # Re-fetch items before running delete query,

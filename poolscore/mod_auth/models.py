@@ -72,32 +72,8 @@ class User(common_models.Base):
 
     @property
     def serialize(self):
-        d = Util.to_serializable_dict(self, self.__class__)
-#        d['groups'] = [group.serialize_shallow for group in self.groups]
-#        d['roles'] = [role.serialize for role in self.roles]
-        return d
+        return Util.to_serializable_dict(self, self.__class__)
 
-    @property
-    def serialize_text(self):
-        name = "{0} {1}".format(self.first_name, 
-            self.last_name if self.last_name else "").strip()
-        return "%s%s" % ("%s@%s" % (self.username, self.xmpp_domain,),
-            "=%s" % name if name else "")
-
-    @property
-    def serialize_shallow(self):
-        d = Util.to_serializable_dict(self, self.__class__)
-        return d
-
-    @property
-    def serialize_profile(self):
-        return dict(
-            id = self.id,
-            first_name = self.first_name,
-            last_name = self.last_name,
-            email = self.email,
-            username = self.username,
-            vcard = self.vcard)
 
 def _apply_user_model_rules(target):
     # Rule enforcements
