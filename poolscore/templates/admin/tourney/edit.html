@@ -30,3 +30,7 @@
 
 
 {% endblock %}
+
+{% block tourney_footer %}
+        <a href="{{ url_for('.tourney_delete', tourney_id = tourney.id) }}" class="btn btn-danger">Delete Tourney</a>
+{% endblock %}

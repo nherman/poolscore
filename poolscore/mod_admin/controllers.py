@@ -5,7 +5,6 @@ from flask import Blueprint, request, render_template, \
 from sqlalchemy import exc
 
 from poolscore import db
-from poolscore import app
 
 from poolscore.mod_common.models import EntityUser
 from poolscore.mod_auth.models import User
@@ -67,6 +66,32 @@ def tourney_add():
         return redirect(url_for('admin.index'))
 
     return render_template('admin/tourney/add.html', form = form)
+
+@mod_admin.route('/tourney/<int:tourney_id>/delete', methods = ['GET'])
+@SecurityUtil.requires_auth()
+@SecurityUtil.requires_admin()
+def tourney_delete(tourney_id):
+    tourney = Tourney.query.filter_by(id=tourney_id).first()
+    if not tourney:
+        return render_template('404.html'), 404
+    
+    with db.session.no_autoflush:
+        try:
+            for match in tourney.matches:
+                for game in match.games:
+                    game.delete()
+                match.delete()
+
+            tourney.delete()
+            db.session.commit()
+
+            flash('Tourney deleted', 'success')
+            return redirect(url_for('.tourneys'))
+        except exc.SQLAlchemyError as ex:
+            db.session.rollback()
+
+            flash('Error: %s' % (ex), 'error')
+            return redirect(url_for('.tourney', tourney_id = tourney.id))
 
 @mod_admin.route('/tourney/<int:tourney_id>/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
@@ -153,10 +178,8 @@ def match_add(tourney_id):
 
     if form.validate_on_submit():
 
-        ordinal = len(tourney.matches) + 1
         match = Match(
             tourney_id = tourney.id,
-            ordinal = ordinal,
             data = form.data.data)
         db.session.add(match)
         db.session.commit()
@@ -189,6 +212,32 @@ def match_add(tourney_id):
 
 
     return render_template('admin/match/add.html', tourney = tourney, form = form)
+
+@mod_admin.route('/match/<int:match_id>/delete', methods = ['GET'])
+@SecurityUtil.requires_auth()
+@SecurityUtil.requires_admin()
+def match_delete(match_id):
+    match = Match.query.filter_by(id=match_id).first()
+    if not match:
+        return render_template('404.html'), 404
+
+    ordinal = match.ordinal
+
+    with db.session.no_autoflush:
+        try:
+            for game in match.games:
+                game.delete()
+
+            match.delete()
+            db.session.commit()
+
+            flash('Match %s deleted' % (ordinal), 'success')
+            return redirect(url_for('.tourney', tourney_id = match.tourney_id))
+        except exc.SQLAlchemyError as ex:
+            db.session.rollback()
+
+            flash('Error: %s' % (ex), 'error')
+            return redirect(url_for('.match', match_id = match.id))
 
 @mod_admin.route('/match/<int:match_id>/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
@@ -261,10 +310,8 @@ def game_add(match_id):
 
     if form.validate_on_submit():
 
-        ordinal = len(match.games) + 1
         game = Game(
             match_id = match.id,
-            ordinal = ordinal,
             data = form.data.data)
         db.session.add(game)
         db.session.commit()
@@ -277,7 +324,7 @@ def game_add(match_id):
                 game.grant_permission(new_owner.id)
 
 
-        flash('Game %s' % (ordinal), 'success')
+        flash('Game %s' % (game.ordinal), 'success')
         return redirect(url_for('admin.game', game_id = game.id))
 
 
@@ -329,7 +376,7 @@ def game(game_id):
 
     return render_template('admin/game/edit.html', tourney = game.match.tourney, match = game.match, game = game, form = form)
 
-@mod_admin.route('/game/<int:game_id>/delete', methods = ['GET', 'POST', 'DELETE'])
+@mod_admin.route('/game/<int:game_id>/delete', methods = ['GET'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def game_delete(game_id):
@@ -337,20 +384,19 @@ def game_delete(game_id):
     if not game:
         return render_template('404.html'), 404
 
-    game_entityusers = EntityUser.query.filter_by(entity = "Game", row_id = game.id).all()
-    match_id = game.match_id
     ordinal = game.ordinal
 
     with db.session.no_autoflush:
         try:
-            count =  game.delete()
-            for eu in game_entityusers:
-                eu.delete()
+            game.delete()
             db.session.commit()
+
             flash('Game %s deleted' % (ordinal), 'success')
-            return redirect(url_for('.match', match_id = match.id))
+            return redirect(url_for('.match', match_id = game.match_id))
         except exc.SQLAlchemyError as ex:
             db.session.rollback()
+
             flash('Error: %s' % (ex), 'error')
             return redirect(url_for('.game', game_id = game.id))
+
 

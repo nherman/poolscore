@@ -70,6 +70,15 @@ class Base(db.Model):
             if entityuser != None:
                 db.session.delete(entityuser)
 
+    def _delete(self):
+        # expects caller to handle transaction and exceptions
+        with db.session.no_autoflush:
+            entityusers = EntityUser.query.filter_by(entity = self.__class__.__name__, row_id = self.id).all()
+
+            db.session.delete(self)
+            for eu in entityusers:
+                db.session.delete(eu)
+
 
 @event.listens_for(Base, 'before_update', propagate=True)
 def before_update_listener(mapper, connection, target):

@@ -1,3 +1,7 @@
+from sqlalchemy import and_
+from sqlalchemy.orm import object_session
+from sqlalchemy.sql import select, func
+
 from poolscore import db
 from poolscore.mod_common import models as common_models
 from poolscore.mod_common.utils import Util, ModelUtil
@@ -42,6 +46,12 @@ class Tourney(common_models.Base):
     def __repr__(self):
         return '<Tourney %r, %r, home: %r, away: %r>' % (self.id, self.date, self.home_team_id, self.away_team_id)
 
+    def delete(self):
+        # expects caller to handle transaction commit/rollback and exceptions
+        # TODO: delete tourney events
+        print "delete tourney {}".format(self)
+        self._delete()
+
     @property
     def serialize(self):
         return Util.to_serializable_dict(self, self.__class__)
@@ -51,8 +61,6 @@ class Match(common_models.Base):
    
     # Tourney ID
     tourney_id = db.Column(db.Integer, db.ForeignKey('tourney.id'), nullable = False)
-    # Ordinal - position in touney order that this match occured
-    ordinal = db.Column(db.Integer, nullable = False)
     #Home Score
     home_score = db.Column(db.Integer, nullable = False)
     #Away Score
@@ -63,6 +71,16 @@ class Match(common_models.Base):
     data = db.Column(db.Text, nullable = True)
 
     players = db.relationship('MatchPlayer', cascade = "all, delete-orphan")
+    games = db.relationship("Game", backref = db.backref("match"))
+
+    # Ordinal - position in match order that this game occured
+    @property
+    def ordinal(self):
+        return object_session(self).\
+            scalar(
+                select([func.count(Match.id)]).\
+                    where(and_(Match.tourney_id==self.tourney_id, Match.id <= self.id))
+            )
 
     def get_players(self, is_home_team = None):
         players = []
@@ -79,19 +97,22 @@ class Match(common_models.Base):
     def get_away_players(self):
         return self.get_players(is_home_team = False)
 
-    games = db.relationship("Game", backref = db.backref("match"))
-
 
     # New instance instantiation procedure
-    def __init__(self, tourney_id = None, ordinal = None, data = None):
+    def __init__(self, tourney_id = None, data = None):
         self.tourney_id = tourney_id
-        self.ordinal = ordinal
         self.home_score = 0
         self.away_score = 0
         self.data = None
 
     def __repr__(self):
         return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
+
+    def delete(self):
+        # expects caller to handle transaction commit/rollback and exceptions
+        # TODO: delete match events
+        print "delete match {}".format(self)
+        self._delete()
 
     @property
     def serialize(self):
@@ -118,8 +139,6 @@ class Game(common_models.Base):
 
     #Match ID
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable = False)
-    # Ordinal - position in match order that this game occured
-    ordinal = db.Column(db.Integer, nullable = False)
     # Winner (player id)
     winner_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable = True)
     # Data (?)
@@ -127,18 +146,33 @@ class Game(common_models.Base):
 
     winner = db.relationship("Player")
 
-    def __init__(self, match_id = None, ordinal = None, winner_id = None, data = None):
+    # Ordinal - position in match order that this game occured
+    @property
+    def ordinal(self):
+        return object_session(self).\
+            scalar(
+                select([func.count(Game.id)]).\
+                    where(and_(Game.match_id==self.match_id, Game.id <= self.id))
+            )
+
+    def __init__(self, match_id = None, winner_id = None, data = None):
         self.match_id = match_id
-        self.ordinal = ordinal
         self.winner_id = 0
         self.data = None
 
     def __repr__(self):
         return '<Game %r, (match %r, tourney %r)>' % (self.id, self.match.id, self.match.tourney.id)
 
+    def delete(self):
+        # expects caller to handle transaction and exceptions
+        # TODO: delete game events
+        print "delete game {}".format(self)
+        self._delete()
+
     @property
     def serialize(self):
         return Util.to_serializable_dict(self, self.__class__)
+
 
 
 # record game events

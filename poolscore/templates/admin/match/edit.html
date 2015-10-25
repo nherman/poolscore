@@ -29,3 +29,7 @@
     <h4>Edit Match {{ match.ordinal }}</h4>
 
 {% endblock %}
+
+{% block match_footer %}
+        <a href="{{ url_for('.match_delete', match_id = match.id) }}" class="btn btn-danger">Delete Match</a>
+{% endblock %}

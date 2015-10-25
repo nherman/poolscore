@@ -16,6 +16,9 @@ class Config(object):
     #DATABASE = 'sqlite:///' + SQLITE_DATABASE_PATH
     DATABASE = os.path.join(BASE_DIR, '/tmp/poolscore.db')
 
+    # Enable query monitoring
+    # SQLALCHEMY_ECHO = True
+
     # The size of the database pool. Defaults to the engine's default (usually 5)
     # SQLALCHEMY_POOL_SIZE = 5
 

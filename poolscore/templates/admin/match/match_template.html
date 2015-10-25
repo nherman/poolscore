@@ -65,4 +65,5 @@
             <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
         </form>
     </p>
+    {% block match_footer %}{% endblock %}
 {% endblock %}
