@@ -27,6 +27,7 @@ class Base(db.Model):
     date_modified = db.Column(db.DateTime, default = db.func.current_timestamp(),
         onupdate = db.func.current_timestamp())
     active = db.Column(db.Boolean, nullable = False, default = True)
+    deleted = db.Column(db.Boolean, nullable = True, default = False)
 
     @classmethod
     def secure_all(cls):
@@ -40,8 +41,17 @@ class Base(db.Model):
         if g._user_auth_token["user_id"] == None:
             raise PermissionsError
 
-        return cls.query.join(EntityUser, cls.id == EntityUser.row_id).\
+        query = _query().join(EntityUser, cls.id == EntityUser.row_id).\
             filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id)
+
+        return query
+
+    @classmethod
+    def _query(cls, hide_deleted = True):
+        q = cls.query
+        if (hide_deleted):
+            q = q.filter_by(deleted = False)
+        return q
 
     def has_permission(self, user_id):
         if (user_id != None):
@@ -70,14 +80,9 @@ class Base(db.Model):
             if entityuser != None:
                 db.session.delete(entityuser)
 
-    def _delete(self):
-        # expects caller to handle transaction and exceptions
-        with db.session.no_autoflush:
-            entityusers = EntityUser.query.filter_by(entity = self.__class__.__name__, row_id = self.id).all()
-
-            db.session.delete(self)
-            for eu in entityusers:
-                db.session.delete(eu)
+    def delete(self):
+        self.deleted = True
+        db.session.merge(self)
 
 
 @event.listens_for(Base, 'before_update', propagate=True)

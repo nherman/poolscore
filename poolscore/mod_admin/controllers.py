@@ -28,18 +28,22 @@ def index():
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def tourneys():
-    tourneys = Tourney.query.order_by(Tourney.date_created).all()
+    tourneys = Tourney._query(request.args.get("deleted") == None).all()
 
     return render_template('admin/tourney/index.html',
         tourneys = tourneys)
+
+
+# TODO: figure out how to get ALL object that aren't deleted. should base method return a query obejct or results? shoudl ther be multiple base objects?
+
 
 @mod_admin.route('/tourney/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def tourney_add():
     form = TourneyAddForm(request.form)
-    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
-    team_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in Team.query.all()]
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
+    team_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in Team._query().all()]
     form.owner_id.choices = user_choices
     form.home_team_id.choices = team_choices
     form.away_team_id.choices = team_choices
@@ -104,14 +108,14 @@ def tourney(tourney_id):
     tourney_entityuser = EntityUser.query.filter_by(entity = "Tourney", row_id = tourney.id).order_by(EntityUser.user_id.desc()).first()
     form = TourneyEditForm(request.form)
 
-    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
 
-    teams = Team.query.filter(Team.id.in_([tourney.home_team_id, tourney.away_team_id])).all()
+    teams = Team._query().filter(Team.id.in_([tourney.home_team_id, tourney.away_team_id])).all()
     winner_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in teams]
     form.winner_id.choices = winner_choices
 
-    has_matches = Match.query.filter_by(tourney_id = tourney.id).count() > 0
+    has_matches = Match._query().filter_by(tourney_id = tourney.id).count() > 0
 
     if form.validate_on_submit():
         tourney.date = form.date.data
@@ -172,7 +176,7 @@ def match_add(tourney_id):
     form.home_players.choices = [(p.id, "{}, {} ({})".format(p.last_name, p.first_name, p.player_id)) for p in tourney.home_team.players]
     form.away_players.choices = [(p.id, "{}, {} ({})".format(p.last_name, p.first_name, p.player_id)) for p in tourney.away_team.players]
 
-    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
     form.owner_id.data = tourney_entityuser.user_id or 1
 
@@ -250,7 +254,7 @@ def match(match_id):
     match_entityuser = EntityUser.query.filter_by(entity = "Match", row_id = match.id).order_by(EntityUser.user_id.desc()).first()
     form = MatchEditForm(request.form)
 
-    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
 
     winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match.get_players()]
@@ -301,7 +305,7 @@ def game_add(match_id):
 
     form = GameForm(request.form)
 
-    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
     form.owner_id.data = match_entityuser.user_id or 1
 
@@ -341,7 +345,7 @@ def game(game_id):
     game_entityuser = EntityUser.query.filter_by(entity = "Game", row_id = game.id).order_by(EntityUser.user_id.desc()).first()
     form = GameForm(request.form)
 
-    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User.query.all()]
+    user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
 
     winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in game.match.get_players()]

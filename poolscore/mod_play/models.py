@@ -46,12 +46,6 @@ class Tourney(common_models.Base):
     def __repr__(self):
         return '<Tourney %r, %r, home: %r, away: %r>' % (self.id, self.date, self.home_team_id, self.away_team_id)
 
-    def delete(self):
-        # expects caller to handle transaction commit/rollback and exceptions
-        # TODO: delete tourney events
-        print "delete tourney {}".format(self)
-        self._delete()
-
     @property
     def serialize(self):
         return Util.to_serializable_dict(self, self.__class__)
@@ -108,12 +102,6 @@ class Match(common_models.Base):
     def __repr__(self):
         return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
 
-    def delete(self):
-        # expects caller to handle transaction commit/rollback and exceptions
-        # TODO: delete match events
-        print "delete match {}".format(self)
-        self._delete()
-
     @property
     def serialize(self):
         return Util.to_serializable_dict(self, self.__class__)
@@ -162,12 +150,6 @@ class Game(common_models.Base):
 
     def __repr__(self):
         return '<Game %r, (match %r, tourney %r)>' % (self.id, self.match.id, self.match.tourney.id)
-
-    def delete(self):
-        # expects caller to handle transaction and exceptions
-        # TODO: delete game events
-        print "delete game {}".format(self)
-        self._delete()
 
     @property
     def serialize(self):
