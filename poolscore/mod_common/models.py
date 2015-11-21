@@ -50,7 +50,7 @@ class Base(db.Model):
     def _query(cls, hide_deleted = True):
         q = cls.query
         if (hide_deleted):
-            q = q.filter_by(deleted = False)
+            q = q.filter(cls.deleted != True)
         return q
 
     def has_permission(self, user_id):
