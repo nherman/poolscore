@@ -364,7 +364,7 @@ def game(game_id):
         game.data = form.data.data
         game.active = form.active.data
 
-        if game.winner_id > 0:
+        if form.winner_id.data > 0:
             game.winner_id = form.winner_id.data
 
         if form.owner_id.data != game_entityuser.user_id:
