@@ -28,13 +28,11 @@ def index():
 @SecurityUtil.requires_auth()
 @SecurityUtil.requires_admin()
 def tourneys():
-    tourneys = Tourney._query(request.args.get("deleted") == None).all()
+    hide_deleted = request.args.get("deleted") == None
+    tourneys = Tourney._query(hide_deleted).all()
 
     return render_template('admin/tourney/index.html',
-        tourneys = tourneys)
-
-
-# TODO: figure out how to get ALL object that aren't deleted. should base method return a query obejct or results? shoudl ther be multiple base objects?
+        tourneys = tourneys, hide_deleted = hide_deleted)
 
 
 @mod_admin.route('/tourney/add/', methods = ['GET', 'POST'])
@@ -115,7 +113,12 @@ def tourney(tourney_id):
     winner_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in teams]
     form.winner_id.choices = winner_choices
 
-    has_matches = Match._query().filter_by(tourney_id = tourney.id).count() > 0
+    hide_deleted = request.args.get("deleted") == None
+    if (hide_deleted):
+        matches = tourney.matches
+    else:
+        matches = tourney.all_matches.all()
+
 
     if form.validate_on_submit():
         tourney.date = form.date.data
@@ -160,7 +163,7 @@ def tourney(tourney_id):
         form.active.data = tourney.active
 
 
-    return render_template('admin/tourney/edit.html', tourney = tourney, has_matches = has_matches, form = form)
+    return render_template('admin/tourney/edit.html', tourney = tourney, matches = matches, form = form, hide_deleted = hide_deleted)
 
 @mod_admin.route('/tourney/<int:tourney_id>/match/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
@@ -211,7 +214,7 @@ def match_add(tourney_id):
                     match.revoke_permission(tourney_entityuser.user_id)
                 match.grant_permission(new_owner.id)
 
-        flash('Match %s vs. %s has been added' % (match.get_home_players()[0].first_name, match.get_away_players()[0].first_name), 'success')
+        flash('Match %s vs. %s has been added' % (match.home_players[0].first_name, match.away_players[0].first_name), 'success')
         return redirect(url_for('admin.match', match_id = match.id))
 
 
@@ -257,8 +260,14 @@ def match(match_id):
     user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
 
-    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match.get_players()]
+    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match._get_players()]
     form.winner_id.choices = winner_choices
+
+    hide_deleted = request.args.get("deleted") == None
+    if (hide_deleted):
+        games = match.games
+    else:
+        games = match.all_games.all()
 
     if form.validate_on_submit():
         match.home_score = form.home_score.data
@@ -280,7 +289,7 @@ def match(match_id):
         db.session.merge(match)
         db.session.commit()
 
-        flash('Match %s vs. %s has been saved' % (match.get_home_players()[0].first_name, match.get_away_players()[0].first_name), 'success')
+        flash('Match %s vs. %s has been saved' % (match.home_players[0].first_name, match.away_players[0].first_name), 'success')
 
     if request.method == 'GET':
         form.winner_id.data = match.winner_id
@@ -291,7 +300,7 @@ def match(match_id):
         form.active.data = match.active
 
 
-    return render_template('admin/match/edit.html', match = match, tourney = match.tourney, form = form)
+    return render_template('admin/match/edit.html', match = match, tourney = match.tourney, games = games, hide_deleted = hide_deleted, form = form)
 
 @mod_admin.route('/match/<int:match_id>/game/add/', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
@@ -309,7 +318,7 @@ def game_add(match_id):
     form.owner_id.choices = user_choices
     form.owner_id.data = match_entityuser.user_id or 1
 
-    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match.get_players()]
+    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match._get_players()]
     form.winner_id.choices = winner_choices
 
     if form.validate_on_submit():
@@ -348,7 +357,7 @@ def game(game_id):
     user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
 
-    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in game.match.get_players()]
+    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in game.match._get_players()]
     form.winner_id.choices = winner_choices
 
     if form.validate_on_submit():

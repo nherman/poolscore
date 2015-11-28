@@ -2,25 +2,34 @@
 {% set user_action = "edit" %}
 
 {% block tourney_header %}
-    <h4>Tourney: {{ tourney.home_team.name }} vs. {{ tourney.away_team.name }} ({{tourney.id}})</h4>
+    <h4>Tourney: {{ tourney.home_team.name }} vs. {{ tourney.away_team.name }} ({{tourney.id}}){% if tourney.deleted %} &#8212; <span class="text-danger">deleted</span>{% endif %}</h4>
     <h5>Matches</h5>
 
+    {% if not tourney.deleted %}
     <p>
         <a href="{{ url_for('.match_add', tourney_id = tourney.id) }}" class="btn btn-default">Add Match</a>
     </p>
+    {% endif %}
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" {% if not hide_deleted %}checked{% endif %} onclick="showDeleted(this.checked);"> show deleted
+        </label>
+    </div>
 
-    {% if tourney.matches %}
+    {% if matches %}
     <p>
         <div class="list-group">
-        {% for match in tourney.matches %}
+        {% for match in matches %}
             <a class="list-group-item{% if match.active == 1 %} active{% endif %}" href="{{ url_for('admin.match', match_id = match.id) }}">
-            {% for player in match.get_home_players() %}
+            <span style="visibility:{% if match.deleted %}hidden{%else%}visible{% endif %};">{{ match.ordinal }}.</span>
+            {% for player in match.home_players %}
                 {{ player.first_name }} {{ player.last_name }}
             {% endfor %}
              vs.
-            {% for player in match.get_away_players() %}
+            {% for player in match.away_players %}
                 {{ player.first_name }} {{ player.last_name }}
-            {% endfor %}</a>    
+            {% endfor %}
+            {% if match.deleted %}<span style="float:right;" class="text-danger">(deleted)</span>{% endif %}</a>    
         {% endfor %}
         </div>
     </p>
@@ -32,5 +41,7 @@
 {% endblock %}
 
 {% block tourney_footer %}
+    {% if not tourney.deleted %}
         <a href="{{ url_for('.tourney_delete', tourney_id = tourney.id) }}" class="btn btn-danger">Delete Tourney</a>
+    {% endif %}
 {% endblock %}

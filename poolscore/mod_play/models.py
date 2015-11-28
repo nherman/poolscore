@@ -31,7 +31,12 @@ class Tourney(common_models.Base):
     home_team = db.relationship("Team", foreign_keys = [home_team_id])
     away_team = db.relationship("Team", foreign_keys = [away_team_id])
 
-    matches = db.relationship("Match", backref = db.backref("tourney"))
+    all_matches = db.relationship("Match", backref = db.backref("tourney"), lazy="dynamic")
+
+    @property
+    def matches(self):
+        return self.all_matches.filter(Match.deleted != True).all();
+
 
     # New instance instantiation procedure
     def __init__(self, active = True, date = None, home_team_id = None, away_team_id = None, ruleset = None, scoring_method = False, data = None):
@@ -65,7 +70,12 @@ class Match(common_models.Base):
     data = db.Column(db.Text, nullable = True)
 
     players = db.relationship('MatchPlayer', cascade = "all, delete-orphan")
-    games = db.relationship("Game", backref = db.backref("match"))
+    all_games = db.relationship("Game", backref = db.backref("match"), lazy="dynamic")
+
+    @property
+    def games(self):
+        return self.all_games.filter(Game.deleted != True).all();
+
 
     # Ordinal - position in match order that this game occured
     @property
@@ -73,23 +83,24 @@ class Match(common_models.Base):
         return object_session(self).\
             scalar(
                 select([func.count(Match.id)]).\
-                    where(and_(Match.tourney_id==self.tourney_id, Match.id <= self.id))
+                    where(and_(Match.tourney_id==self.tourney_id, Match.id <= self.id, Match.deleted != True))
             )
 
-    def get_players(self, is_home_team = None):
+    @property
+    def home_players(self):
+        return self._get_players(is_home_team = True)
+
+    @property
+    def away_players(self):
+        return self._get_players(is_home_team = False)
+
+    def _get_players(self, is_home_team = None):
         players = []
         for mp in self.players:
             if(mp.is_home_team == is_home_team or is_home_team == None):
                 players.append(mp.player)
 
         return players
-
-
-    def get_home_players(self):
-        return self.get_players(is_home_team = True)
-
-    def get_away_players(self):
-        return self.get_players(is_home_team = False)
 
 
     # New instance instantiation procedure
@@ -140,7 +151,7 @@ class Game(common_models.Base):
         return object_session(self).\
             scalar(
                 select([func.count(Game.id)]).\
-                    where(and_(Game.match_id==self.match_id, Game.id <= self.id))
+                    where(and_(Game.match_id==self.match_id, Game.id <= self.id, Game.deleted != True))
             )
 
     def __init__(self, match_id = None, winner_id = None, data = None):

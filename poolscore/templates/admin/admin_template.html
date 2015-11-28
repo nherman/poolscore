@@ -1,3 +1,21 @@
+{% extends "master.html" %}
+{% block script %}
+    <script>
+
+        function showDeleted(bool) {
+            var url = location.href.split('?')[0];
+            if (bool) {
+                url += "?deleted";
+            }
+            location.assign(url);
+        } 
+
+    </script>
+
+{% endblock %}
+{% block body %}
+
+
     <h1 class="text-center">Tourney/Match/Game</h1>
     <p>
         <ol class="breadcrumb">
@@ -13,3 +31,8 @@
             {% endif %}
         </ol>
     </p>
+
+    {% block admin_body %}{% endblock %}
+
+
+{% endblock %}

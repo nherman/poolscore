@@ -1,8 +1,5 @@
-{% extends "master.html" %}
-{% set body_class = "root-context" %}
-{% block body %}
-
-    {% include "admin/header.html" %}
+{% extends "admin/admin_template.html" %}
+{% block admin_body %}
 
     {% block tourney_header %}{% endblock %}
 
@@ -74,7 +71,9 @@
                 <label for="name">Data:</label>
                 {{ form.data(class = 'form-control', placeholder = 'Data') }}
             </div>
+            {% if not tourney or not tourney.deleted %}
             <button type="submit" name="submit" class="btn btn-primary">{% if user_action == 'edit' %}Edit{% else %}Add{% endif %}</button>
+            {% endif %}
         </form>
     </p>
     {% block tourney_footer %}{% endblock %}

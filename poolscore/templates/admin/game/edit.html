@@ -2,15 +2,19 @@
 {% set user_action = "edit" %}
 
 {% block game_header %}
-    <h4>Game {{ game.ordinal }}: {% for player in game.match.get_home_players() %}
+    <h4>Game {{ game.ordinal }}: {% for player in game.match.home_players %}
             {{ player.first_name }} {{ player.last_name }}
         {% endfor %}
          vs.
-        {% for player in game.match.get_away_players() %}
+        {% for player in game.match.away_players %}
             {{ player.first_name }} {{ player.last_name }}
-        {% endfor %}</h4>
+        {% endfor %}
+        {% if game.deleted %} &#8212; <span class="text-danger">deleted</span>{% endif %}
+    </h4>
 {% endblock %}
 
 {% block game_footer %}
+        {% if not game.deleted %}
         <a href="{{ url_for('.game_delete', game_id = game.id) }}" class="btn btn-danger">Delete Game</a>
+        {% endif %}
 {% endblock %}

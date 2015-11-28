@@ -82,6 +82,7 @@ class Base(db.Model):
 
     def delete(self):
         self.deleted = True
+        self.active = False
         db.session.merge(self)
 
 
