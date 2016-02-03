@@ -142,7 +142,6 @@ def tourney(tourney_id):
 
         # TODO: add home_games and away_games as count of games where winner_id == home | away
         #       update home_score automatically on game save if winner_id != None and scoring_method exists
-        #       allow tourney delete - remember to cascade properly and delete matches, matchplayers, and games
 
 
 
