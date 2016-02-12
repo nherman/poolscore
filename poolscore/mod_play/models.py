@@ -104,11 +104,11 @@ class Match(common_models.Base):
 
 
     # New instance instantiation procedure
-    def __init__(self, tourney_id = None, data = None):
+    def __init__(self, tourney_id = None, data = None, home_score = 0, away_score = 0):
         self.tourney_id = tourney_id
-        self.home_score = 0
-        self.away_score = 0
-        self.data = None
+        self.home_score = home_score
+        self.away_score = away_score
+        self.data = data
 
     def __repr__(self):
         return '<Match %r, (tourney %r)>' % (self.id, self.tourney_id)
@@ -154,10 +154,10 @@ class Game(common_models.Base):
                     where(and_(Game.match_id==self.match_id, Game.id <= self.id, Game.deleted != True))
             )
 
-    def __init__(self, match_id = None, winner_id = None, data = None):
+    def __init__(self, match_id = None, winner_id = 0, data = None):
         self.match_id = match_id
-        self.winner_id = 0
-        self.data = None
+        self.winner_id = winner_id
+        self.data = data
 
     def __repr__(self):
         return '<Game %r, (match %r, tourney %r)>' % (self.id, self.match.id, self.match.tourney.id)
