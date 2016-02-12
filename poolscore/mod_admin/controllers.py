@@ -325,6 +325,13 @@ def game_add(match_id):
         game = Game(
             match_id = match.id,
             data = form.data.data)
+
+        game.active = form.active.data
+
+        if form.winner_id.data > 0:
+            game.winner_id = form.winner_id.data
+
+
         db.session.add(game)
         db.session.commit()
 
