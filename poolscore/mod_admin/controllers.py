@@ -129,8 +129,10 @@ def tourney(tourney_id):
         tourney.data = form.data.data
         tourney.active = form.active.data
 
-        if tourney.winner_id > 0:
+        if form.winner_id.data > 0:
             tourney.winner_id = form.winner_id.data
+        elif tourney.winner_id > 0:
+            tourney.winner_id = 0
 
         if form.owner_id.data != tourney_entityuser.user_id:
             new_owner = User.query.filter_by(id=form.owner_id.data).first()
@@ -274,8 +276,10 @@ def match(match_id):
         match.data = form.data.data
         match.active = form.active.data
 
-        if match.winner_id > 0:
+        if form.winner_id.data > 0:
             match.winner_id = form.winner_id.data
+        elif match.winner_id > 0:
+            match.winner_id = 0
 
         if form.owner_id.data != match_entityuser.user_id:
             new_owner = User.query.filter_by(id=form.owner_id.data).first()
@@ -372,6 +376,8 @@ def game(game_id):
 
         if form.winner_id.data > 0:
             game.winner_id = form.winner_id.data
+        elif game.winner_id > 0:
+            game.winner_id = 0
 
         if form.owner_id.data != game_entityuser.user_id:
             new_owner = User.query.filter_by(id=form.owner_id.data).first()
