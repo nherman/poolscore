@@ -41,7 +41,7 @@ class Base(db.Model):
         if g._user_auth_token["user_id"] == None:
             raise PermissionsError
 
-        query = _query().join(EntityUser, cls.id == EntityUser.row_id).\
+        query = cls._query().join(EntityUser, cls.id == EntityUser.row_id).\
             filter(cls.__name__ == EntityUser.entity, g._user_auth_token["user_id"] == EntityUser.user_id)
 
         return query
@@ -105,7 +105,7 @@ class EntityUser(db.Model):
     entity = db.Column(db.String(32), primary_key=True)
     # Row ID
     row_id = db.Column(db.Integer, primary_key=True)
-    # USer ID
+    # User ID
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
 
     # New instance instantiation procedure

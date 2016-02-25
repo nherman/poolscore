@@ -1,3 +1,4 @@
+from sqlalchemy.exc import SQLAlchemyError
 from flask import Blueprint, request, render_template, \
                   flash, g, session, redirect, url_for, send_from_directory
 from poolscore import db
@@ -42,7 +43,11 @@ def add():
             user.active = True if form.active.data else False
 
             db.session.add(user)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError as e:
+                flash(e, 'error')
+                return render_template("user/add.html", form = form)
 
             user.grant_permission(user.id)
 
@@ -63,7 +68,7 @@ def edit(id):
         existing_user = User.query.filter(User.id != id).filter(
             (User.email == form.email.data) | (User.username == form.username.data)).first()
         if existing_user:
-            flash('User with username \'%s\' or email \'%s\' already exists' % existing_user.username, existing_user.email, 'error')
+            flash('User with username \'{}\' or email \'{}\' already exists'.format(form.username.data, form.email.data), 'error')
             return redirect(url_for('user.edit', id = id))
         else:
             user.first_name = form.first_name.data
