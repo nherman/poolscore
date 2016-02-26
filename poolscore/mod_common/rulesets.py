@@ -30,7 +30,9 @@ class Ruleset(object):
 # {"event_name": ( ["Valid","Values"], "Default Value" ) }
 apa8ball_tourney_events = {
     "coin_toss": (int,None),
-    "player_choice": (int,None)
+    "player_choice": (int,None),
+    "start_time": (int,None),
+    "end_time": (int,None)
 }
 
 apa8ball_match_events = {
