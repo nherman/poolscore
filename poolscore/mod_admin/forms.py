@@ -1,5 +1,5 @@
 from flask.ext.wtf import Form
-from wtforms import TextField, SelectField, SelectMultipleField, DateField, IntegerField, BooleanField
+from wtforms import TextField, SelectField, SelectMultipleField, DateField, IntegerField, BooleanField, DateTimeField
 from wtforms.validators import Required, NumberRange, Optional
 
 from poolscore import app
@@ -22,10 +22,12 @@ class TourneyEditForm(TourneyForm):
     away_score = IntegerField('Away Score', [Optional(strip_whitespace = True)])
     winner_id = SelectField('Winner', coerce=int)
     active = BooleanField('Active')
+    events = TextField('Events')
 
 class MatchForm(Form):
     __abstract__ = True
 
+    events = TextField('Events')
     data = TextField('Data')
     owner_id = SelectField('Owner',[Required(message = 'Select Match Owner.')], coerce=int, default = 1)
 
@@ -41,6 +43,7 @@ class MatchEditForm(MatchForm):
 
 class GameForm(Form):
     winner_id = SelectField('Winner', coerce=int)
+    events = TextField('Events')
     data = TextField('Data')
     active = BooleanField('Active', default = True)
     owner_id = SelectField('Owner',[Required(message = 'Select Game Owner.')], coerce=int, default = 1)

@@ -25,6 +25,8 @@ class Tourney(common_models.Base):
     home_score =  db.Column(db.Integer, nullable = True)
     # Away Team Score
     away_score =  db.Column(db.Integer, nullable = True)
+    # Events
+    events = db.Column(db.Text, nullable = True)
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
@@ -39,13 +41,14 @@ class Tourney(common_models.Base):
 
 
     # New instance instantiation procedure
-    def __init__(self, active = True, date = None, home_team_id = None, away_team_id = None, ruleset = None, scoring_method = False, data = None):
+    def __init__(self, active = True, date = None, home_team_id = None, away_team_id = None, ruleset = None, scoring_method = False, events = None, data = None):
         self.active = active
         self.date = date
         self.home_team_id = home_team_id
         self.away_team_id = away_team_id
         self.ruleset = ruleset
         self.scoring_method = scoring_method
+        self.events = events
         self.data = data
 
     def __repr__(self):
@@ -66,6 +69,8 @@ class Match(common_models.Base):
     away_score = db.Column(db.Integer, nullable = False)
     # Winner (team id)
     winner_id = db.Column(db.Integer, nullable = True)
+    # Events
+    events = db.Column(db.Text, nullable = True)
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
@@ -104,10 +109,11 @@ class Match(common_models.Base):
 
 
     # New instance instantiation procedure
-    def __init__(self, tourney_id = None, data = None, home_score = 0, away_score = 0):
+    def __init__(self, tourney_id = None, events = None, data = None, home_score = 0, away_score = 0):
         self.tourney_id = tourney_id
         self.home_score = home_score
         self.away_score = away_score
+        self.events = events
         self.data = data
 
     def __repr__(self):
@@ -140,6 +146,8 @@ class Game(common_models.Base):
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable = False)
     # Winner (player id)
     winner_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable = True)
+    # Events
+    events = db.Column(db.Text, nullable = True)
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
@@ -154,9 +162,10 @@ class Game(common_models.Base):
                     where(and_(Game.match_id==self.match_id, Game.id <= self.id, Game.deleted != True))
             )
 
-    def __init__(self, match_id = None, winner_id = 0, data = None):
+    def __init__(self, match_id = None, winner_id = 0, events = None, data = None):
         self.match_id = match_id
         self.winner_id = winner_id
+        self.events = events
         self.data = data
 
     def __repr__(self):
@@ -165,31 +174,5 @@ class Game(common_models.Base):
     @property
     def serialize(self):
         return Util.to_serializable_dict(self, self.__class__)
-
-
-
-# record game events
-game_events = db.Table('game_events', common_models.Base.metadata,
-    db.Column('id', db.Integer, primary_key = True),
-    db.Column('game_id', db.Integer, db.ForeignKey('game.id'), nullable = False),
-    db.Column('name', db.Text, nullable = False),
-    db.Column('value', db.Text, nullable = True)
-)
-
-# record match events
-match_events = db.Table('match_events', common_models.Base.metadata,
-    db.Column('id', db.Integer, primary_key = True),
-    db.Column('match_id', db.Integer, db.ForeignKey('match.id'), nullable = False),
-    db.Column('name', db.Text, nullable = False),
-    db.Column('value', db.Text, nullable = True)
-)
-
-# record tourney events
-tourney_events = db.Table('tourney_events', common_models.Base.metadata,
-    db.Column('id', db.Integer, primary_key = True),
-    db.Column('tourney_id', db.Integer, db.ForeignKey('tourney.id'), nullable = False),
-    db.Column('name', db.Text, nullable = False),
-    db.Column('value', db.Text, nullable = True)
-)
 
 

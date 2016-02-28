@@ -1,3 +1,5 @@
+import json
+
 from datetime import date
 
 from flask import Blueprint, request, render_template, \
@@ -5,12 +7,12 @@ from flask import Blueprint, request, render_template, \
 from sqlalchemy import exc
 
 from poolscore import db
-
 from poolscore.mod_common.models import EntityUser
 from poolscore.mod_auth.models import User
 from poolscore.mod_team.models import Team, Player
 from poolscore.mod_play.models import Tourney, Match, Game, MatchPlayer
 from poolscore.mod_common.utils import SecurityUtil
+from poolscore.mod_common.rulesets import Rulesets
 from poolscore.mod_admin.forms import TourneyAddForm, TourneyEditForm, \
                                       MatchAddForm, MatchEditForm, \
                                       GameForm
@@ -18,7 +20,6 @@ from poolscore.mod_admin.forms import TourneyAddForm, TourneyEditForm, \
 
 
 mod_admin = Blueprint('admin', __name__, url_prefix = '/admin')
-
 
 @mod_admin.route('/', methods = ['GET'])
 def index():
@@ -54,6 +55,7 @@ def tourney_add():
             away_team_id = form.away_team_id.data,
             scoring_method = form.scoring_method.data,
             ruleset = form.ruleset.data,
+            events = json.dumps(Rulesets[form.ruleset.data].tourney_events),
             data = form.data.data)
 
         db.session.add(tourney)
@@ -119,13 +121,13 @@ def tourney(tourney_id):
     else:
         matches = tourney.all_matches.all()
 
-
     if form.validate_on_submit():
         tourney.date = form.date.data
         tourney.ruleset = form.ruleset.data
         tourney.scoring_method = form.scoring_method.data
         tourney.home_score = form.home_score.data
         tourney.away_score = form.away_score.data
+        tourney.events = form.events.data
         tourney.data = form.data.data
         tourney.active = form.active.data
 
@@ -159,6 +161,7 @@ def tourney(tourney_id):
         form.winner_id.data = tourney.winner_id
         form.home_score.data = tourney.home_score
         form.away_score.data = tourney.away_score
+        form.events.data = tourney.events
         form.data.data = tourney.data
         form.owner_id.data = tourney_entityuser.user_id or 1
         form.active.data = tourney.active
@@ -186,8 +189,11 @@ def match_add(tourney_id):
 
     if form.validate_on_submit():
 
+        print form.events.data
+
         match = Match(
             tourney_id = tourney.id,
+            events = form.events.data,
             data = form.data.data)
         db.session.add(match)
         db.session.commit()
@@ -218,6 +224,8 @@ def match_add(tourney_id):
         flash('Match %s vs. %s has been added' % (match.home_players[0].first_name, match.away_players[0].first_name), 'success')
         return redirect(url_for('admin.match', match_id = match.id))
 
+    if request.method == 'GET':
+        form.events.data = json.dumps(Rulesets[tourney.ruleset].match_events)
 
     return render_template('admin/match/add.html', tourney = tourney, form = form)
 
@@ -273,6 +281,7 @@ def match(match_id):
     if form.validate_on_submit():
         match.home_score = form.home_score.data
         match.away_score = form.away_score.data
+        match.events = form.events.data
         match.data = form.data.data
         match.active = form.active.data
 
@@ -298,6 +307,7 @@ def match(match_id):
         form.winner_id.data = match.winner_id
         form.home_score.data = match.home_score
         form.away_score.data = match.away_score
+        form.events.data = match.events
         form.data.data = match.data
         form.owner_id.data = match_entityuser.user_id or 1
         form.active.data = match.active
@@ -328,6 +338,7 @@ def game_add(match_id):
 
         game = Game(
             match_id = match.id,
+            events = form.events.data,
             data = form.data.data)
 
         game.active = form.active.data
@@ -350,6 +361,8 @@ def game_add(match_id):
         flash('Game %s' % (game.ordinal), 'success')
         return redirect(url_for('admin.game', game_id = game.id))
 
+    if request.method == 'GET':
+        form.events.data = json.dumps(Rulesets[match.tourney.ruleset].game_events)
 
     return render_template('admin/game/add.html', tourney = match.tourney, match = match, form = form)
 
@@ -371,6 +384,7 @@ def game(game_id):
     form.winner_id.choices = winner_choices
 
     if form.validate_on_submit():
+        game.events = form.events.data
         game.data = form.data.data
         game.active = form.active.data
 
@@ -394,6 +408,7 @@ def game(game_id):
 
     if request.method == 'GET':
         form.winner_id.data = game.winner_id
+        form.events.data = game.events
         form.data.data = game.data
         form.owner_id.data = game_entityuser.user_id or 1
         form.active.data = game.active

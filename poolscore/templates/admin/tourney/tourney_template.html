@@ -67,6 +67,12 @@
                 <label for="name">Owner:</label>
                 {{ form.owner_id(class = 'form-control', placeholder = 'Owner') }}
             </div>
+            {% if user_action == 'edit' %}
+            <div class="form-group">
+                <label for="name">Events:</label>
+                {{ form.events(class = 'form-control', placeholder = 'Events') }}
+            </div>
+            {% endif %}
             <div class="form-group">
                 <label for="name">Data:</label>
                 {{ form.data(class = 'form-control', placeholder = 'Data') }}
