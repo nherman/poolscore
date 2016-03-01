@@ -1,0 +1,89 @@
+{% extends "master.html" %}
+{% set body_class = "root-context" %}
+
+{% block script %}
+<script type="text/javascript">
+function NewTourneyModel() {
+    var self = this,
+    userId = "{{session.user_id}}";
+
+    function initFormObservables() {
+        var fvm = {
+            "data": {
+                "home_team": ko.observable(),
+                "away_team": ko.observable(),
+                "coin_toss": ko.observable(),
+                "player_choice": ko.observable(),
+                "date": ko.observable(),
+                "time": ko.observable()
+            },
+            "teams": ko.observableArray()
+        };
+
+        fvm.validate = function() {
+            var errors = [];
+
+            /* home team */
+            if (fvm.data.subject() == "") {
+                errors.push("Select Home Team");
+            }
+
+            /* away team */
+            if (fvm.data.subject() == "") {
+                errors.push("Select Away Team");
+            }
+
+
+            if (errors.length) {
+                //TODO: prettify errors
+                alert(errors.join('\n'));
+                return false;
+            }
+
+            return true;
+        };
+
+        fvm.submit = function() {
+            var url;
+
+            if (fvm.validate()) {
+
+                $.ajax(url, {
+                    data: ko.toJSON({"tourney": fvm.data}),
+                    type: "POST",
+                    contentType: "application/json",
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        var message = errorThrown;
+                        if ( jqXHR.responseJSON && jqXHR.responseJSON.message ) {
+                            message = jqXHR.responseJSON.message;
+                        }
+                        /* TODO: generate pretty error message */
+                        alert(textStatus + ': ' + message + ' - Unable to save');
+
+                    },
+                    success: function(data) {
+                        self.showListing();
+                        //TODO: pretty status message
+                        alert('New Tourney Started');
+                    }
+                });
+
+            }
+        }
+
+        return fvm;
+    }
+
+}
+
+ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
+
+</script>
+
+{% endblock %}
+
+{% block body %}
+
+    <h1 class="text-center">Play</h1>  
+
+{% endblock %}
