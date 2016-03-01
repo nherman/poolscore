@@ -46,7 +46,6 @@ def tourney_add():
     form.owner_id.choices = user_choices
     form.home_team_id.choices = team_choices
     form.away_team_id.choices = team_choices
-    form.date.data = date.today()
 
     if form.validate_on_submit():
         tourney = Tourney(
@@ -68,6 +67,9 @@ def tourney_add():
 
         flash('Tourney %s vs. %s has been added' % (tourney.home_team_id, tourney.away_team_id), 'success')
         return redirect(url_for('admin.index'))
+
+    if request.method == 'GET':
+        form.date.data = date.today()
 
     return render_template('admin/tourney/add.html', form = form)
 
