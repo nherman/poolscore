@@ -4,6 +4,7 @@ from poolscore import db
 from poolscore import app
 
 from poolscore.mod_common.utils import SecurityUtil
+from poolscore.mod_play.models import Tourney
 
 
 
@@ -12,4 +13,5 @@ mod_home = Blueprint('home', __name__, url_prefix = '/home')
 @mod_home.route('/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def index():
-    return render_template('home/index.html')
+    tourneys = Tourney.secure_all()
+    return render_template('home/index.html', tourneys = tourneys)
