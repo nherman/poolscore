@@ -29,7 +29,7 @@ def index():
 @SecurityUtil.requires_auth()
 def new():
     form = NewTourneyForm(request.form)
-    team_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in Team._query().all()]
+    team_choices = [(-1,"Select a Team")] + [(t.id, "{} ({})".format(t.name, t.id)) for t in Team.secure_all()]
     form.home_team_id.choices = team_choices
     form.away_team_id.choices = team_choices
 
@@ -73,4 +73,4 @@ def new():
 @mod_play.route('/<int:id>/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def play(id):
-    return render_template('play/index.html')
+    return render_template('play/play.html')
