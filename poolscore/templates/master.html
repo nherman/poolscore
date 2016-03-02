@@ -39,7 +39,7 @@
                 </div>
             </nav>
         </header>
-    <div class="container main">
+    <div id="main" class="container main">
 
         {% for message in get_flashed_messages() %}
         <div class="flash-message"> {{ message }}</div>
@@ -60,6 +60,10 @@
         </div>
     </script>
     <div id="alerts" data-bind="template: alertTemplateOptions"></div>
+
+    <div id="loading" data-bind="visible:isLoading" style="display:none;">
+        <div data-bind="html:content">Loading&hellip;</div>
+    </div>
 
     <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
     <!-- TODO: Remove? -->

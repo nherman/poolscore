@@ -1,6 +1,7 @@
 import json
 import re
 from functools import wraps
+from datetime import datetime, date
 
 from flask import request, redirect, \
                 g, url_for, session, \
@@ -141,6 +142,12 @@ class SecurityUtil(object):
             return wrapped
         return requires_admin_decorator
 
+
+class PagerDict(dict):
+
+    def __init__(self, *args, **kwargs):
+        super(PagerDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 class Util(object):
 

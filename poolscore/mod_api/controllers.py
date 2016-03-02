@@ -16,9 +16,11 @@ from boto.exception import BotoServerError, JSONResponseError
 '''
 
 from poolscore import db
-from poolscore import app
+from poolscore.mod_common.utils import SecurityUtil
 from poolscore.mod_common.utils import Util, ModelUtil, ApiError
 from poolscore.mod_auth.models import User
+from poolscore.mod_play.models import Tourney
+
 '''
 from grizzly.mod_common.utils import Util, ModelUtil, SecurityUtil, \
             RegexConverter, ApiError, add_app_url_map_converter, VERIFICATION_TOKEN_TYPE
@@ -78,10 +80,13 @@ def _process_request(klass = None, query = None,
             if query:
                 item = query.first()
             else:
-                item = klass.query.filter_by(id = id).first()
+                #item = klass.query.filter_by(id = id).first() original code for reference
+                item = klass.secure_query().filter(klass.id == id).first()
+                print "item date: {}".format(item.date)
             if not item:
                 raise ApiError('Resource not found for id %s' % id, status_code = 404)
             http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): _serialize_json(item)})
+            print _serialize_json(item)
         else:
             if query:
                 pagination = Util.paginate_with_pager(klass, query, g._pager, False)
@@ -193,11 +198,15 @@ def load_pager(*args, **kwargs):
 
 # tourneys
 @mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET'])
-@mod_api.route('/tourneys/<int:id>.json', methods = ['GET'])
-def tourneys(id):
-    return _process_request(klass = Tourney, id = id)
+@mod_api.route('/tourneys/<int:id>.json', defaults = {'serialize': 'serialize_deep'}, methods = ['GET'])
+@SecurityUtil.requires_auth()
+def tourneys(id, serialize):
+    t = Tourney.query.filter_by(id = id).first()
+    print "Tourney Date: {}".format(t.date)
+    return _process_request(klass = Tourney, id = id, json_serializer_property = serialize)
 
 @mod_api.route('/tourneys/count.json', methods = ['GET'])
+@SecurityUtil.requires_auth()
 def tourneys_count():
     return _process_count_request(klass = Tourney)
     

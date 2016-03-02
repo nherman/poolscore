@@ -123,6 +123,39 @@ window.PS.alertsModel = (function() {
 })();
 ko.applyBindings(window.PS.alertsModel, document.getElementById('alerts'));
 
+
+window.PS.loaderModel = (function() {
+    var self;
+
+    function _t(bool) {
+        self.isLoading(bool);
+    }
+
+    self = {
+        "content": "Loading&hellip;",
+        "isLoading": ko.observable(false),
+        "showLoader": function() {
+            _t(true);
+        },
+        "hideLoader": function() {
+            _t(false);
+        }
+    }
+
+    $( document ).ajaxStart(function() {
+        self.showLoader()
+    });
+
+    $( document ).ajaxStop(function() {
+        self.hideLoader()
+    });
+
+    return self;
+
+})();
+ko.applyBindings(window.PS.loaderModel, document.getElementById('loading'));
+
+
 window.PS.sModel = function(config) {
     var self = this;
 

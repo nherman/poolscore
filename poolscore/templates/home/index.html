@@ -17,7 +17,7 @@
             <h3>Tourneys in Progress</h3>
             <div class="list-group">
             {% for tourney in tourneys %}
-                <a class="list-group-item" href="{{ url_for('play.play', id = tourney.id) }}">{{ tourney.date|datetime }} {{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</a>
+                <a class="list-group-item" href="{{ url_for('play.play', tourney_id = tourney.id) }}">{{ tourney.date|datetime }} {{ tourney.home_team.name }} vs. {{ tourney.away_team.name }}</a>
             {% endfor %}
             </div>
             {% endif %}

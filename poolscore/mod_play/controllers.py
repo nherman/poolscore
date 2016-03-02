@@ -71,10 +71,11 @@ def new():
 
     return render_template('play/new.html', form = form)
 
-@mod_play.route('/<int:id>/', methods = ['GET'])
+@mod_play.route('/<int:tourney_id>', methods = ['GET'])
+@mod_play.route('/<int:tourney_id>/', methods = ['GET'])
 @SecurityUtil.requires_auth()
-def play(id):
-    if not Tourney.has_entityUser(row_id = id):
+def play(tourney_id):
+    if not Tourney.has_entityUser(row_id = tourney_id):
         return SecurityUtil.not_found_error_response()
 
-    return render_template('play/play.html')
+    return render_template('play/play.html', tourney_id = tourney_id)

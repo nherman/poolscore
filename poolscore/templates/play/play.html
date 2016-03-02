@@ -5,7 +5,27 @@
 <script type="text/javascript">
 function NewTourneyModel() {
     var self = this,
-    userId = "{{session.user_id}}";
+    userId = "{{session.user_id}}",
+    tourney_id = "{{ tourney_id }}",
+    url = "/api/v1.0/tourneys/{{ tourney_id }}.json"
+    mainBlockTemplateDefault = {
+        "name": "main_template",
+        "data": self
+    };
+
+    self.mainBlockTemplateOptions = ko.observable({ "name": "" });
+    self.tourney = ko.observable();
+
+    url = "/api/v1.0/tourneys/" + tourney_id + ".json"
+
+    $.getJSON( url, function( json ) {
+        if (json["tourney"] !== undefined) {
+            self.tourney(json["tourney"]);
+            self.mainBlockTemplateOptions(mainBlockTemplateDefault)
+            console.log(json["tourney"]);
+        }
+    });
+
 
     function initFormObservables() {
         var fvm = {
@@ -85,5 +105,13 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 {% block body %}
 
     <h1 class="text-center">Play</h1>  
+
+    <!-- ko template: mainBlockTemplateOptions --><!-- /ko -->
+
+<script type="text/html" id="main_template">
+    <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>vs.</small> <span data-bind="text: tourney().away_team.name"></span></h3>
+    <h6 class="text-center" data-bind="text: tourney().date"></h6>
+</script>
+
 
 {% endblock %}

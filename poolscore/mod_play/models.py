@@ -55,8 +55,20 @@ class Tourney(common_models.Base):
         return '<Tourney %r, %r, home: %r, away: %r>' % (self.id, self.date, self.home_team_id, self.away_team_id)
 
     @property
+    def serialize_deep(self):
+        d = Util.to_serializable_dict(self, self.__class__)
+        d['home_team'] = Util.to_serializable_dict(self.home_team, self.home_team.__class__)
+        d['away_team'] = Util.to_serializable_dict(self.away_team, self.away_team.__class__)
+        return d
+
+    @property
     def serialize(self):
-        return Util.to_serializable_dict(self, self.__class__)
+        return self.serialize_shallow
+
+    @property
+    def serialize_shallow(self):
+        d = Util.to_serializable_dict(self, self.__class__)
+        return d
 
 class Match(common_models.Base):
     __tablename__ = 'match'

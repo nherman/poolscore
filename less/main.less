@@ -113,6 +113,23 @@ footer {
   padding: @grid-gutter-width @grid-gutter-width+15;
 }
 
+#loading {
+    z-index: @zindex-modal + 10;;
+    position:absolute;
+    top:0px;
+    left:50%;
+
+    div {
+        display:block;
+        left:-50%;
+        padding:0.25em 0.5em;
+        text-align:center;
+        border:1px solid @state-info-border;
+
+        .bg-info
+    }
+}
+
 //tourney
 .tourney-context .subheader {
   .text-center;
