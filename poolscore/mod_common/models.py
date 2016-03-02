@@ -53,11 +53,17 @@ class Base(db.Model):
             q = q.filter(cls.deleted != True)
         return q
 
-    def has_permission(self, user_id):
-        if (user_id != None):
-            perms = EntityUser.query.filter_by(entity = self.__class__.__name__, row_id = self.id, user_id = user_id).count()
+    @classmethod
+    def has_entityUser(cls, row_id = None, user_id = None):
+        if (user_id == None):
+            user_id = g._user_auth_token["user_id"]  
+        if (row_id != None and user_id != None):            
+            perms = EntityUser.query.filter_by(entity = cls.__name__, row_id = row_id, user_id = user_id).count()
             return (perms > 0)
         return False
+
+    def has_permission(self, user_id = None):
+        return self.__class__.has_entityUser(row_id = self.id, user_id = user_id)
 
     def grant_permission(self, user_id, connection = None):
         if user_id != None:
@@ -107,6 +113,7 @@ class EntityUser(db.Model):
     row_id = db.Column(db.Integer, primary_key=True)
     # User ID
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+
 
     # New instance instantiation procedure
     def __init__(self, entity = None, row_id = None, user_id = None):

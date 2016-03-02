@@ -7,6 +7,7 @@ from flask import Blueprint, request, render_template, \
 from poolscore import db
 from poolscore.mod_common.utils import SecurityUtil
 from poolscore.mod_common.rulesets import Rulesets
+from poolscore.mod_common.models import EntityUser
 from poolscore.mod_team.models import Team
 from poolscore.mod_play.models import Tourney
 from poolscore.mod_play.forms import NewTourneyForm
@@ -73,4 +74,7 @@ def new():
 @mod_play.route('/<int:id>/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def play(id):
+    if not Tourney.has_entityUser(row_id = id):
+        return SecurityUtil.not_found_error_response()
+
     return render_template('play/play.html')

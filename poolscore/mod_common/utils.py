@@ -115,6 +115,10 @@ class SecurityUtil(object):
         return render_template('403.html'), 403
 
     @staticmethod
+    def not_found_error_response():
+        return render_template('404.html'), 404
+
+    @staticmethod
     def requires_auth(**options):
         def requires_auth_decorator(fn):
             @wraps(fn)
