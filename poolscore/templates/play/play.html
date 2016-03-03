@@ -7,92 +7,92 @@ function NewTourneyModel() {
     var self = this,
     userId = "{{session.user_id}}",
     tourney_id = "{{ tourney_id }}",
-    url = "/api/v1.0/tourneys/{{ tourney_id }}.json"
+    api = (function() {
+        var ep, root = "/api/v1.0/";
+
+        function _m(n,p) {
+            return {"path":root + p,"node": n};
+        }
+
+        ep = {
+            "tourneys": _m("tourneys","tourney/tourneys.json"),
+            "tourneyCount": _m("count","tourney/count.json"),
+            "tourney": _m("tourney", "tourneys/%s.json"),
+            "user": _m("user", "users/%s.json")
+        };
+
+        return {
+            "node": function(endpoint) {
+                if (ep[endpoint] !== undefined) {
+                    return ep[endpoint].node;
+                }
+                return "";
+            },
+            "path": function(endpoint) {
+                var i=1, p;
+                if (ep[endpoint] === undefined) return "";
+                p = ep[endpoint].path;
+
+                while(i < arguments.length) {
+                    p = p.replace(/%s/,arguments[i++]);
+                }
+
+                return p;
+            }
+        };
+    })(),
+
     mainBlockTemplateDefault = {
         "name": "main_template",
         "data": self
     };
 
+
+    function _getEntity(entity, id, callback) {
+        if (typeof callback !== "function") return;
+
+        url = api.path(entity, id);
+        node = api.node(entity);
+
+        $.getJSON( url, function( json ) {
+            if (json[node] !== undefined) {
+                callback(json[node]);
+            }
+        });
+    }
+
+    function _processTourney() {
+        var date, time, t;
+        if (self.tourney() === undefined) return;
+
+        date = new Date(self.tourney().date);
+        self.tourneyDate(date.toDateString());
+
+        if (self.tourney().events != null) {
+            events = ko.utils.parseJson(self.tourney().events);
+            if (events.start_time != null) {                
+                self.tourneyStartTime(events.start_time);
+            }
+        }
+    }
+
+
+
     self.mainBlockTemplateOptions = ko.observable({ "name": "" });
     self.tourney = ko.observable();
-
-    url = "/api/v1.0/tourneys/" + tourney_id + ".json"
-
-    $.getJSON( url, function( json ) {
-        if (json["tourney"] !== undefined) {
-            self.tourney(json["tourney"]);
-            self.mainBlockTemplateOptions(mainBlockTemplateDefault)
-            console.log(json["tourney"]);
-        }
-    });
+    self.tourneyDate = ko.observable();
+    self.tourneyStartTime = ko.observable();
 
 
-    function initFormObservables() {
-        var fvm = {
-            "data": {
-                "home_team": ko.observable(),
-                "away_team": ko.observable(),
-                "coin_toss": ko.observable(),
-                "player_choice": ko.observable(),
-                "date": ko.observable(),
-                "time": ko.observable()
-            },
-            "teams": ko.observableArray()
-        };
 
-        fvm.validate = function() {
-            var errors = [];
+    _getEntity("tourney", tourney_id, function(r) {
+        self.tourney(r);
+        _processTourney();
+        self.mainBlockTemplateOptions(mainBlockTemplateDefault)
 
-            /* home team */
-            if (fvm.data.subject() == "") {
-                errors.push("Select Home Team");
-            }
+        console.log(self.tourney());
+    })
 
-            /* away team */
-            if (fvm.data.subject() == "") {
-                errors.push("Select Away Team");
-            }
-
-
-            if (errors.length) {
-                //TODO: prettify errors
-                alert(errors.join('\n'));
-                return false;
-            }
-
-            return true;
-        };
-
-        fvm.submit = function() {
-            var url;
-
-            if (fvm.validate()) {
-
-                $.ajax(url, {
-                    data: ko.toJSON({"tourney": fvm.data}),
-                    type: "POST",
-                    contentType: "application/json",
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        var message = errorThrown;
-                        if ( jqXHR.responseJSON && jqXHR.responseJSON.message ) {
-                            message = jqXHR.responseJSON.message;
-                        }
-                        /* TODO: generate pretty error message */
-                        alert(textStatus + ': ' + message + ' - Unable to save');
-
-                    },
-                    success: function(data) {
-                        self.showListing();
-                        //TODO: pretty status message
-                        alert('New Tourney Started');
-                    }
-                });
-
-            }
-        }
-
-        return fvm;
-    }
 
 }
 
@@ -110,7 +110,7 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 
 <script type="text/html" id="main_template">
     <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>vs.</small> <span data-bind="text: tourney().away_team.name"></span></h3>
-    <h6 class="text-center" data-bind="text: tourney().date"></h6>
+    <h6 class="text-center"><span data-bind="text: tourneyDate"></span> <span data-bind="text: tourneyStartTime"></span></h6>
 </script>
 
 
