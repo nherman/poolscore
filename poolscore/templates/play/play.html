@@ -7,6 +7,20 @@ function NewTourneyModel() {
     var self = this,
     userId = "{{session.user_id}}",
     tourney_id = "{{ tourney_id }}",
+    matchDefaultContent = {
+        "id": -1 
+    },
+    initTemplateOptions = {
+        "name": ""
+    },
+    topBlockTemplateOptions = {
+        "name": "top_template",
+        "data": self
+    },
+    mainBlockTemplateOptions = {
+        "name": "match_list_template",
+        "data": self
+    },
     api = (function() {
         var ep, root = "/api/v1.0/";
 
@@ -57,12 +71,7 @@ function NewTourneyModel() {
                 });
             }
         };
-    })(),
-
-    mainBlockTemplateDefault = {
-        "name": "main_template",
-        "data": self
-    };
+    })();
 
 
     function _getEntity(endpoint, args, callback) {
@@ -107,25 +116,32 @@ function NewTourneyModel() {
     }
 
 
-
-    self.mainBlockTemplateOptions = ko.observable({ "name": "" });
+    self.mainBlockTemplateOptions = ko.observable(initTemplateOptions);
+    self.topBlockTemplateOptions = ko.observable(initTemplateOptions);
     self.tourney = ko.observable();
     self.tourneyDate = ko.observable();
     self.tourneyStartTime = ko.observable();
     self.matches = ko.observableArray();
+    while (self.matches().length < 5) {
+        self.matches.push(matchDefaultContent);
+    }
+ 
 
+    self.addMatch = function() {
+
+    }
 
 
     api.get("tourney", [tourney_id], function(json) {
         self.tourney(json);
         _processTourney();
-        self.mainBlockTemplateOptions(mainBlockTemplateDefault)
-
+        self.topBlockTemplateOptions(topBlockTemplateOptions)
+        self.mainBlockTemplateOptions(mainBlockTemplateOptions)
     })
 
     api.get("matches", [tourney_id], function(json) {
-        self.matches(json);
-        console.log(self.matches());
+        console.log(json);
+//]        self.matches(json);
     });
 
 }
@@ -137,17 +153,19 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 {% endblock %}
 
 {% block body %}
-
-    <h1 class="text-center">Play</h1>  
-
+    <!-- ko template: topBlockTemplateOptions --><!-- /ko -->
     <!-- ko template: mainBlockTemplateOptions --><!-- /ko -->
 
-<script type="text/html" id="main_template">
-    <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>vs.</small> <span data-bind="text: tourney().away_team.name"></span></h3>
+<script type="text/html" id="top_template">
     <h6 class="text-center"><span data-bind="text: tourneyDate"></span> <span data-bind="text: tourneyStartTime"></span></h6>
+    <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: tourney().away_team.name"></span> <small>(Away)</small></h3>
+</script>
 
-
-    <table class="table beartalk-list-table">
+<script type="text/html" id="match_list_template">
+    <p>
+        <a class="btn btn-default btn-xs" data-bind="click: addMatch">Start Match</a>
+    </p>
+    <table>
         <tbody>
         <!-- ko foreach: {data: matches, as: 'match'} -->
             <tr>
@@ -156,7 +174,6 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <!-- /ko -->
         </tbody>
     </table>
-
 </script>
 
 
