@@ -19,7 +19,7 @@ from poolscore import db
 from poolscore.mod_common.utils import SecurityUtil
 from poolscore.mod_common.utils import Util, ModelUtil, ApiError
 from poolscore.mod_auth.models import User
-from poolscore.mod_play.models import Tourney
+from poolscore.mod_play.models import Tourney, Match, Game
 
 '''
 from grizzly.mod_common.utils import Util, ModelUtil, SecurityUtil, \
@@ -82,11 +82,9 @@ def _process_request(klass = None, query = None,
             else:
                 #item = klass.query.filter_by(id = id).first() original code for reference
                 item = klass.secure_query().filter(klass.id == id).first()
-                print "item date: {}".format(item.date)
             if not item:
                 raise ApiError('Resource not found for id %s' % id, status_code = 404)
             http_resp = jsonify({ModelUtil.singularize(klass.__tablename__): _serialize_json(item)})
-            print _serialize_json(item)
         else:
             if query:
                 pagination = Util.paginate_with_pager(klass, query, g._pager, False)
@@ -201,9 +199,18 @@ def load_pager(*args, **kwargs):
 @mod_api.route('/tourneys/<int:id>.json', defaults = {'serialize': 'serialize_deep'}, methods = ['GET'])
 @SecurityUtil.requires_auth()
 def tourneys(id, serialize):
-    t = Tourney.query.filter_by(id = id).first()
-    print "Tourney Date: {}".format(t.date)
     return _process_request(klass = Tourney, id = id, json_serializer_property = serialize)
+
+# tourney matches
+@mod_api.route('/tourneys/<int:id>/matches.json', methods = ['GET'])
+@SecurityUtil.requires_auth()
+def matches(id):
+    tourney = Tourney.secure_query().filter(Tourney.id == id).first()
+    if not tourney:
+        raise ApiError("Resource not found for tourney id {}".format(id), status_code = 404)
+
+    return jsonify({ModelUtil.pluralize(Match.__tablename__): tourney.matches})
+
 
 @mod_api.route('/tourneys/count.json', methods = ['GET'])
 @SecurityUtil.requires_auth()

@@ -14,30 +14,47 @@ function NewTourneyModel() {
             return {"path":root + p,"node": n};
         }
 
+        function _p(endpoint) {
+            var i=1, p;
+            if (ep[endpoint] === undefined) return "";
+            p = ep[endpoint].path;
+
+            while(i < arguments.length) {
+                p = p.replace(/%s/,arguments[i++]);
+            }
+
+            return p;
+        }
+
+        function _n(endpoint) {
+            if (ep[endpoint] !== undefined) {
+                return ep[endpoint].node;
+            }
+            return "";
+        }
+
         ep = {
-            "tourneys": _m("tourneys","tourney/tourneys.json"),
-            "tourneyCount": _m("count","tourney/count.json"),
             "tourney": _m("tourney", "tourneys/%s.json"),
-            "user": _m("user", "users/%s.json")
+            "matches": _m("matches", "tourneys/%s/matches.json")
         };
 
         return {
-            "node": function(endpoint) {
-                if (ep[endpoint] !== undefined) {
-                    return ep[endpoint].node;
-                }
-                return "";
-            },
-            "path": function(endpoint) {
-                var i=1, p;
-                if (ep[endpoint] === undefined) return "";
-                p = ep[endpoint].path;
+            "node": _n,
+            "path": _p,
+            "get": function(endpoint, args, callback) {
+                var url, node;
+                if (typeof callback !== "function" || !Array.isArray(args)) return;
 
-                while(i < arguments.length) {
-                    p = p.replace(/%s/,arguments[i++]);
-                }
+                args.unshift(endpoint);
 
-                return p;
+                url = _p.apply(this, args);
+                node = _n(endpoint);
+
+                $.getJSON( url, function( json ) {
+                    if (json[node] !== undefined) {
+                        callback(json[node]);
+                    }
+                });
             }
         };
     })(),
@@ -48,17 +65,30 @@ function NewTourneyModel() {
     };
 
 
-    function _getEntity(entity, id, callback) {
-        if (typeof callback !== "function") return;
+    function _getEntity(endpoint, args, callback) {
+        var url, node;
+        if (typeof callback !== "function" || !Array.isArray(args)) return;
 
-        url = api.path(entity, id);
-        node = api.node(entity);
+        args.unshift(endpoint);
+
+        url = api.path.apply(this, args);
+        node = api.node(endpoint);
 
         $.getJSON( url, function( json ) {
             if (json[node] !== undefined) {
                 callback(json[node]);
             }
         });
+    }
+
+    function _getEntities(endpoint, args, callback) {
+        if (typeof callback !== "function" || !Array.isArray(args)) return;
+
+        args.unshift(endpoint);
+
+        url = api.path.apply(this, args);
+        node = api.node(endpoint);
+
     }
 
     function _processTourney() {
@@ -82,17 +112,21 @@ function NewTourneyModel() {
     self.tourney = ko.observable();
     self.tourneyDate = ko.observable();
     self.tourneyStartTime = ko.observable();
+    self.matches = ko.observableArray();
 
 
 
-    _getEntity("tourney", tourney_id, function(r) {
-        self.tourney(r);
+    api.get("tourney", [tourney_id], function(json) {
+        self.tourney(json);
         _processTourney();
         self.mainBlockTemplateOptions(mainBlockTemplateDefault)
 
-        console.log(self.tourney());
     })
 
+    api.get("matches", [tourney_id], function(json) {
+        self.matches(json);
+        console.log(self.matches());
+    });
 
 }
 
@@ -111,6 +145,18 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 <script type="text/html" id="main_template">
     <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>vs.</small> <span data-bind="text: tourney().away_team.name"></span></h3>
     <h6 class="text-center"><span data-bind="text: tourneyDate"></span> <span data-bind="text: tourneyStartTime"></span></h6>
+
+
+    <table class="table beartalk-list-table">
+        <tbody>
+        <!-- ko foreach: {data: matches, as: 'match'} -->
+            <tr>
+                <td><span data-bind="text: match.id"></span></td>
+            </tr>
+        <!-- /ko -->
+        </tbody>
+    </table>
+
 </script>
 
 
