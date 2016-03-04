@@ -28,20 +28,21 @@ header .container {
   top:auto;
   padding:0;
 }
+header .nav-header {
+  margin-left: -15px;
+  margin-right: -15px;
 
-header .navbar-nav > li > a {
+  @media (min-width: 768px) {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+header .nav-link a, header a.nav-link {
   display:inline-block;
   line-height: 44px;
   padding:5px 10px;
   font-size: 175%;
 }
-header nav a.pulse {
-  -webkit-animation: pulse 8s infinite;
-  -moz-animation: pulse 8s infinite;
-  -o-animation: pulse 8s infinite;
-  -ms-animation: pulse 8s infinite;
-  animation: pulse 8s infinite;
-  }
 header .logo {
   display:block;
   background-image: url(/static/images/logo_sm.png);
@@ -57,20 +58,6 @@ header .logo {
   }
 }
 
-footer {
-  width:100%;
-  padding:12px;
-  margin-top: 50px !important;
-  margin-bottom:0 !important;
-  .h5;
-
-  @media (min-width: @screen-sm-min) {
-    position:fixed;
-    bottom:0;
-    left:0;
-    z-index:1000;
-  }
-}
 
 .flash-message {
   .alert;

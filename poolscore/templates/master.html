@@ -7,38 +7,33 @@
     <title>poolScore</title>
 
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="{{ body_class }}">
-        <header>
-            <nav class="navbar">
-                <div class="container">
-                    <div class="navbar-header">
-                        <a class="navbar-brand logo" href="/">PoolScore</a>
-                    </div>
-                    <ul class="nav navbar-nav navbar-right">
-                        <p class="navbar-text">Welcome, {{ session.user_name }}</p>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="/team" title="Teams">Teams</a></li>
-                                <li><a href="/team/player" title="Players">Players</a></li>
-                                <li><a href="/user" title="Account">Account</a></li>
-                                {% if is_admin %}
-                                <li><a href="/admin" title="Admin">Admin</a></li>
-                                {% endif %}
-                            </ul>
-                        </li>
-                        {% if not session.logged_in %}
-                        <li><a href="{{ url_for('auth.login') }}" title="Log in"><span class="glyphicon glyphicon-off"></span></a></li>
-                        {% else %}
-                        <li><a href="{{ url_for('auth.logout') }}" title="Log out"><span class="glyphicon glyphicon-off"></span></a></li>
-                        {% endif %}
-                    </ul>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-header">
+                    <a class="navbar-brand logo" href="/">PoolScore</a>
                 </div>
-            </nav>
-        </header>
+                    {% if session.logged_in %}
+                    <a class="pull-right nav-link" href="{{ url_for('auth.logout') }}" title="Log out"><span class="glyphicon glyphicon-off"></span></a>
+                    <div class="dropdown pull-right">
+                        <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-cog"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/team" title="Teams">Teams</a></li>
+                            <li><a href="/team/player" title="Players">Players</a></li>
+                            <li><a href="/user" title="Account">Account</a></li>
+                            {% if is_admin %}
+                            <li><a href="/admin" title="Admin">Admin</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <p class="navbar-text pull-right">Welcome, {{ session.user_name }}</p>
+                    {% endif %}
+            </div>
+        </nav>
+    </header>
     <div id="main" class="container main">
 
         {% for message in get_flashed_messages() %}
@@ -48,10 +43,6 @@
         {% block body %}{% endblock %}
 
     </div>
-
-    <footer>
-        &copy; Nick Herman
-    </footer>
 
     <script type="text/html" id="alert_template">
         <div data-bind="css: css" role="alert">
