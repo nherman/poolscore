@@ -13,10 +13,6 @@ function NewTourneyModel() {
     initTemplateOptions = {
         "name": ""
     },
-    topBlockTemplateOptions = {
-        "name": "top_template",
-        "data": self
-    },
     mainBlockTemplateOptions = {
         "name": "match_list_template",
         "data": self
@@ -117,7 +113,6 @@ function NewTourneyModel() {
 
 
     self.mainBlockTemplateOptions = ko.observable(initTemplateOptions);
-    self.topBlockTemplateOptions = ko.observable(initTemplateOptions);
     self.tourney = ko.observable();
     self.tourneyDate = ko.observable();
     self.tourneyStartTime = ko.observable();
@@ -135,7 +130,6 @@ function NewTourneyModel() {
     api.get("tourney", [tourney_id], function(json) {
         self.tourney(json);
         _processTourney();
-        self.topBlockTemplateOptions(topBlockTemplateOptions)
         self.mainBlockTemplateOptions(mainBlockTemplateOptions)
     })
 
@@ -153,13 +147,13 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 {% endblock %}
 
 {% block body %}
-    <!-- ko template: topBlockTemplateOptions --><!-- /ko -->
+    <div data-bind="if: tourney() !== undefined">
+        <h6 class="text-center"><span data-bind="text: tourneyDate"></span> <span data-bind="text: tourneyStartTime"></span></h6>
+        <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: tourney().away_team.name"></span> <small>(Away)</small></h3>
+    </div>
+
     <!-- ko template: mainBlockTemplateOptions --><!-- /ko -->
 
-<script type="text/html" id="top_template">
-    <h6 class="text-center"><span data-bind="text: tourneyDate"></span> <span data-bind="text: tourneyStartTime"></span></h6>
-    <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: tourney().away_team.name"></span> <small>(Away)</small></h3>
-</script>
 
 <script type="text/html" id="match_list_template">
     <p>
