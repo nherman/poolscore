@@ -6205,6 +6205,22 @@ header .logo {
 a#loading div:hover {
   background-color: #afd9ee;
 }
+.match_list {
+  width: 100%;
+}
+.match_list td {
+  height: 1em;
+  padding: 5px;
+  border-color: #eee;
+  border-style: solid;
+  border-top-width: 2px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-right-width: 1px;
+}
+.match_list tr.top-row > td {
+  border-top-width: 5px;
+}
 @-webkit-keyframes pulse {
   0% {
     color: #428bca;
