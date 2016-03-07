@@ -7,9 +7,6 @@ function NewTourneyModel() {
     var self = this,
     userId = "{{session.user_id}}",
     tourney_id = "{{ tourney_id }}",
-    matchDefaultContent = {
-        "id": -1 
-    },
     initTemplateOptions = {
         "name": ""
     },
@@ -69,6 +66,7 @@ function NewTourneyModel() {
         };
     })();
 
+    function _isEmpty(v) { return (v == undefined || v == null || v == "");}
 
     function _getEntity(endpoint, args, callback) {
         var url, node;
@@ -100,9 +98,11 @@ function NewTourneyModel() {
         var date, time, t;
         if (self.tourney() === undefined) return;
 
+        //date
         date = new Date(self.tourney().date);
         self.tourneyDate(date.toDateString());
 
+        //start time
         if (self.tourney().events != null) {
             events = ko.utils.parseJson(self.tourney().events);
             if (events.start_time != null) {                
@@ -111,25 +111,113 @@ function NewTourneyModel() {
         }
     }
 
+    function _init() {
+
+        _processTourney();
+
+        //init player options
+        self.addMatch.populate();
+    }
+
 
     self.mainBlockTemplateOptions = ko.observable(initTemplateOptions);
     self.tourney = ko.observable();
     self.tourneyDate = ko.observable();
     self.tourneyStartTime = ko.observable();
     self.matches = ko.observableArray();
-    while (self.matches().length < 5) {
-        self.matches.push(matchDefaultContent);
-    }
- 
+    self.addMatch = (function() {
+        var options = {};
 
-    self.addMatch = function() {
+        function _getPlayerId(o) {
+            a = o.split('_');
+            return {
+                "team": a[0],
+                "id": a[1]
+            }
+        }
 
-    }
+        function _getPlayerSelectItem(p, team) {
+            return {
+                "value":team + "_" + p.id,
+                "label":p.last_name + ", " + p.first_name + " (" + p.handicap + ")",
+                "team": team
+            };
+        }
+
+        options.home = [];
+        options.away = [];
+
+        return {
+            getplayer: _getPlayerId,
+            lag_winner: ko.observable(),
+            lag_loser: ko.observable(),
+            options: options,
+            canAdd: function() { return false; },
+            populate: function() {
+                if (self.tourney() != undefined) {
+                    self.tourney().home_team.players.forEach(function(p) {
+                        self.addMatch.options.home.push(_getPlayerSelectItem(p));
+                    });
+                    self.tourney().away_team.players.forEach(function(p) {
+                        self.addMatch.options.away.push(_getPlayerSelectItem(p));
+                    });
+                }
+            },
+            add: function() {
+                var url, data;
+                console.log(this);
+                if (!canAdd()) return;
+
+                url = api.path(newMatch);
+                data = {
+                    "tourney_id": self.tourney().id,
+                    "home_player_id": null,
+                    "away_player_id": null,
+                    "lag_winner_id": null
+                };
+
+                $.ajax(url, {
+                    data: ko.toJSON({"match": data}),
+                    type: options.saveMethod,
+                    contentType: "application/json",
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        formVM.btnText(options.btnText);
+                        var message = errorThrown;
+                        if ( jqXHR.responseJSON && jqXHR.responseJSON.message ) {
+                            message = jqXHR.responseJSON.message;
+                        }
+                        window.LVX.alertsModel.add({
+                            'content': textStatus + ': ' + message + ' - Unable to save',
+                            'type':'error'
+                        });
+                    },
+                    success: function(data) {
+                        if (typeof options.success === "function") {
+                            options.success.call(formVM);
+                        }
+                        self.showListing();
+                    }
+                });
+
+            }
+        };
+    })();
+    self.addMatch.canAdd =  ko.computed(function() {
+        var wid, lid;
+        if (_isEmpty(this.lag_winner()) || _isEmpty(this.lag_loser())) {
+            return false;
+        }
+        wid = this.getplayer(this.lag_winner());
+        lid = this.getplayer(this.lag_loser());
+        if(wid.id == lid.id) return false;
+        return true;
+    }, self.addMatch)
+
 
 
     api.get("tourney", [tourney_id], function(json) {
         self.tourney(json);
-        _processTourney();
+        _init();
         self.mainBlockTemplateOptions(mainBlockTemplateOptions)
     })
 
@@ -156,22 +244,44 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 
 
 <script type="text/html" id="match_list_template">
-    <p>
-        <a class="btn btn-default btn-xs" data-bind="click: addMatch">Start Match</a>
-    </p>
-    <table>
+    <table class="match_list">
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Games</th>
+                <th>Score</th>
+                <th>Points</th>
+            </tr>
+        </thead>
         <tbody>
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <tr>
-                <td><span data-bind="text: match.id"></span></td>
+            <!-- ko if: match.id !== undefined -->
+                <tr>
+                    <td><span data-bind="text: match.id"></span></td>
+                </tr>
+            <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko with: addMatch -->
+            <tr class="top-row">
+                <td><select placeholder="Select Player" data-bind="value: lag_winner, template: { name: 'select_player_template', data: $data}"></select></td>
+                <td colspan="3" rowspan="2" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
+            </tr>
+            <tr class="bottom-row">
+                <td><select placeholder="Select Player" data-bind="value: lag_loser , template: { name: 'select_player_template', data: $data}"></select></td>
             </tr>
         <!-- /ko -->
         </tbody>
     </table>
 </script>
 
-<script type="text/html" id="match_add_template">
-
+<script type="text/html" id="select_player_template">
+    <option>Select a Player</option>
+    <optgroup label="Home Team" data-bind="foreach: options.home">
+        <option data-bind="text: label, value: value" ></option>
+    </optgroup>
+    <optgroup label="Away Team" data-bind="foreach: options.away">
+        <option data-bind="text: label, value: value" ></option>
+    </optgroup>
 </script>
 
 
