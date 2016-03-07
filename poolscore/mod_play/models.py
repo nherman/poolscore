@@ -57,8 +57,8 @@ class Tourney(common_models.Base):
     @property
     def serialize_deep(self):
         d = Util.to_serializable_dict(self, self.__class__)
-        d['home_team'] = Util.to_serializable_dict(self.home_team, self.home_team.__class__)
-        d['away_team'] = Util.to_serializable_dict(self.away_team, self.away_team.__class__)
+        d['home_team'] = self.home_team.serialize_deep
+        d['away_team'] = self.away_team.serialize_deep
         return d
 
     @property

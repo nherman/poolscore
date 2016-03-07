@@ -35,8 +35,21 @@ class Team(common_models.Base):
         return '<Team %r, %r>' % (self.id, self.name)
 
     @property
+    def serialize_deep(self):
+        d = Util.to_serializable_dict(self, self.__class__)
+        d['players'] = []
+        for player in self.players:
+            d['players'].append(player.serialize)
+        return d
+
+    @property
     def serialize(self):
-        return Util.to_serializable_dict(self, self.__class__)
+        return self.serialize_shallow
+
+    @property
+    def serialize_shallow(self):
+        d = Util.to_serializable_dict(self, self.__class__)
+        return d
 
 class Player(common_models.Base):
     __tablename__ = 'player'
