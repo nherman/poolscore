@@ -120,6 +120,12 @@ header .logo {
 //play
 .match_list {
   width: 100%;
+  margin-top: 2em;
+
+  th.rotate {
+    font-size: .8em;
+    transform: rotate(65deg);
+  }
 
   td {
     height:1em;
@@ -131,6 +137,17 @@ header .logo {
     border-left-width: 1px;
     border-right-width: 1px;
 
+  }
+
+  td.gamenum {
+    .rotate90;
+
+    width:1em;
+    white-space: nowrap;
+    padding:0;
+    font-size: .8em;
+    text-align:center;
+    vertical-align: middle;
   }
 
   tr.top-row > td {
@@ -163,4 +180,9 @@ header .logo {
     0% { color: @link-color; }
     15% { color: darken(@link-color, 30%); }
     30% { color: @link-color; }
+}
+
+//utils
+.rotate90 {
+    transform: rotate(90deg);  
 }

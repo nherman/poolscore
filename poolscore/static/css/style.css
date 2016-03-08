@@ -6207,6 +6207,11 @@ a#loading div:hover {
 }
 .match_list {
   width: 100%;
+  margin-top: 2em;
+}
+.match_list th.rotate {
+  font-size: .8em;
+  transform: rotate(65deg);
 }
 .match_list td {
   height: 1em;
@@ -6218,8 +6223,17 @@ a#loading div:hover {
   border-left-width: 1px;
   border-right-width: 1px;
 }
+.match_list td.gamenum {
+  transform: rotate(90deg);
+  width: 1em;
+  white-space: nowrap;
+  padding: 0;
+  font-size: .8em;
+  text-align: center;
+  vertical-align: middle;
+}
 .match_list tr.top-row > td {
-  border-top-width: 5px;
+  border-top-width: 3px;
 }
 @-webkit-keyframes pulse {
   0% {
@@ -6275,4 +6289,7 @@ a#loading div:hover {
   30% {
     color: #428bca;
   }
+}
+.rotate90 {
+  transform: rotate(90deg);
 }

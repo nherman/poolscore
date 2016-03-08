@@ -248,9 +248,9 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <thead>
             <tr>
                 <th>Player Name</th>
-                <th>Games</th>
-                <th>Score</th>
-                <th>Points</th>
+                <th class="rotate">Games</th>
+                <th class="rotate">Score</th>
+                <th class="rotate">Points</th>
             </tr>
         </thead>
         <tbody>
@@ -264,7 +264,7 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <!-- ko with: addMatch -->
             <tr class="top-row">
                 <td><select placeholder="Select Player" data-bind="value: lag_winner, template: { name: 'select_player_template', data: $data}"></select></td>
-                <td colspan="3" rowspan="2" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
+                <td colspan="3" rowspan="2" class="text-center" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
             </tr>
             <tr class="bottom-row">
                 <td><select placeholder="Select Player" data-bind="value: lag_loser , template: { name: 'select_player_template', data: $data}"></select></td>
