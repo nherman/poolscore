@@ -89,7 +89,7 @@ def _process_request(klass = None, query = None,
             if query:
                 pagination = Util.paginate_with_pager(klass, query, g._pager, False)
             else:
-                pagination = Util.paginate_with_pager(klass, klass.query, g._pager, False)
+                pagination = Util.paginate_with_pager(klass, klass.secure_query(), g._pager, False)
             http_resp = jsonify({ModelUtil.pluralize(klass.__tablename__): [
                 _serialize_json(item) for item in pagination.items] if pagination else []})
     elif method == 'POST':
@@ -201,19 +201,40 @@ def load_pager(*args, **kwargs):
 def tourneys(id, serialize):
     return _process_request(klass = Tourney, id = id, json_serializer_property = serialize)
 
-# tourney matches
-@mod_api.route('/tourneys/<int:id>/matches.json', methods = ['GET'])
-@SecurityUtil.requires_auth()
-def matches(id):
-    tourney = Tourney.secure_query().filter(Tourney.id == id).first()
-    if not tourney:
-        raise ApiError("Resource not found for tourney id {}".format(id), status_code = 404)
-
-    return jsonify({ModelUtil.pluralize(Match.__tablename__): tourney.matches})
-
-
 @mod_api.route('/tourneys/count.json', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def tourneys_count():
     return _process_count_request(klass = Tourney)
-    
+
+# tourney matches
+@mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', methods = ['GET', 'POST'])
+@SecurityUtil.requires_auth()
+def match(tourney_id, match_id):
+    tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
+    if not tourney:
+        raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
+
+    additional_attributes = dict(tourney_id = tourney_id)
+    query = None
+
+    if match_id:
+        query = Match.secure_query().filter(Match.tourney_id == tourney_id and Match.id == match_id)
+
+    else:
+        query = Match.secure_query().filter(Match.tourney_id == tourney_id)
+
+
+    # before_http_action_callback = None
+    # additional_attributes = None
+
+    # def modify_events_callback(klass, id, method, attributes):
+    #     pass
+
+    # if request.method == 'POST':
+    #     before_http_action_callback = modify_events_callback
+    #     additional_attributes = dict(tourney_id = tourney_id)
+
+    return _process_request(klass = Match, id = match_id, query = query, additional_attributes = additional_attributes)
+
+

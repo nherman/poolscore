@@ -42,7 +42,8 @@ function NewTourneyModel() {
 
         ep = {
             "tourney": _m("tourney", "tourneys/%s.json"),
-            "matches": _m("matches", "tourneys/%s/matches.json")
+            "matches": _m("matches", "tourneys/%s/matches.json"),
+            "newmatch": _m("match", "tourneys/%s/matches.json")
         };
 
         return {
@@ -156,46 +157,54 @@ function NewTourneyModel() {
             populate: function() {
                 if (self.tourney() != undefined) {
                     self.tourney().home_team.players.forEach(function(p) {
-                        self.addMatch.options.home.push(_getPlayerSelectItem(p));
+                        self.addMatch.options.home.push(_getPlayerSelectItem(p, 'home'));
                     });
                     self.tourney().away_team.players.forEach(function(p) {
-                        self.addMatch.options.away.push(_getPlayerSelectItem(p));
+                        self.addMatch.options.away.push(_getPlayerSelectItem(p, 'away'));
                     });
                 }
             },
             add: function() {
-                var url, data;
-                console.log(this);
-                if (!canAdd()) return;
-
-                url = api.path(newMatch);
-                data = {
-                    "tourney_id": self.tourney().id,
+                var url, data = {
                     "home_player_id": null,
                     "away_player_id": null,
                     "lag_winner_id": null
                 };
 
+                function _populateData(p,w) {
+                    var o = _getPlayerId(p);
+                    console.log(p);
+                    data[o.team + '_player_id'] = o.id;
+                    if (w) {
+                        data.lag_winner_id = o.id;
+                    }
+                }
+
+                if (!this.canAdd()) return;
+
+                _populateData(this.lag_winner(),true);
+                _populateData(this.lag_loser(),false);
+
+
+                url = api.path("newmatch", self.tourney().id);
+
                 $.ajax(url, {
                     data: ko.toJSON({"match": data}),
-                    type: options.saveMethod,
+                    type: "POST",
                     contentType: "application/json",
                     error: function(jqXHR, textStatus, errorThrown) {
-                        formVM.btnText(options.btnText);
                         var message = errorThrown;
                         if ( jqXHR.responseJSON && jqXHR.responseJSON.message ) {
                             message = jqXHR.responseJSON.message;
                         }
-                        window.LVX.alertsModel.add({
-                            'content': textStatus + ': ' + message + ' - Unable to save',
-                            'type':'error'
-                        });
+                        console.log(textStatus + ': ' + message + ' - Unable to save');
+                        // window.PS.alertsModel.add({
+                        //     'content': textStatus + ': ' + message + ' - Unable to save',
+                        //     'type':'error'
+                        // });
                     },
                     success: function(data) {
-                        if (typeof options.success === "function") {
-                            options.success.call(formVM);
-                        }
-                        self.showListing();
+
                     }
                 });
 
@@ -222,8 +231,7 @@ function NewTourneyModel() {
     })
 
     api.get("matches", [tourney_id], function(json) {
-        console.log(json);
-//]        self.matches(json);
+        self.matches(json);
     });
 
 }

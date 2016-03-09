@@ -2,11 +2,16 @@ import json
 import re
 from functools import wraps
 from datetime import datetime, date
+from inspect import getmro
 
 from flask import request, redirect, \
                 g, url_for, session, \
                 render_template
+from flask.ext.sqlalchemy import Pagination
 from sqlalchemy.sql import text
+from sqlalchemy import inspect
+from sqlalchemy.sql.expression import asc as asc_expr, desc as desc_expr
+from sqlalchemy.sql.sqltypes import DateTime
 from pytz import timezone, utc, all_timezones_set
 from pytz.exceptions import UnknownTimeZoneError
 
@@ -412,3 +417,162 @@ class ModelUtil(object):
         """
         return re.sub(r'\B((?<=[a-z])[A-Z]|[A-Z](?=[a-z]))',
                       r'_\1', word).lower()
+
+
+
+    @staticmethod
+    def create_model(klass = None, attributes = None, additional_attributes = None):
+        data = ModelUtil._find_attrs_by_class_name(klass, attributes)
+        if data:
+            model = ModelUtil._update(klass(), data)
+            if additional_attributes and isinstance(additional_attributes, dict):
+                model = ModelUtil._update(model, additional_attributes)
+            return model
+        return None
+
+    @staticmethod
+    def update_model(model = None, attributes = None, additional_attributes = None):
+        data = ModelUtil._find_attrs_by_class_name(model.__class__, attributes)
+        if data:
+            model = ModelUtil._update(model, data, ignore_attrs = True)
+            if additional_attributes and isinstance(additional_attributes, dict):
+                model = ModelUtil._update(model, additional_attributes)
+            return model
+        return None
+
+    @staticmethod
+    def _update(model = None, attributes = None, ignore_attrs = False):
+        if not isinstance(attributes, dict):
+            return model
+        ins = inspect(model)
+        for key, value in attributes.iteritems():
+            if hasattr(model, key):
+                # ##############################################################
+                # Ignore attributes specified in the IGNORE_ATTRIBUTES_ON_UPDATE
+                # array. Thios allows for cleaner API endpoints.
+                # ##############################################################
+                if ignore_attrs and \
+                    hasattr(model, 'IGNORE_ATTRIBUTES_ON_UPDATE') and \
+                    model.IGNORE_ATTRIBUTES_ON_UPDATE and \
+                    key in model.IGNORE_ATTRIBUTES_ON_UPDATE:
+                    continue
+                # ##############################################################
+                if isinstance(value, dict):
+                    klass = ModelUtil._find_class_for(key)
+                    fetched = ModelUtil._load_child(
+                        klass, value, parent_klass = model.__class__)
+                    setattr(model, key, fetched)
+                elif isinstance(value, list):
+                    klass = None
+                    # Flush sqlalchemy lists on transient models before
+                    # adding new items. Associations are always refreshed.
+                    if not ins.transient:
+                        setattr(model, key, [])
+                    attr = getattr(model, key)
+                    for child in value:
+                        if isinstance(child, dict):
+                            if klass is None:
+                                klass = ModelUtil._find_class_for_collection(key)
+                            fetched = ModelUtil._load_child(
+                                klass, child, parent_klass = model.__class__)
+                            if fetched:
+                                attr.append(fetched)
+                        else:
+                            attr.append(child)
+                else:
+                    # Handle iso8601 dates, and datetime (or date) in general.
+                    column = getattr(model.__class__, key)
+                    if column and hasattr(column, 'type') and \
+                        isinstance(column.type, DateTime):
+                        if isinstance(value, date) or \
+                            isinstance(value, datetime):
+                            setattr(model, key, value)
+                        else:
+                            if value:
+                                parsed_date = ModelUtil._parse_iso8601(value)
+                                if parsed_date:
+                                    setattr(model, key, parsed_date)
+                                else:
+                                    logger.warn("Unable to parse datetime value %s for the %s field" % (value, key))
+                    else:
+                        setattr(model, key, value)
+        return model
+
+    @staticmethod
+    def _find_attrs_by_class_name(klass, attributes):
+        for cls in getmro(klass):
+            name = ModelUtil.underscore(cls.__name__)
+            if name in attributes:
+                return attributes[name]
+        return None
+
+    @staticmethod
+    def extract_attrs_by_key(klass, attributes, key, remove = True):
+        for cls in getmro(klass):
+            name = ModelUtil.underscore(cls.__name__)
+            if name in attributes and \
+                key and key in attributes[name]:
+                    if not remove:
+                        return attributes[name][key]
+                    else:
+                        return attributes[name].pop(key)
+        return None
+
+    @staticmethod
+    def _load_child(klass = None, attributes = None, parent_klass = None):
+        if not klass:
+            return None
+        # Handle association classes. We should find a better way to handle associations,
+        # but since we have the only one (MessageUser), this hard-coded hack should work
+        # fine, for now.
+        if klass.__name__ == 'MessageUser':
+            # Take the opposite association. If parent is message take user, if parent is user take message.
+            # We'll only be looking for association class with two relationships.
+            associations = [relation.mapper.class_ for relation in inspect(klass).relationships]
+            child_klass = None
+            if len(associations) == 2 and parent_klass:
+                if associations[0] == parent_klass:
+                    child_klass = associations[1]
+                else:
+                    child_klass = associations[0]
+            if child_klass:
+                for key, value in attributes.iteritems():
+                    if key == 'id' and hasattr(child_klass, key):
+                        if child_klass.__name__ == 'User':
+                            return klass(user = child_klass.query.filter_by(id = value).first())
+        else:
+            for key, value in attributes.iteritems():
+                if key == 'id' and hasattr(klass, key):
+                    return klass.query.filter_by(id = value).first()
+        return None
+
+    @staticmethod
+    def _find_class_for_collection(collection_name = None):
+        return ModelUtil._find_class_for(ModelUtil.singularize(collection_name))
+
+    @staticmethod
+    def _find_class_for(element_name = None, table_name = None):
+        from sqlalchemy.orm import mapperlib
+        for x in mapperlib._mapper_registry.items():
+            if x[0].mapped_table.name == table_name:
+                return x[0].class_
+            if element_name and x[0].class_.__name__ == ModelUtil.camelize(element_name):
+                return x[0].class_
+        return None
+
+    @staticmethod
+    def _parse_iso8601(iso8601 = None):
+        # TODO: Make this function better.
+        # This function is complete bs. Parsing iso8601 dates is very hard.
+        # We should use some proper lib, such as aniso8601, or dateutils.
+        # Also, do we care about py 3.x?
+        if not iso8601 or not isinstance(iso8601, basestring):
+            return None
+        iso8601 = iso8601.strip()
+        try:
+            struct = strptime(
+                iso8601.replace("-", ""), "%Y%m%dT%H:%M:%S")
+            return datetime.fromtimestamp(mktime(struct))
+        except ValueError, ex:
+            logger.error(ex)
+        return None
