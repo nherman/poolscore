@@ -22,7 +22,7 @@ def index():
     if (len(tourneys) == 0):
         return redirect(url_for('play.new'))
     if (len(tourneys) == 1):
-        return redirect(url_for('play.play', id = tourneys[0].id))
+        return redirect(url_for('play.play', tourney_id = tourneys[0].id))
 
     return render_template('play/index.html', tourneys = tourneys)
 
@@ -62,7 +62,7 @@ def new():
         db.session.commit()
 
         flash('Tourney %s vs. %s has been added' % (tourney.home_team_id, tourney.away_team_id), 'success')
-        return redirect(url_for('play.play', id = tourney.id))
+        return redirect(url_for('play.play', tourney_id = tourney.id))
 
     if request.method == 'GET':
         timestamp = datetime.now()
