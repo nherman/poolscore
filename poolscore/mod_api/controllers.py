@@ -218,10 +218,12 @@ def match(tourney_id, match_id):
         raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
 
     additional_attributes = dict(tourney_id = tourney_id)
+    json_serializer_property = None
     query = None
 
     if match_id:
         query = Match.secure_query().filter(Match.tourney_id == tourney_id and Match.id == match_id)
+        json_serializer_property = "serialize_deep"
 
     else:
         if request.method == "POST":
@@ -302,8 +304,13 @@ def match(tourney_id, match_id):
 
         else:
             query = Match.secure_query().filter(Match.tourney_id == tourney_id)
+            json_serializer_property = "serialize_deep"
 
 
-    return _process_request(klass = Match, id = match_id, query = query, additional_attributes = additional_attributes)
+    return _process_request(klass = Match,
+                            id = match_id,
+                            query = query,
+                            additional_attributes = additional_attributes,
+                            json_serializer_property = json_serializer_property)
 
 
