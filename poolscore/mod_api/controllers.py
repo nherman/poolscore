@@ -16,8 +16,10 @@ from boto.exception import BotoServerError, JSONResponseError
 '''
 
 from poolscore import db
+from poolscore import app
 from poolscore.mod_common.utils import SecurityUtil
 from poolscore.mod_common.utils import Util, ModelUtil, ApiError
+from poolscore.mod_common.rulesets import Rulesets
 from poolscore.mod_auth.models import User
 from poolscore.mod_play.models import Tourney, Match, Game
 
@@ -222,18 +224,64 @@ def match(tourney_id, match_id):
         query = Match.secure_query().filter(Match.tourney_id == tourney_id and Match.id == match_id)
 
     else:
-        query = Match.secure_query().filter(Match.tourney_id == tourney_id)
+        if request.method == "POST":
+            attributes = request.get_json(force = True, silent = True, cache = False)
+            match_attributes = ModelUtil._find_attrs_by_class_name(Match, attributes)
+
+            try:
+                match = ModelUtil.create_model(Match, attributes, additional_attributes = additional_attributes)
+                if not match:
+                    raise ApiError('Match cannot be created. Invalid json format', status_code = 400)
+
+                events = Rulesets[tourney.ruleset].match_events
+                for label in events:
+                    if label in attributes:
+                        print "LABEL: {}".format(label)
+                        events[label] = attributes[label]
+
+                match.events = json.dumps(events)
+                db.session.add(match)
+                db.session.commit()
+
+            except exc.SQLAlchemyError as ex:
+                db.session.rollback()
+                app.logger.error("Match cannot be created", exc_info = ex)
+                raise ApiError('Match cannot be created - [%s]' % ex.message, status_code = 400)
 
 
-    # before_http_action_callback = None
-    # additional_attributes = None
+            def assign_players(player_ids, is_home_team):
+                for pid in player_ids:
+                    matchplayer = MatchPlayer(
+                        match_id = match.id,
+                        player_id = pid,
+                        is_home_team = is_home_team)
+                    db.session.add(matchplayer)
 
-    # def modify_events_callback(klass, id, method, attributes):
-    #     pass
+            try:
 
-    # if request.method == 'POST':
-    #     before_http_action_callback = modify_events_callback
-    #     additional_attributes = dict(tourney_id = tourney_id)
+                print "ATTRIBUTES: {}".format(attributes)
+
+                #Assign Home Player(s)
+                assign_players(attributes["home_players"], True)
+
+                #Assign Away Player(s)
+                assign_players(attributes["away_players"], False)
+            
+                db.session.commit()
+            except exc.SQLAlchemyError as ex:
+                db.session.rollback()
+                app.logger.error("Match Player cannot be created", exc_info = ex)
+                raise ApiError('Match Player cannot be created - [%s]' % ex.message, status_code = 400)
+
+
+
+            http_resp = jsonify({"match": match.serialize_deep})
+            http_resp.status_code = 201
+            return http_resp
+
+        else:
+            query = Match.secure_query().filter(Match.tourney_id == tourney_id)
+
 
     return _process_request(klass = Match, id = match_id, query = query, additional_attributes = additional_attributes)
 
