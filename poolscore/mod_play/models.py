@@ -73,6 +73,10 @@ class Tourney(common_models.Base):
 class Match(common_models.Base):
     __tablename__ = 'match'
    
+    JSON_SERIALIZATION_JSON_FIELDS = [
+        'events',
+    ]
+
     # Tourney ID
     tourney_id = db.Column(db.Integer, db.ForeignKey('tourney.id'), nullable = False)
     #Home Score
@@ -135,10 +139,10 @@ class Match(common_models.Base):
     def serialize_deep(self):
         d = Util.to_serializable_dict(self, self.__class__)
         d['home_players'] = []
-        for p in home_players:
+        for p in self.home_players:
             d['home_players'].append(p.serialize)
         d['away_players'] = []
-        for p in away_players:
+        for p in self.away_players:
             d['away_players'].append(p.serialize)
         return d
 
