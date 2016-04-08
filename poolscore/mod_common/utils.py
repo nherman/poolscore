@@ -291,6 +291,15 @@ class Util(object):
             total = query.count()
         return Pagination(query, page, limit, total, items)
 
+    @staticmethod
+    def _from_json(value):
+        if value:
+            try:
+                return json.loads(value)
+            except ValueError:
+                logger.error("Unable to parse json value {0}".format(value))
+        return None
+
 
 # Code blatantly stolen from pyactiveresource and Rails' Inflector
 # https://github.com/rails/activeresource
@@ -423,12 +432,11 @@ class ModelUtil(object):
     @staticmethod
     def create_model(klass = None, attributes = None, additional_attributes = None):
         data = ModelUtil._find_attrs_by_class_name(klass, attributes)
-        if data:
-            model = ModelUtil._update(klass(), data)
-            if additional_attributes and isinstance(additional_attributes, dict):
-                model = ModelUtil._update(model, additional_attributes)
-            return model
-        return None
+        #Removed null check on data to allow creation of empty entities
+        model = ModelUtil._update(klass(), data)
+        if additional_attributes and isinstance(additional_attributes, dict):
+            model = ModelUtil._update(model, additional_attributes)
+        return model
 
     @staticmethod
     def update_model(model = None, attributes = None, additional_attributes = None):
