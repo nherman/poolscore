@@ -166,18 +166,20 @@ function NewTourneyModel() {
             },
             add: function() {
                 var url, data = {
+                    "match":{
+                        "events": {
+                            "lag": null
+                        }
+                    },
                     "home_players": [],
                     "away_players": [],
-                    "lag": null,
-                    "match":{}
                 };
 
                 function _populateData(p,w) {
                     var o = _getPlayerId(p);
-                    console.log(p);
                     data[o.team + '_players'].push(o.id);
                     if (w) {
-                        data.lag = o.team;
+                        data.match.events.lag = o.team;
                     }
                 }
 
@@ -206,6 +208,7 @@ function NewTourneyModel() {
                     },
                     success: function(data) {
                         console.log(data);
+                        self.matches.push(data);
                     }
                 });
 

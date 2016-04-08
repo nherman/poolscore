@@ -21,7 +21,7 @@ from poolscore.mod_common.utils import SecurityUtil
 from poolscore.mod_common.utils import Util, ModelUtil, ApiError
 from poolscore.mod_common.rulesets import Rulesets
 from poolscore.mod_auth.models import User
-from poolscore.mod_play.models import Tourney, Match, Game
+from poolscore.mod_play.models import Tourney, Match, MatchPlayer, Game
 
 '''
 from grizzly.mod_common.utils import Util, ModelUtil, SecurityUtil, \
@@ -225,23 +225,47 @@ def match(tourney_id, match_id):
 
     else:
         if request.method == "POST":
+            ###
+            # Create new match for tourney
+            #
+            # attributes format:
+            # {
+            #   "match": {
+            #       "events": {
+            #           match_event: "",
+            #           ...
+            #      },
+            #       match_attribute: "",
+            #       ...
+            #   },
+            #   "home_players": [],
+            #   "away_players": [],
+            # }
+            ###
+
             attributes = request.get_json(force = True, silent = True, cache = False)
             match_attributes = ModelUtil._find_attrs_by_class_name(Match, attributes)
 
+            #Enforce format and serialize match events
+            events = Rulesets[tourney.ruleset].match_events
+            if "events" in match_attributes:
+                for label in events:
+                    if label in match_attributes["events"]:
+                        events[label] = match_attributes["events"][label]
+
+            #add entity events as string
+            additional_attributes["events"] = json.dumps(events)
+
             try:
+                #Create match entity
                 match = ModelUtil.create_model(Match, attributes, additional_attributes = additional_attributes)
                 if not match:
                     raise ApiError('Match cannot be created. Invalid json format', status_code = 400)
 
-                events = Rulesets[tourney.ruleset].match_events
-                for label in events:
-                    if label in attributes:
-                        print "LABEL: {}".format(label)
-                        events[label] = attributes[label]
-
-                match.events = json.dumps(events)
                 db.session.add(match)
                 db.session.commit()
+
+                match_id = match.id
 
             except exc.SQLAlchemyError as ex:
                 db.session.rollback()
@@ -249,17 +273,15 @@ def match(tourney_id, match_id):
                 raise ApiError('Match cannot be created - [%s]' % ex.message, status_code = 400)
 
 
-            def assign_players(player_ids, is_home_team):
-                for pid in player_ids:
-                    matchplayer = MatchPlayer(
-                        match_id = match.id,
-                        player_id = pid,
-                        is_home_team = is_home_team)
-                    db.session.add(matchplayer)
-
             try:
-
-                print "ATTRIBUTES: {}".format(attributes)
+                #assign players to match
+                def assign_players(player_ids, is_home_team):
+                    for pid in player_ids:
+                        matchplayer = MatchPlayer(
+                            match_id = match_id,
+                            player_id = pid,
+                            is_home_team = is_home_team)
+                        db.session.add(matchplayer)
 
                 #Assign Home Player(s)
                 assign_players(attributes["home_players"], True)
@@ -272,7 +294,6 @@ def match(tourney_id, match_id):
                 db.session.rollback()
                 app.logger.error("Match Player cannot be created", exc_info = ex)
                 raise ApiError('Match Player cannot be created - [%s]' % ex.message, status_code = 400)
-
 
 
             http_resp = jsonify({"match": match.serialize_deep})
