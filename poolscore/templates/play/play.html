@@ -225,6 +225,30 @@ function NewTourneyModel() {
         if(wid.id == lid.id) return false;
         return true;
     }, self.addMatch)
+    self.utils = (function() {
+        function _getMatchPlayer(match, isLagger) {
+            var players;
+            if (match == undefined || match.events == undefined || match.events.lag == undefined) return undefined;
+
+            if (isLagger) {
+                players = match.events.lag == "home" ? match.home_players : match.away_players;
+            } else {
+                players = match.events.lag == "home" ? match.away_players : match.home_players;            
+            }
+
+            if (!Array.isArray(players)) return undefined;
+            return players[0];
+        }
+
+        return {
+            getLagWinner:function(match){
+                return _getMatchPlayer(match, true);
+            },
+            getLagLoser:function(match){
+                return _getMatchPlayer(match, false);
+            }
+        };
+    })();
 
 
 
@@ -235,6 +259,7 @@ function NewTourneyModel() {
     })
 
     api.get("matches", [tourney_id], function(json) {
+        console.log(json);
         self.matches(json);
     });
 
@@ -266,13 +291,28 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
             </tr>
         </thead>
         <tbody>
+
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <!-- ko if: match.id !== undefined -->
-                <tr>
-                    <td><span data-bind="text: match.id"></span></td>
-                </tr>
+            <tr>
+                <td data-bind="with: $root.utils.getLagWinner(match)">
+                    <span data-bind="text: first_name"></span>
+                    <span data-bind="text: last_name"></span>
+                    <a data-bind="href: '/team/player/' + id, text: id" href="#"></a>
+                </td>
+            </tr>
+            <tr>
+                <td data-bind="with: $root.utils.getLagWinner(match)">
+                    <span data-bind="text: first_name"></span>
+                </td>
+            </tr>
+            <!-- ko if: match.winner_id == null -->
+
+            <!-- /ko -->
+            <!-- ko if: match.winner_id != null -->
+
             <!-- /ko -->
         <!-- /ko -->
+
         <!-- ko with: addMatch -->
             <tr class="top-row">
                 <td><select placeholder="Select Player" data-bind="value: lag_winner, template: { name: 'select_player_template', data: $data}"></select></td>
@@ -285,6 +325,7 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         </tbody>
     </table>
 </script>
+
 
 <script type="text/html" id="select_player_template">
     <option>Select a Player</option>
