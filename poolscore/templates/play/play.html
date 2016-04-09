@@ -200,6 +200,7 @@ function NewTourneyModel() {
         return true;
     }, self.addMatch)
     self.utils = (function() {
+        var id_len = 5;
         function _getMatchPlayer(match, isLagger) {
             var players;
             if (match == undefined || match.events == undefined || match.events.lag == undefined) return undefined;
@@ -215,11 +216,20 @@ function NewTourneyModel() {
         }
 
         return {
-            getLagWinner:function(match){
+            getLagWinner:function(match) {
                 return _getMatchPlayer(match, true);
             },
-            getLagLoser:function(match){
+            getLagLoser:function(match) {
                 return _getMatchPlayer(match, false);
+            },
+            padID: function(id) {
+                var p = id + "",
+                    d = id_len - p.length;
+                while (d>0) {
+                    p = "0" + p;
+                    d--;
+                }
+                return p;
             }
         };
     })();
@@ -268,15 +278,11 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
             <tr>
-                <td data-bind="with: $root.utils.getLagWinner(match)">
-                    <span data-bind="text: first_name"></span>
-                    <span data-bind="text: last_name"></span>
-                    <a data-bind="href: '/team/player/' + id, text: id" href="#"></a>
+                <td data-bind="template: {name: 'display_player_template', data: $root.utils.getLagWinner(match)}">
                 </td>
             </tr>
             <tr>
-                <td data-bind="with: $root.utils.getLagWinner(match)">
-                    <span data-bind="text: first_name"></span>
+                <td data-bind="template: {name: 'display_player_template', data: $root.utils.getLagLoser(match)}">
                 </td>
             </tr>
             <!-- ko if: match.winner_id == null -->
@@ -298,6 +304,12 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <!-- /ko -->
         </tbody>
     </table>
+</script>
+
+<script type="text/html" id="display_player_template">
+    <span data-bind="text: first_name"></span>
+    <span data-bind="text: last_name"></span>
+    <a data-bind="attr: {href: '/team/player/' + id}, text: $root.utils.padID(id)" href="#"></a>
 </script>
 
 
