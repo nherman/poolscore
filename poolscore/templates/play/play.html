@@ -69,32 +69,6 @@ function NewTourneyModel() {
 
     function _isEmpty(v) { return (v == undefined || v == null || v == "");}
 
-    function _getEntity(endpoint, args, callback) {
-        var url, node;
-        if (typeof callback !== "function" || !Array.isArray(args)) return;
-
-        args.unshift(endpoint);
-
-        url = api.path.apply(this, args);
-        node = api.node(endpoint);
-
-        $.getJSON( url, function( json ) {
-            if (json[node] !== undefined) {
-                callback(json[node]);
-            }
-        });
-    }
-
-    function _getEntities(endpoint, args, callback) {
-        if (typeof callback !== "function" || !Array.isArray(args)) return;
-
-        args.unshift(endpoint);
-
-        url = api.path.apply(this, args);
-        node = api.node(endpoint);
-
-    }
-
     function _processTourney() {
         var date, time, t;
         if (self.tourney() === undefined) return;
