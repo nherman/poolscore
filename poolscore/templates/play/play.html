@@ -202,16 +202,23 @@ function NewTourneyModel() {
     self.utils = (function() {
         var id_len = 5;
         function _getMatchPlayer(match, isLagger) {
-            var players;
+            var players, team;
             if (match == undefined || match.events == undefined || match.events.lag == undefined) return undefined;
 
-            if (isLagger) {
-                players = match.events.lag == "home" ? match.home_players : match.away_players;
+            if ((isLagger && match.events.lag == "home") ||
+                (!isLagger && match.events.lag == "away")) {
+                    players = match.home_players;
+                    team = "home";
             } else {
-                players = match.events.lag == "home" ? match.away_players : match.home_players;            
+                    players = match.away_players;
+                    team = "away";            
             }
 
             if (!Array.isArray(players)) return undefined;
+
+            /* add team label */
+            players[0].team = team;
+
             return players[0];
         }
 
@@ -269,7 +276,8 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <thead>
             <tr>
                 <th>Player Name</th>
-                <th class="rotate">Games</th>
+                <th class="rotate">Games<br>Needed</th>
+                <th class="rotate">Games<br>Won</th>
                 <th class="rotate">Score</th>
                 <th class="rotate">Points</th>
             </tr>
@@ -307,8 +315,10 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 </script>
 
 <script type="text/html" id="display_player_template">
+    <span data-bind="text: team"></span>
     <span data-bind="text: first_name"></span>
     <span data-bind="text: last_name"></span>
+    (<span data-bind="text: handicap"></span>)
     <a data-bind="attr: {href: '/team/player/' + id}, text: $root.utils.padID(id)" href="#"></a>
 </script>
 
