@@ -10,7 +10,7 @@
             <li role="presentation"{% if user_action == 'add' %} class="active"{% endif %}><a href="{{ url_for('team.players') }}">All Players</a></li>
             <li role="presentation"><a href="{{ url_for('team.add_player') }}">Add Player</a></li>
             {% if user_action == 'edit' %}
-            <li role="presentation" class="active"><a href="{{ url_for('team.edit_player',id=player.id) }}">Edit Team</a></li>
+            <li role="presentation" class="active"><a href="{{ url_for('team.edit_player',id=player.id) }}">Edit Player</a></li>
             {% endif %}
         </ul>
     </p>
