@@ -144,6 +144,9 @@ class Match(common_models.Base):
         d['away_players'] = []
         for p in self.away_players:
             d['away_players'].append(p.serialize)
+        d['games'] = []
+        for g in self.games:
+            d['games'].append(g.serialize)
         return d
 
     @property
