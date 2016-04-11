@@ -303,11 +303,11 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 
         <!-- ko with: addMatch -->
             <tr class="top-row">
-                <td><select required placeholder="Select a Player" data-bind="value: lag_winner, template: { name: 'select_player_template', data: $data}"></select></td>
+                <td data-bind="template: { name: 'select_player_template', data: {options:options, value:lag_winner}}"></td>
                 <td colspan="3" rowspan="2" class="text-center" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
             </tr>
             <tr class="bottom-row">
-                <td><select requiredplaceholder="Select a Player" data-bind="value: lag_loser , template: { name: 'select_player_template', data: $data}"></select></td>
+                <td data-bind="value: lag_loser , template: { name: 'select_player_template', data: {options:options, value:lag_loser}}"></td>
             </tr>
         <!-- /ko -->
         </tbody>
@@ -327,14 +327,16 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 
 
 <script type="text/html" id="select_player_template">
-    <option default selected="selected">Select a Player</option>
-    <optgroup label="Home Team" data-bind="foreach: options.home">
-        <option data-bind="text: label, value: value" ></option>
-    </optgroup>
-    <optgroup label="Away Team" data-bind="foreach: options.away">
-        <option data-bind="text: label, value: value" ></option>
-    </optgroup>
-    <option value="0">FORFEIT</option>
+    <select required placeholder="Select a Player" data-bind="value: value">
+        <option default selected="selected">Select a Player</option>
+        <optgroup label="Home Team" data-bind="foreach: options.home">
+            <option data-bind="text: label, value: value" ></option>
+        </optgroup>
+        <optgroup label="Away Team" data-bind="foreach: options.away">
+            <option data-bind="text: label, value: value" ></option>
+        </optgroup>
+        <option value="0">FORFEIT</option>
+    </select>
 </script>
 
 
