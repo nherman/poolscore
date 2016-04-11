@@ -69,8 +69,9 @@ function NewTourneyModel() {
 
     function _isEmpty(v) { return (v == undefined || v == null || v == "");}
 
-    function _processTourney() {
+    function _initTourney(json) {
         var date, time, t;
+        self.tourney(json);
         if (self.tourney() === undefined) return;
 
         //date
@@ -84,11 +85,6 @@ function NewTourneyModel() {
                 self.tourneyStartTime(events.start_time);
             }
         }
-    }
-
-    function _init() {
-
-        _processTourney();
 
         //init player options
         self.addMatch.populate();
@@ -199,8 +195,17 @@ function NewTourneyModel() {
         if(wid.id == lid.id) return false;
         return true;
     }, self.addMatch)
-    self.utils = (function() {
-        var id_len = 5;
+    self.utils = (function(match) {
+        var id_len = 5,
+            handicap_matrix = [
+                [[2,2],[2,3],[2,4],[2,5],[2,6],[2,7]],
+                [[3,2],[2,2],[2,3],[2,4],[2,5],[2,6]],
+                [[4,2],[3,2],[3,3],[3,4],[3,5],[2,5]],
+                [[5,2],[4,2],[4,3],[4,4],[4,5],[3,5]],
+                [[6,2],[5,2],[5,3],[5,4],[5,5],[4,5]],
+                [[7,2],[6,2],[5,2],[6,3],[5,4],[5,5]],
+            ];
+
         function _getMatchPlayer(match, isLagger) {
             var players, team;
             if (match == undefined || match.events == undefined || match.events.lag == undefined) return undefined;
@@ -222,6 +227,16 @@ function NewTourneyModel() {
             return players[0];
         }
 
+        function _padID(id, n) {
+            var p = id + "",
+                d = n - p.length;
+            while (d>0) {
+                p = "0" + p;
+                d--;
+            }
+            return p;
+        }
+
         return {
             getLagWinner:function(match) {
                 return _getMatchPlayer(match, true);
@@ -229,29 +244,52 @@ function NewTourneyModel() {
             getLagLoser:function(match) {
                 return _getMatchPlayer(match, false);
             },
-            padID: function(id) {
-                var p = id + "",
-                    d = id_len - p.length;
-                while (d>0) {
-                    p = "0" + p;
-                    d--;
-                }
-                return p;
+            padID: function(id, n) {
+                if (!Number.isInteger(n)) n = id_len;
+                return _padID(id, n);
+            },
+            handicap: function(p1, p2) {
+                if (p1 < 2 || p1 > 7 || p2 < 2 || p2 > 7) return undefined;
+                return handicap_matrix[p1-2][p2-2]
             }
         };
     })();
 
 
-
+    /* initialize model data */
     api.get("tourney", [tourney_id], function(json) {
-        self.tourney(json);
-        _init();
+        _initTourney(json);
         self.mainBlockTemplateOptions(mainBlockTemplateOptions)
     })
 
     api.get("matches", [tourney_id], function(json) {
         console.log(json);
         self.matches(json);
+
+        /* TODO: 
+            Write method that uses ko.mapping to de-serialize each individual match. Use it to init each match in this method AND each time a match is added via addMatch
+
+            Use mapping configuration to only make necessary objects observable:
+            var map_config = {
+                "observe": ['games', 'events', 'winner_id']
+            };
+
+            Add new attributes to make things easier (?):
+                lag_winner = player object
+                lag_loser = player object
+                lag_winner.games_needed
+                lag_loser.games_needed
+
+            Use mapping configuration to make sure these new attributes are ignored on serialization:
+            var map_config = {
+                "ignore": ['lag_winner','lag_loser']
+            };
+
+            example mapping calls (for new and existing models):
+            var match = ko.mapping.fromJS(data, map_config);
+            ko.mapping.fromJS(data, map_config, match)
+
+        */
     });
 
 }
@@ -285,13 +323,9 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <tr>
-                <td data-bind="template: {name: 'display_player_template', data: $root.utils.getLagWinner(match)}">
-                </td>
+            <tr data-bind="template: {name: 'display_player_template', data: $root.utils.getLagWinner(match)}">
             </tr>
-            <tr>
-                <td data-bind="template: {name: 'display_player_template', data: $root.utils.getLagLoser(match)}">
-                </td>
+            <tr data-bind="template: {name: 'display_player_template', data: $root.utils.getLagLoser(match)}">
             </tr>
             <!-- ko if: match.winner_id == null -->
 
@@ -304,7 +338,7 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <!-- ko with: addMatch -->
             <tr class="top-row">
                 <td data-bind="template: { name: 'select_player_template', data: {options:options, value:lag_winner}}"></td>
-                <td colspan="3" rowspan="2" class="text-center" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
+                <td colspan="4" rowspan="2" class="text-center" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
             </tr>
             <tr class="bottom-row">
                 <td data-bind="value: lag_loser , template: { name: 'select_player_template', data: {options:options, value:lag_loser}}"></td>
@@ -322,6 +356,9 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         (<span data-bind="text: handicap"></span>)
         <a data-bind="attr: {href: '/team/player/' + id}, text: $root.utils.padID(id)" href="#"></a>
     </td>
+    <td data-bind=""></td>
+    <td data-bind=""></td>
+    <td data-bind=""></td>
     <td data-bind=""></td>
 </script>
 
