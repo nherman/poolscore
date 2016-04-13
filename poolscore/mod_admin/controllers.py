@@ -271,7 +271,9 @@ def match(match_id):
     user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
 
-    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match._get_players()]
+    winner_choices = [(-1,"Select a Team"),
+        (match.tourney.home_team.id, "{} ({})".format(match.tourney.home_team.name, match.tourney.home_team.id)),
+        (match.tourney.away_team.id, "{} ({})".format(match.tourney.away_team.name, match.tourney.away_team.id))]
     form.winner_id.choices = winner_choices
 
     hide_deleted = request.args.get("deleted") == None
