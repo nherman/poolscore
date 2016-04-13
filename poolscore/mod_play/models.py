@@ -155,6 +155,8 @@ class Match(common_models.Base):
         d['games'] = []
         for g in self.games:
             d['games'].append(g.serialize)
+        d['home_games_won'] = self.home_games_won
+        d['away_games_won'] = self.away_games_won
         return d
 
     @property
