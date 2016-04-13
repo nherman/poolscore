@@ -92,13 +92,21 @@ class Match(common_models.Base):
 
     players = db.relationship('MatchPlayer', cascade = "all, delete-orphan")
     all_games = db.relationship("Game", backref = db.backref("match"), lazy="dynamic")
+    #tourney propery created by backref viw Tourney entity
 
     @property
     def games(self):
         return self.all_games.filter(Game.deleted != True).all();
 
+    @property
+    def home_games_won(self):
+        return self.all_games.filter(Game.deleted != True, Game.winner_id == self.tourney.home_team_id).count()
 
-    # Ordinal - position in match order that this game occured
+    @property
+    def away_games_won(self):
+        return self.all_games.filter(Game.deleted != True, Game.winner_id == self.tourney.away_team_id).count()
+
+    # Ordinal - position in tourney order that this match occured
     @property
     def ordinal(self):
         return object_session(self).\
@@ -179,14 +187,14 @@ class Game(common_models.Base):
 
     #Match ID
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable = False)
-    # Winner (player id)
-    winner_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable = True)
+    # Winner (team id)
+    winner_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable = True)
     # Events
     events = db.Column(db.Text, nullable = True)
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
-    winner = db.relationship("Player")
+    winner = db.relationship("Team")
 
     # Ordinal - position in match order that this game occured
     @property
