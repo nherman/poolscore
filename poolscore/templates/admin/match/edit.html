@@ -32,7 +32,7 @@
             <a class="list-group-item{% if game.active == 1 %} active{% endif %}" href="{{ url_for('admin.game', game_id = game.id) }}">
                 Game
                 <span style="visibility:{% if game.deleted %}hidden{%else%}visible{% endif %};">{{ game.ordinal }}</span>
-                {% if game.winner != None %}(Winner: {{ game.winner.first_name }} {{ game.winner.last_name }}){% endif %}
+                {% if game.winner != None %}(Winner: {{ game.winner.name }}){% endif %}
                 {% if game.deleted %}<span class="text-danger">(deleted)</span>{% endif %}</a>    
             </a>
         {% endfor %}

@@ -335,7 +335,9 @@ def game_add(match_id):
     form.owner_id.choices = user_choices
     form.owner_id.data = match_entityuser.user_id or 1
 
-    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in match._get_players()]
+    winner_choices = [(-1,"Select a Team"),
+        (match.tourney.home_team.id, "{} ({})".format(match.tourney.home_team.name, match.tourney.home_team.id)),
+        (match.tourney.away_team.id, "{} ({})".format(match.tourney.away_team.name, match.tourney.away_team.id))]
     form.winner_id.choices = winner_choices
 
     if form.validate_on_submit():
@@ -384,7 +386,9 @@ def game(game_id):
     user_choices = [(u.id, "{}, {} ({})".format(u.last_name, u.first_name, u.id)) for u in User._query().all()]
     form.owner_id.choices = user_choices
 
-    winner_choices = [(-1,"Select a Player")] + [(p.id, "{} {} ({})".format(p.first_name, p.last_name, p.id)) for p in game.match._get_players()]
+    winner_choices = [(-1,"Select a Team"),
+        (game.match.tourney.home_team.id, "{} ({})".format(game.match.tourney.home_team.name, game.match.tourney.home_team.id)),
+        (game.match.tourney.away_team.id, "{} ({})".format(game.match.tourney.away_team.name, game.match.tourney.away_team.id))]
     form.winner_id.choices = winner_choices
 
     if form.validate_on_submit():
