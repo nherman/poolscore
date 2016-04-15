@@ -342,8 +342,7 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
                 <th>Player Name</th>
                 <th class="rotate">Games<br>Needed</th>
                 <th class="rotate">Games<br>Won</th>
-                <th class="rotate">Score</th>
-                <th class="rotate">Points</th>
+                <th class="rotate">Match<br>Points</th>
             </tr>
         </thead>
         <tbody>
@@ -384,8 +383,7 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
     </td>
     <td data-bind=""></td>
     <td data-bind="text: match[team+'_games_won']"></td>
-    <td data-bind=""></td>
-    <td data-bind=""></td>
+    <td data-bind="text: match[team+'_score']"></td>
 </script>
 
 
