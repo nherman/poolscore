@@ -297,6 +297,21 @@ def match(tourney_id, match_id):
                 app.logger.error("Match Player cannot be created", exc_info = ex)
                 raise ApiError('Match Player cannot be created - [%s]' % ex.message, status_code = 400)
 
+            try:
+                #create game 1
+
+                game_events = Rulesets[tourney.ruleset].game_events
+                game = Game(
+                    match_id = match_id,
+                    events = json.dumps(game_events))
+
+                db.session.add(game)
+                db.session.commit()
+            except exc.SQLAlchemyError as ex:
+                db.session.rollback()
+                app.logger.error("Game cannot be created for match", exc_info = ex)
+                raise ApiError('Game cannot be created for match - [%s]' % ex.message, status_code = 400)
+
 
             http_resp = jsonify({"match": match.serialize_deep})
             http_resp.status_code = 201

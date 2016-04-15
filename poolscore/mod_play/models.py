@@ -218,6 +218,8 @@ class Game(common_models.Base):
 
     @property
     def serialize(self):
-        return Util.to_serializable_dict(self, self.__class__)
+        d = Util.to_serializable_dict(self, self.__class__)
+        d['ordinal'] = self.ordinal
+        return d
 
 
