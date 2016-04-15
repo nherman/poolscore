@@ -266,6 +266,21 @@ function NewTourneyModel() {
             return p;
         }
 
+        function _incEvent(obj, eventName, input) {
+            try {
+                if (Number.isInteger(game.events[eventName])) {
+                    game.events[eventName] += input;
+                } else {
+                    game.events[eventName] = input;
+                }
+
+console.log(game.events);
+
+            } catch(e) {
+                console.log(e);
+            }
+        }
+
         return {
             getLagLosePlayer:function(match) {
                 return _getLag(match, false).player;
@@ -288,6 +303,20 @@ function NewTourneyModel() {
             padID: function(id, n) {
                 if (!Number.isInteger(n)) n = id_len;
                 return _padID(id, n);
+            },
+            getActiveGame: function(match) {
+                if (match.games.length) {
+                    game = match.games[match.games.length-1];
+                }
+                if (!Number.isInteger(game.winner_id)) return undefined;
+
+                return game;
+            },
+            eventIncrement: function(game, eventName) {
+                _incEvent(game, eventName, 1);
+            },
+            eventDecrement: function(game, eventName) {
+                _incEvent(game, eventName, -1);
             }
         };
     })();
@@ -302,6 +331,12 @@ function NewTourneyModel() {
     api.get("matches", [tourney_id], function(json) {
         console.log(json);
         self.matches(json);
+        // for (var i=0;i<json.length;i++) {
+        //     console.log(json[i]);
+        //     json[i].games = ko.observableArray(json[i].games);
+        //     self.matches.push(json[i])
+        // }
+        // console.log(self.matches());
 
         /* TODO: 
             Write method that uses ko.mapping to de-serialize each individual match. Use it to init each match in this method AND each time a match is added via addMatch
@@ -372,10 +407,28 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
                 team: $root.utils.getLagLoseTeam(match)}}">
             </tr>
             <!-- ko if: match.winner_id == null -->
+            <tr>
+                <td colspan="4">
+                    <div data-bind="foreach: {data: games, as: 'game'}">
+                        <div style="border:1px solid #fafafa;">
+                            <span>#<span data-bind="text: game.ordinal"></span></span>
+                            <span>Innings: <span data-bind="text: game.events.innings"></span></span>
+                            <span>home coach: <span data-bind="text: game.events.home_coaches"></span></span>
+                            <span>away coach: <span data-bind="text: game.events.away_coaches"></span></span>
+                            <span>home safe: <span data-bind="text: game.events.home_safes"></span></span>
+                            <span>away safe: <span data-bind="text: game.events.away_safes"></span></span>
+                            <span>winning team: <span data-bind="text: game.winner_id"></span></span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" data-bind="with: $root.utils.getActiveGame(match)">
+                    <p>Edit Game #<span data-bind="text: ordinal"></span></p>
+                    <button class="btn btn-default" data-bind="click: $root.utils.eventIncrement($data,'innings')">+</button>
 
-            <!-- /ko -->
-            <!-- ko if: match.winner_id != null -->
-
+                </td>
+            </tr>
             <!-- /ko -->
         <!-- /ko -->
 
