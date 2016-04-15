@@ -214,32 +214,41 @@ function NewTourneyModel() {
     self.utils = (function(match) {
         var id_len = 5,
             handicap_matrix = [
-                [[2,2],[2,3],[2,4],[2,5],[2,6],[2,7]],
-                [[3,2],[2,2],[2,3],[2,4],[2,5],[2,6]],
-                [[4,2],[3,2],[3,3],[3,4],[3,5],[2,5]],
-                [[5,2],[4,2],[4,3],[4,4],[4,5],[3,5]],
-                [[6,2],[5,2],[5,3],[5,4],[5,5],[4,5]],
-                [[7,2],[6,2],[5,2],[6,3],[5,4],[5,5]],
+                [2,2,2,2,2,2],
+                [3,2,2,2,2,2],
+                [4,3,3,3,3,2],
+                [5,4,4,4,4,3],
+                [6,5,5,5,5,4],
+                [7,6,5,6,5,5],
             ];
 
         function _getLag(match, isLagger) {
             var players, team, r = {
                 "player":undefined,
-                "team":undefined
+                "team":undefined,
+                "games_needed":undefined
             };
             if (match !== undefined && match.events !== undefined && match.events.lag !== undefined) {
 
                 if ((isLagger && match.events.lag == "home") ||
                     (!isLagger && match.events.lag == "away")) {
                         players = match.home_players;
+                        opponents = match.away_players;
                         r.team = "home";
                 } else {
                         players = match.away_players;
+                        opponents = match.home_players;
                         r.team = "away";            
                 }
 
+
                 if (Array.isArray(players)) {
                     r.player = players[0];
+                    if (Array.isArray(opponents)) {
+                        p = r.player.handicap;
+                        o = opponents[0].handicap;
+                        r.games_needed = handicap_matrix[p-2][o-2];
+                    }
                 }
 
             }
@@ -261,22 +270,24 @@ function NewTourneyModel() {
             getLagLosePlayer:function(match) {
                 return _getLag(match, false).player;
             },
-            getLagLoseTeam:function(match) {
-                return _getLag(match, false).team;
-            },
             getLagWinPlayer:function(match) {
                 return _getLag(match, true).player;
             },
             getLagWinTeam:function(match) {
                 return _getLag(match, true).team;
             },
+            getLagLoseTeam:function(match) {
+                return _getLag(match, false).team;
+            },
+            getLagWinGames:function(match) {
+                return _getLag(match, true).games_needed;
+            },
+            getLagLoseGames:function(match) {
+                return _getLag(match, false).games_needed;
+            },
             padID: function(id, n) {
                 if (!Number.isInteger(n)) n = id_len;
                 return _padID(id, n);
-            },
-            handicap: function(p1, p2) {
-                if (p1 < 2 || p1 > 7 || p2 < 2 || p2 > 7) return undefined;
-                return handicap_matrix[p1-2][p2-2]
             }
         };
     })();
@@ -348,9 +359,17 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <tr data-bind="template: {name: 'display_player_template', data: {match: match, player: $root.utils.getLagWinPlayer(match), team: $root.utils.getLagWinTeam(match)}}">
+            <tr data-bind="template: {name: 'display_player_template', data: {
+                match: match,
+                player: $root.utils.getLagWinPlayer(match),
+                games: $root.utils.getLagWinGames(match),
+                team: $root.utils.getLagWinTeam(match)}}">
             </tr>
-            <tr data-bind="template: {name: 'display_player_template', data: {match: match, player: $root.utils.getLagLosePlayer(match), team: $root.utils.getLagLoseTeam(match)}}">
+            <tr data-bind="template: {name: 'display_player_template', data: {
+                match: match,
+                player: $root.utils.getLagLosePlayer(match),
+                games: $root.utils.getLagLoseGames(match),
+                team: $root.utils.getLagLoseTeam(match)}}">
             </tr>
             <!-- ko if: match.winner_id == null -->
 
@@ -381,7 +400,7 @@ ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
         (<span data-bind="text: player.handicap"></span>)
         <a data-bind="attr: {href: '/team/player/' + player.id}, text: $root.utils.padID(player.id)" href="#"></a>
     </td>
-    <td data-bind=""></td>
+    <td data-bind="text: games"></td>
     <td data-bind="text: match[team+'_games_won']"></td>
     <td data-bind="text: match[team+'_score']"></td>
 </script>
