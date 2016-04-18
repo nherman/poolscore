@@ -274,6 +274,7 @@ function NewTourneyModel() {
                     game.events[eventName] = input;
                 }
 
+console.log(game.events);
 
             } catch(e) {
                 console.log(e);
@@ -365,143 +366,21 @@ function NewTourneyModel() {
 
 }
 
-//ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
+ko.applyBindings(new NewTourneyModel(), document.getElementById('main'));
 
 </script>
-<script type="text/javascript">
-function ViewModel() {
-    var self = this,
-        tourney_id = "{{ tourney_id }}",
-        initTemplateOptions = {
-            "name": ""
-        },
-        headerTemplateOptions = {
-            "name": "header_template",
-            "data": {}
-        };
 
-    /* initialize templates */
-    self.headerTemplateOptions = ko.observable(initTemplateOptions);
-
-    /* populate Tourney model */
-    self.tourney = new Tourney(tourney_id, function() {
-        headerTemplateOptions.data = self.tourney;
-        self.headerTemplateOptions(headerTemplateOptions);
-    });
-
-}
-
-function Tourney(tourney_id, initCallback) {
-    var self = this,
-    map_config = {
-
-        //map tourney.events
-    },
-    api = (function() {
-        var root = "/api/v1.0/";
-
-        function _m(n,p) {
-            return {"path":root + p,"node": n};
-        }
-
-        function _p(endpoint) {
-            var i=1, p;
-            if (ep[endpoint] === undefined) return "";
-            p = ep[endpoint].path;
-
-            while(i < arguments.length) {
-                p = p.replace(/%s/,arguments[i++]);
-            }
-
-            return p;
-        }
-
-        function _n(endpoint) {
-            if (ep[endpoint] !== undefined) {
-                return ep[endpoint].node;
-            }
-            return "";
-        }
-
-        ep = {
-            "tourney": _m("tourney", "tourneys/%s.json"),
-            "matches": _m("matches", "tourneys/%s/matches.json"),
-            "newmatch": _m("match", "tourneys/%s/matches.json")
-        };
-
-        return {
-            "node": _n,
-            "path": _p,
-            "get": function(endpoint, args, callback) {
-                var url, node;
-                if (typeof callback !== "function" || !Array.isArray(args)) return;
-
-                args.unshift(endpoint);
-
-                url = _p.apply(this, args);
-                node = _n(endpoint);
-
-                $.getJSON( url, function( json ) {
-                    if (json[node] !== undefined) {
-                        callback(json[node]);
-                    }
-                });
-            }
-        };
-    })();
-
-    self.tourney = {};
-    self.tourneyDate = ko.observable();
-    self.tourneyStartTime = ko.observable();
-    self.matches = ko.observableArray();
-
-    /* initialize model data */
-    api.get("tourney", [tourney_id], function(json) {
-            console.log(json);
-            ko.mapping.fromJS(json, map_config, self);
-            console.log(self);
-            console.log(self.date())
-            console.log(self.events());
-            console.log(self.home_team);
-
-            var date, time, t;
-
-            //date
-            date = new Date(self.date());
-            console.log(self.date());
-            self.tourneyDate(date.toDateString());
-
-            //start time
-            if (self.events != null) {
-                events = ko.utils.parseJson(self.events());
-                if (events.start_time != null) {                
-                    self.tourneyStartTime(events.start_time);
-                }
-            }
-
-            initCallback();
-//        _initTourney(json);
-    });
-}
-//ko.applyBindings(new Tourney("{{ tourney_id }}"), document.getElementById('tourney'));
-ko.applyBindings(new ViewModel(), document.getElementById('main'));
-</script>
 {% endblock %}
 
 {% block body %}
-    <!-- ko template: headerTemplateOptions --><!-- /ko -->
-
-
-
-    <!-- //ko template: mainBlockTemplateOptions --><!-- /ko -->
-
-
-<script type="text/html" id="header_template">
-    <div id="tourney">
+    <div data-bind="if: tourney() !== undefined">
         <h6 class="text-center"><span data-bind="text: tourneyDate"></span> <span data-bind="text: tourneyStartTime"></span></h6>
-        <h3 class="text-center"><span data-bind="text: home_team.name()"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: away_team.name()"></span> <small>(Away)</small></h3>
+        <h3 class="text-center"><span data-bind="text: tourney().home_team.name"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: tourney().away_team.name"></span> <small>(Away)</small></h3>
     </div>
-</script>
+
+    <!-- ko template: mainBlockTemplateOptions --><!-- /ko -->
+
+
 <script type="text/html" id="match_list_template">
     <table class="match_list">
         <thead>
