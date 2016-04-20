@@ -23,6 +23,7 @@ class Ruleset(object):
     def __repr__(self):
         return '<Ruleset %r>' % (self.name)
 
+    def __getitem__(self, key): return self.__dict__[key]
 
 
 apa8ball_tourney_events = {

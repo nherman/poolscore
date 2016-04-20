@@ -9,6 +9,10 @@ from poolscore.mod_common.utils import Util, ModelUtil
 class Tourney(common_models.Base):
     __tablename__ = 'tourney'
    
+    JSON_SERIALIZATION_JSON_FIELDS = [
+        'events'
+    ]
+
     # Tourney Date
     date = db.Column(db.DateTime, nullable = False)
     # Home Team ID

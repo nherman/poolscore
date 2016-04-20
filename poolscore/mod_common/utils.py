@@ -1,5 +1,7 @@
 import json
 import re
+import logging
+from time import mktime, strptime
 from functools import wraps
 from datetime import datetime, date
 from inspect import getmro
@@ -17,6 +19,8 @@ from pytz.exceptions import UnknownTimeZoneError
 
 from poolscore import app
 from poolscore import db
+
+logger = logging.getLogger(__name__)
 
 class ApiError(Exception):
 
