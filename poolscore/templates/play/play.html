@@ -384,129 +384,135 @@ function ViewModel() {
     self.headerTemplateOptions = ko.observable(initTemplateOptions);
 
     /* populate Tourney model */
-    self.tourney = new Tourney(tourney_id, function() {
-        headerTemplateOptions.data = self.tourney;
-        self.headerTemplateOptions(headerTemplateOptions);
+    self.tourney = new Tourney(tourney_id, {
+        "init": function() {
+            headerTemplateOptions.data = self.tourney;
+            self.headerTemplateOptions(headerTemplateOptions);
+        }
     });
 
 }
 
-function Tourney(tourney_id, initCallback) {
-    var self = this,
-    map_config = {
-        'ignore': 'tourneyDate',
-        'observe': ['date','events','winner_id','home_score','away_score'],
-        'date': {
-            create: function(options) {
-                date = new Date(options.data);
-                self.tourneyDate = ko.computed(function() {
-                    return this.date.toDateString();
-                });                    
-                return ko.observable(options.data);
-            }
+window.PS.API = (function() {
+    var root = "/api/v1.0/";
+
+    function _p(path) {
+        var i=1;
+        if (path === undefined) return "";
+
+        while(i < arguments.length) {
+            path = path.replace(/%s/,arguments[i++]);
+        }
+
+        return root + path;
+    }
+
+    function send(method, url, payload, callback, node) {
+        var settings = {
+                type: method || "POST",
+                url: url,
+                data: ko.toJSON(payload),
+                dataType: "json"
+            };
+
+        if (url == undefined) return;
+
+        if (typeof callback == "function") {
+            settings.success = callback;
+        }
+
+        $.ajax(settings);
+    }
+
+
+    return {
+        "path":_p,
+        "get": function(url, callback) {
+            if (typeof callback !== "function" || url == undefined) return;
+
+            $.getJSON( url, function( json ) {
+                callback(json);
+            });
+            
         },
-        'events': {
-            create: function(options) {
-                var events = options.data
-                if(typeof events === "string") {
-                    events = ko.utils.parseJson(events);
+        "put": function(url, payload, callback) {
+            send("PUT", url, payload, callback)
+        },
+        "post": function(url, payload, callback) {
+            send("POST", url, payload, callback)
+        }
+    };
+})();
+
+function superModel(config) {
+    var self = this;
+
+    /* process config */
+    self.modelName = config.modelName || "viewModel";
+    self.map = ko.utils.extend({}, config.map);
+
+}
+
+
+function Tourney(id, options) {
+    var self = this,
+        api_endpoint = PS.API.path("tourneys/%s.json", id),
+        options = options || {
+            "init": function() {}
+        },
+        map_config = {
+            'ignore': ['get','update','tourneyDate'],
+            'observe': ['date','events','winner_id','home_score','away_score'],
+            'date': {
+                create: function(options) {
+                    self.tourneyDate = ko.computed(function() {
+                        /* hack to disregard time zone. Needs to be fixed - probably in the data model */
+                        var date = new Date(self.date());
+                        var date2 = new Date(date.getTime() + date.getTimezoneOffset()*60*1000);
+                        return date2.toDateString();
+                    });                    
+                    return ko.observable(options.data);
                 }
-                return ko.observable(ko.mapping.fromJS(events));
-            }
-        }
-    },
-    api = (function() {
-        var root = "/api/v1.0/";
-
-        function _m(n,p) {
-            return {"path":root + p,"node": n};
-        }
-
-        function _p(endpoint) {
-            var i=1, p;
-            if (ep[endpoint] === undefined) return "";
-            p = ep[endpoint].path;
-
-            while(i < arguments.length) {
-                p = p.replace(/%s/,arguments[i++]);
-            }
-
-            return p;
-        }
-
-        function _n(endpoint) {
-            if (ep[endpoint] !== undefined) {
-                return ep[endpoint].node;
-            }
-            return "";
-        }
-
-        ep = {
-            "tourney": _m("tourney", "tourneys/%s.json"),
-            "matches": _m("matches", "tourneys/%s/matches.json"),
-            "newmatch": _m("match", "tourneys/%s/matches.json")
-        };
-
-        return {
-            "node": _n,
-            "path": _p,
-            "get": function(endpoint, args, callback) {
-                var url, node;
-                if (typeof callback !== "function" || !Array.isArray(args)) return;
-
-                args.unshift(endpoint);
-
-                url = _p.apply(this, args);
-                node = _n(endpoint);
-
-                $.getJSON( url, function( json ) {
-                    if (json[node] !== undefined) {
-                        callback(json[node]);
-                    }
-                });
             },
-            "post": function(endpoint, args, payload, callback) {
-                var url, node, data={};
-                if (typeof callback !== "function" || !Array.isArray(args)) return;
-
-                args.unshift(endpoint);
-
-                url = _p.apply(this, args);
-                node = _n(endpoint);
-
-                data[node] = payload;
-                data = ko.toJSON(data);
-
-                $.ajax({
-                    type: "PUT",
-                    url: url,
-                    data: data,
-                    success: callback,
-                    dataType: "json"
-                });
+            'events': {
+                create: function(options) {
+                    var events = options.data
+                    if(typeof events === "string") {
+                        events = ko.utils.parseJson(events);
+                    }
+                    return ko.observable(ko.mapping.fromJS(events));
+                }
             }
         };
-    })();
 
+    self.get = function(callback) {
+        PS.API.get(api_endpoint,
+            function(json) {
+                ko.mapping.fromJS(json["tourney"], map_config, self);
+                if (typeof callback == "function") {
+                    callback.call(self);
+                }
+            }
+        );
+    };
+
+    self.update = function(callback) {
+        var data = {};
+
+        data["tourney"] = ko.mapping.toJS(self);
+
+        PS.API.put(
+            api_endpoint,
+            data,
+            function(json) {
+                if (typeof callback == "function") {
+                    callback.call(self);
+                }
+        });
+    };
 
     /* initialize model data */
-    api.get("tourney", [tourney_id], function(json) {
-        ko.mapping.fromJS(json, map_config, self);
-        console.log(self);
-        console.log(self.events());
-        initCallback();
-    });
-
-    self.update = function() {
-        self.events().player_choice("away");
-        var data = ko.mapping.toJS(self);
-        console.log("PUT");
-        console.log(data);
-        api.post("tourney", [tourney_id], data, function(resp) {
-            console.log("POST CALLBACK");
-            console.log(resp);
-        });
-    }
+    self.get(options.init);
 
 }
 //ko.applyBindings(new Tourney("{{ tourney_id }}"), document.getElementById('tourney'));
