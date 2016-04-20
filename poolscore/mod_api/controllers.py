@@ -195,13 +195,57 @@ def _generic_update(entity):
 def load_pager(*args, **kwargs):
     g._pager = Util.build_pager(request)
 
+#Ensure that events dict has all required events before serializing
+def put_events_callback(klass, id, method, attributes):
+    if klass and attributes and method == "PUT":
+        klass_name = ModelUtil.underscore(klass.__name__)
+        klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
+        if klass_attributes and 'events' in klass_attributes:
+            #Enforce tourney event format
+            entity = klass.secure_query().filter(klass.id == id).first()
+            ruleset = None
+            if hasattr(entity, "match"):
+                entity = entity.match
+            if hasattr(entity, "tourney"):
+                entity = entity.tourney
+            if hasattr(entity, "ruleset"):
+                ruleset = entity.ruleset
+
+            if (ruleset != None):
+                events = Rulesets[ruleset][klass_name + "_events"]
+                for label in events:
+                    if label not in klass_attributes["events"]:
+                        klass_attributes["events"][label] = ""
+
+            #convert events dict to string before writing to DB
+            klass_attributes["events"] = json.dumps(klass_attributes["events"])
+            attributes[klass_name] = klass_attributes
+
 
 # tourneys
 @mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET'])
-@mod_api.route('/tourneys/<int:id>.json', defaults = {'serialize': 'serialize_deep'}, methods = ['GET'])
+@mod_api.route('/tourneys/<int:id>.json', methods = ['GET','PUT'])
 @SecurityUtil.requires_auth()
-def tourneys(id, serialize):
-    return _process_request(klass = Tourney, id = id, json_serializer_property = serialize)
+def tourneys(id):
+    before_http_action_callback = None
+    # def put_events_callback(klass, id, method, attributes):
+    #     if attributes and 'tourney' in attributes:
+    #         if attributes['tourney'] and 'events' in attributes['tourney']:
+    #             #Enforce tourney event format
+    #             tourney = Tourney.secure_query().filter(Tourney.id == id).first()
+    #             events = Rulesets[tourney.ruleset].tourney_events
+    #             for label in events:
+    #                 if label not in attributes["tourney"]["events"]:
+    #                     attributes["tourney"]["events"][label] = ""
+
+    #             #convert events dict to string before writing to DB
+    #             attributes["tourney"]["events"] = json.dumps(attributes["tourney"]["events"])
+
+    if request.method == "PUT":
+        before_http_action_callback = put_events_callback
+
+
+    return _process_request(klass = Tourney, id = id, before_http_action_callback = before_http_action_callback)
 
 @mod_api.route('/tourneys/count.json', methods = ['GET'])
 @SecurityUtil.requires_auth()

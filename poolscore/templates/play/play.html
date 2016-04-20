@@ -394,8 +394,26 @@ function ViewModel() {
 function Tourney(tourney_id, initCallback) {
     var self = this,
     map_config = {
-
-        //map tourney.events
+        'ignore': 'tourneyDate',
+        'observe': ['date','events','winner_id','home_score','away_score'],
+        'date': {
+            create: function(options) {
+                date = new Date(options.data);
+                self.tourneyDate = ko.computed(function() {
+                    return this.date.toDateString();
+                });                    
+                return ko.observable(options.data);
+            }
+        },
+        'events': {
+            create: function(options) {
+                var events = options.data
+                if(typeof events === "string") {
+                    events = ko.utils.parseJson(events);
+                }
+                return ko.observable(ko.mapping.fromJS(events));
+            }
+        }
     },
     api = (function() {
         var root = "/api/v1.0/";
@@ -446,42 +464,50 @@ function Tourney(tourney_id, initCallback) {
                         callback(json[node]);
                     }
                 });
+            },
+            "post": function(endpoint, args, payload, callback) {
+                var url, node, data={};
+                if (typeof callback !== "function" || !Array.isArray(args)) return;
+
+                args.unshift(endpoint);
+
+                url = _p.apply(this, args);
+                node = _n(endpoint);
+
+                data[node] = payload;
+                data = ko.toJSON(data);
+
+                $.ajax({
+                    type: "PUT",
+                    url: url,
+                    data: data,
+                    success: callback,
+                    dataType: "json"
+                });
             }
         };
     })();
 
-    self.tourney = {};
-    self.tourneyDate = ko.observable();
-    self.tourneyStartTime = ko.observable();
-    self.matches = ko.observableArray();
 
     /* initialize model data */
     api.get("tourney", [tourney_id], function(json) {
-            console.log(json);
-            ko.mapping.fromJS(json, map_config, self);
-            console.log(self);
-            console.log(self.date())
-            console.log(self.events());
-            console.log(self.home_team);
-
-            var date, time, t;
-
-            //date
-            date = new Date(self.date());
-            console.log(self.date());
-            self.tourneyDate(date.toDateString());
-
-            //start time
-            if (self.events != null) {
-                events = ko.utils.parseJson(self.events());
-                if (events.start_time != null) {                
-                    self.tourneyStartTime(events.start_time);
-                }
-            }
-
-            initCallback();
-//        _initTourney(json);
+        ko.mapping.fromJS(json, map_config, self);
+        console.log(self);
+        console.log(self.events());
+        initCallback();
     });
+
+    self.update = function() {
+        self.events().player_choice("away");
+        var data = ko.mapping.toJS(self);
+        console.log("PUT");
+        console.log(data);
+        api.post("tourney", [tourney_id], data, function(resp) {
+            console.log("POST CALLBACK");
+            console.log(resp);
+        });
+    }
+
 }
 //ko.applyBindings(new Tourney("{{ tourney_id }}"), document.getElementById('tourney'));
 ko.applyBindings(new ViewModel(), document.getElementById('main'));
@@ -498,8 +524,9 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 
 <script type="text/html" id="header_template">
     <div id="tourney">
-        <h6 class="text-center"><span data-bind="text: tourneyDate"></span> <span data-bind="text: tourneyStartTime"></span></h6>
-        <h3 class="text-center"><span data-bind="text: home_team.name()"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: away_team.name()"></span> <small>(Away)</small></h3>
+        <h6 class="text-center"><span data-bind="text: tourneyDate()"></span> <span data-bind="text: events().start_time()"></span></h6>
+        <h3 class="text-center"><span data-bind="text: 'home team name'"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: 'away team name'"></span> <small>(Away)</small></h3>
+        <a data-bind="click:update">hit me</a>
     </div>
 </script>
 <script type="text/html" id="match_list_template">
