@@ -701,6 +701,9 @@ function Match(id, options) {
     }
 
     function _init() {
+        /* calculate games needed */
+
+
         /* initialize lag winner/loser */
         lag_team = self.events().lag();
         no_lag_team = (lag_team == "home") ? "away" : "home";
