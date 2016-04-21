@@ -191,6 +191,10 @@ class MatchPlayer(db.Model):
 class Game(common_models.Base):
     __tablename__ = 'game'
 
+    JSON_SERIALIZATION_JSON_FIELDS = [
+        'events',
+    ]
+
     #Match ID
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable = False)
     # Winner (team id)
