@@ -388,8 +388,15 @@ function ViewModel() {
         "init": function() {
             headerTemplateOptions.data = self.tourney;
             self.headerTemplateOptions(headerTemplateOptions);
+
+
+            console.log(self.tourney);
         }
     });
+
+    /* get Teams & all Players */
+
+    /* get all Matches */
 
 }
 
@@ -457,12 +464,12 @@ function superModel(config) {
 function Tourney(id, options) {
     var self = this,
         api_endpoint = PS.API.path("tourneys/%s.json", id),
-        options = options || {
-            "init": function() {}
-        },
+        options = ko.utils.extend({
+            "init": function() {},
+        }, options),
         map_config = {
             'ignore': ['get','update','tourneyDate'],
-            'observe': ['date','events','winner_id','home_score','away_score'],
+            'observe': ['date','events','winner_id','home_score','away_score','data'],
             'date': {
                 create: function(options) {
                     self.tourneyDate = ko.computed(function() {
@@ -499,7 +506,10 @@ function Tourney(id, options) {
     self.update = function(callback) {
         var data = {};
 
+        /* wrap data in entity name node and remove extraneous objects */
         data["tourney"] = ko.mapping.toJS(self);
+        delete data["tourney"].home_team;
+        delete data["tourney"].away_team;
 
         PS.API.put(
             api_endpoint,
@@ -513,8 +523,63 @@ function Tourney(id, options) {
 
     /* initialize model data */
     self.get(options.init);
+}
+
+function Match(id, options) {
+    var self = this,
+        options = ko.utils.extend({
+            "init": function() {},
+            "tourney_id":""
+        }, options),
+        map_config = {
+            'ignore': ['get','update'],
+            'observe': ['events','home_score','away_score','winner_id','data'],
+            'events': {
+                create: function(options) {
+                    var events = options.data
+                    if(typeof events === "string") {
+                        events = ko.utils.parseJson(events);
+                    }
+                    return ko.observable(ko.mapping.fromJS(events));
+                }
+            }
+        },
+        api_endpoint = PS.API.path("tourneys/%s/matches/%s.json", options.tourney_id, id);
+
+    self.get = function(callback) {
+        PS.API.get(api_endpoint,
+            function(json) {
+                ko.mapping.fromJS(json["match"], map_config, self);
+                if (typeof callback == "function") {
+                    callback.call(self);
+                }
+            }
+        );
+    };
+
+    self.update = function(callback) {
+        var data = {};
+
+        data["match"] = ko.mapping.toJS(self);
+
+        PS.API.put(
+            api_endpoint,
+            data,
+            function(json) {
+                if (typeof callback == "function") {
+                    callback.call(self);
+                }
+        });
+    };
+    /* initialize model data */
+    self.get(options.init);
+}
+
+function Game() {
 
 }
+
+
 //ko.applyBindings(new Tourney("{{ tourney_id }}"), document.getElementById('tourney'));
 ko.applyBindings(new ViewModel(), document.getElementById('main'));
 </script>
@@ -531,7 +596,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 <script type="text/html" id="header_template">
     <div id="tourney">
         <h6 class="text-center"><span data-bind="text: tourneyDate()"></span> <span data-bind="text: events().start_time()"></span></h6>
-        <h3 class="text-center"><span data-bind="text: 'home team name'"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: 'away team name'"></span> <small>(Away)</small></h3>
+        <h3 class="text-center"><span data-bind="text: home_team.name"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: away_team.name"></span> <small>(Away)</small></h3>
         <a data-bind="click:update">hit me</a>
     </div>
 </script>

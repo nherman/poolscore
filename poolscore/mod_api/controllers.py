@@ -224,28 +224,17 @@ def put_events_callback(klass, id, method, attributes):
 
 # tourneys
 @mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET'])
-@mod_api.route('/tourneys/<int:id>.json', methods = ['GET','PUT'])
+@mod_api.route('/tourneys/<int:id>.json', defaults = {'json_serializer_property': 'serialize_deep'}, methods = ['GET','PUT'])
 @SecurityUtil.requires_auth()
-def tourneys(id):
+def tourneys(id, json_serializer_property="serialize"):
     before_http_action_callback = None
-    # def put_events_callback(klass, id, method, attributes):
-    #     if attributes and 'tourney' in attributes:
-    #         if attributes['tourney'] and 'events' in attributes['tourney']:
-    #             #Enforce tourney event format
-    #             tourney = Tourney.secure_query().filter(Tourney.id == id).first()
-    #             events = Rulesets[tourney.ruleset].tourney_events
-    #             for label in events:
-    #                 if label not in attributes["tourney"]["events"]:
-    #                     attributes["tourney"]["events"][label] = ""
-
-    #             #convert events dict to string before writing to DB
-    #             attributes["tourney"]["events"] = json.dumps(attributes["tourney"]["events"])
-
     if request.method == "PUT":
         before_http_action_callback = put_events_callback
 
-
-    return _process_request(klass = Tourney, id = id, before_http_action_callback = before_http_action_callback)
+    return _process_request(klass = Tourney, 
+                            id = id,
+                            before_http_action_callback = before_http_action_callback,
+                            json_serializer_property = json_serializer_property)
 
 @mod_api.route('/tourneys/count.json', methods = ['GET'])
 @SecurityUtil.requires_auth()
