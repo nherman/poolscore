@@ -372,6 +372,7 @@ function NewTourneyModel() {
 function ViewModel() {
     var self = this,
         tourney_id = "{{ tourney_id }}",
+        matches_endpoint,
         initTemplateOptions = {
             "name": ""
         },
@@ -394,9 +395,23 @@ function ViewModel() {
         }
     });
 
-    /* get Teams & all Players */
-
     /* get all Matches */
+    self.matches = ko.observableArray();
+    matches_endpoint = PS.API.path("tourneys/%s/matches.json", tourney_id);
+
+    PS.API.get(matches_endpoint,
+        function(json) {
+            if (json === undefined || typeof json != "object") return;
+            if (!Array.isArray(json)) json = [json];
+
+            ko.utils.arrayForEach(json, function(match){
+                console.log(match);
+                self.matches().push(new Match(match.id, {
+                    "json": match
+                }));
+            });
+        }
+    );
 
 }
 
@@ -414,7 +429,7 @@ window.PS.API = (function() {
         return root + path;
     }
 
-    function send(method, url, payload, callback, node) {
+    function _send(method, url, payload, callback, node) {
         var settings = {
                 type: method || "POST",
                 url: url,
@@ -443,10 +458,10 @@ window.PS.API = (function() {
             
         },
         "put": function(url, payload, callback) {
-            send("PUT", url, payload, callback)
+            _send("PUT", url, payload, callback)
         },
         "post": function(url, payload, callback) {
-            send("POST", url, payload, callback)
+            _send("POST", url, payload, callback)
         }
     };
 })();
@@ -492,10 +507,23 @@ function Tourney(id, options) {
             }
         };
 
+    function _mapData(json) {
+        ko.mapping.fromJS(json, map_config, self);
+    }
+
+    function _init() {
+        if (typeof options.json == "object") {
+            _mapData(options.json);
+            options.init();
+        } else {
+            self.get(options.init);
+        }
+    }
+
     self.get = function(callback) {
         PS.API.get(api_endpoint,
             function(json) {
-                ko.mapping.fromJS(json["tourney"], map_config, self);
+                _mapData(json["tourney"]);
                 if (typeof callback == "function") {
                     callback.call(self);
                 }
@@ -522,7 +550,7 @@ function Tourney(id, options) {
     };
 
     /* initialize model data */
-    self.get(options.init);
+    _init();
 }
 
 function Match(id, options) {
@@ -545,6 +573,20 @@ function Match(id, options) {
             }
         },
         api_endpoint = PS.API.path("tourneys/%s/matches/%s.json", options.tourney_id, id);
+
+    function _mapData(json) {
+        ko.mapping.fromJS(json, map_config, self);
+    }
+
+    function _init() {
+        /* if match is in progress then pull games from server */
+        if (typeof options.json == "object") {
+            _mapData(options.json);
+            options.init();
+        } else {
+            self.get(options.init);
+        }
+    }
 
     self.get = function(callback) {
         PS.API.get(api_endpoint,
@@ -571,8 +613,9 @@ function Match(id, options) {
                 }
         });
     };
+
     /* initialize model data */
-    self.get(options.init);
+    _init();
 }
 
 function Game() {
