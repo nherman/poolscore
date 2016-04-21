@@ -226,7 +226,7 @@ def put_events_callback(klass, id, method, attributes):
 @mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET'])
 @mod_api.route('/tourneys/<int:id>.json', defaults = {'json_serializer_property': 'serialize_deep'}, methods = ['GET','PUT'])
 @SecurityUtil.requires_auth()
-def tourneys(id, json_serializer_property="serialize"):
+def tourneys(id, json_serializer_property=None):
     before_http_action_callback = None
     if request.method == "PUT":
         before_http_action_callback = put_events_callback
