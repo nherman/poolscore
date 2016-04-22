@@ -493,7 +493,8 @@ function ViewModel() {
             console.log(resp);
             if (typeof resp == "object" && resp.id !== undefined) {
                 self.matches.push(new Match(resp.id, {
-                    "json": resp
+                    "json": resp,
+                    "tourney": self
                 }));
             }
         }
@@ -528,7 +529,8 @@ function ViewModel() {
 
             ko.utils.arrayForEach(json["matches"], function(match){
                 self.matches.push(new Match(match.id, {
-                    "json": match
+                    "json": match,
+                    "tourney": self
                 }));
             });
         }
@@ -679,10 +681,10 @@ function Match(id, options) {
     var self = this,
         options = ko.utils.extend({
             "init": function() {},
-            "tourney_id":""
+            "tourney": {}
         }, options),
         map_config = {
-            'ignore': ['get','update', 'lag_winner', 'lag_loser'],
+            'ignore': ['get','update', 'lag_winner', 'lag_loser', 'in_progress'],
             'observe': ['events','home_score','away_score','winner_id','data'],
             'events': {
                 create: function(options) {
@@ -696,13 +698,13 @@ function Match(id, options) {
         },
         api_endpoint = PS.API.path("tourneys/%s/matches/%s.json", options.tourney_id, id);
 
+    function _isEmpty(v) { return (v == undefined || v == null || v == "");}
+
     function _mapData(json) {
         ko.mapping.fromJS(json, map_config, self);
     }
 
     function _init() {
-        /* calculate games needed */
-
 
         /* initialize lag winner/loser */
         lag_team = self.events().lag();
@@ -710,10 +712,11 @@ function Match(id, options) {
         self.lag_winner(self[lag_team + "_players"][0]);
         self.lag_loser(self[no_lag_team + "_players"][0]);
 
+        self.in_progress(_isEmpty(self.winner_id()))
 
-        console.log(self.lag_winner());
     }
 
+    self.in_progress = ko.observable();
     self.lag_winner = ko.observable();
     self.lag_loser = ko.observable()
 
@@ -783,40 +786,6 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
     <table class="match_list">
         <thead>
             <tr>
-                <th data-bind="text: matches().length">Player Name</th>
-                <th class="rotate">Games<br>Needed</th>
-                <th class="rotate">Games<br>Won</th>
-                <th class="rotate">Match<br>Points</th>
-            </tr>
-        </thead>
-        <tbody>
-
-        <!-- ko foreach: {data: matches, as: 'match'} -->
-            <tr data-bind="template: {name: 'display_player_template2', data: {
-                player: match.lag_winner,
-                team: 'home'}}">
-            </tr>
-        <!-- /ko -->
-
-        <!-- ko with: addMatch -->
-            <tr class="top-row">
-                <td data-bind="template: { name: 'select_player_template', data: {options:selectItems, value:lag_winner}}"></td>
-                <td colspan="4" rowspan="2" class="text-center" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
-            </tr>
-            <tr class="bottom-row">
-                <td data-bind="value: lag_loser , template: { name: 'select_player_template', data: {options:selectItems, value:lag_loser}}"></td>
-            </tr>
-        <!-- /ko -->
-
-        </tbody>
-    </table>
-</script>
-
-
-<script type="text/html" id="match_list_template">
-    <table class="match_list">
-        <thead>
-            <tr>
                 <th>Player Name</th>
                 <th class="rotate">Games<br>Needed</th>
                 <th class="rotate">Games<br>Won</th>
@@ -828,17 +797,16 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
         <!-- ko foreach: {data: matches, as: 'match'} -->
             <tr data-bind="template: {name: 'display_player_template', data: {
                 match: match,
-                player: $root.utils.getLagWinPlayer(match),
-                games: $root.utils.getLagWinGames(match),
-                team: $root.utils.getLagWinTeam(match)}}">
+                player: match.lag_winner(),
+                team: match.events().lag()}}">
             </tr>
             <tr data-bind="template: {name: 'display_player_template', data: {
                 match: match,
-                player: $root.utils.getLagLosePlayer(match),
-                games: $root.utils.getLagLoseGames(match),
-                team: $root.utils.getLagLoseTeam(match)}}">
+                player: match.lag_loser(),
+                team: (match.events().lag() == 'home') ? 'away' : 'home'}}">
             </tr>
-            <!-- ko if: match.winner_id == null -->
+            <!-- ko if: match.in_progress() == true -->
+            <!--
             <tr>
                 <td colspan="4">
                     <div data-bind="foreach: {data: games, as: 'game'}">
@@ -861,39 +829,41 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 
                 </td>
             </tr>
+            -->
             <!-- /ko -->
         <!-- /ko -->
 
         <!-- ko with: addMatch -->
             <tr class="top-row">
-                <td data-bind="template: { name: 'select_player_template', data: {options:options, value:lag_winner}}"></td>
+                <td data-bind="template: { name: 'select_player_template', data: {
+                    options:selectItems,
+                    value:lag_winner,
+                    placeholder: 'Select Lag Winner'
+                }}"></td>
                 <td colspan="4" rowspan="2" class="text-center" style="vertical-align: middle;" data-bind="if: canAdd"><button class="btn btn-default" data-bind="click: add, text: 'Start Match'">Start Match</button></td>
             </tr>
             <tr class="bottom-row">
-                <td data-bind="value: lag_loser , template: { name: 'select_player_template', data: {options:options, value:lag_loser}}"></td>
+                <td data-bind="value: lag_loser , template: { name: 'select_player_template', data: {
+                    options:selectItems,
+                    value:lag_loser,
+                    placeholder: 'Select Lag Loser'
+                }}"></td>
             </tr>
         <!-- /ko -->
+
         </tbody>
     </table>
 </script>
 
-<script type="text/html" id="display_player_template2">
-    <span data-bind="text: team"></span>
-    <span data-bind="text: player.first_name"></span>
-    <span data-bind="text: player.last_name"></span>
-    (<span data-bind="text: player.handicap"></span>)
-    <a data-bind="attr: {href: '/team/player/' + player.id}, text: player.id" href="#"></a>
-</script>
-
 <script type="text/html" id="display_player_template">
     <td>
-        <span data-bind="text: team"></span>
+        <span style="font-weight:bold;" data-bind="text: (team == 'home') ? 'H' : 'A'"></span>&nbsp;
         <span data-bind="text: player.first_name"></span>
         <span data-bind="text: player.last_name"></span>
         (<span data-bind="text: player.handicap"></span>)
-        <a data-bind="attr: {href: '/team/player/' + player.id}, text: $root.utils.padID(player.id)" href="#"></a>
+        <a data-bind="attr: {href: '/team/player/' + player.id}, text: player.player_id" href="#"></a>
     </td>
-    <td data-bind="text: games"></td>
+    <td data-bind="text: match[team+'_games_needed']"></td>
     <td data-bind="text: match[team+'_games_won']"></td>
     <td data-bind="text: match[team+'_score']"></td>
 </script>
@@ -901,7 +871,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 
 <script type="text/html" id="select_player_template">
     <select required placeholder="Select a Player" data-bind="value: value">
-        <option default selected="selected">Select a Player</option>
+        <option default selected="selected" data-bind="text: placeholder">Select a Player</option>
         <optgroup label="Home Team" data-bind="foreach: options.home">
             <option data-bind="text: label, value: value" ></option>
         </optgroup>

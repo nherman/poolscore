@@ -1,22 +1,22 @@
 #handicaping functions
 
-def APA8BALL(player1, player2):
+def APA8BALL(players1, players2):
     '''
         player1 & player2 must be integers between 2 & 7.
-        return dict containing the number of games each player must win
+        return numer of games player 1 must win
     '''
 
     matrix = [
-        [(2,2),(2,3),(2,4),(2,5),(2,6),(2,7)],
-        [(3,2),(2,2),(2,3),(2,4),(2,5),(2,6)],
-        [(4,2),(3,2),(3,3),(3,4),(3,5),(2,5)],
-        [(5,2),(4,2),(4,3),(4,4),(4,5),(3,5)],
-        [(6,2),(5,2),(5,3),(5,4),(5,5),(4,5)],
-        [(7,2),(6,2),(5,2),(6,3),(5,4),(5,5)],
+        [2,2,2,2,2,2],
+        [3,2,2,2,2,2],
+        [4,3,3,3,3,2],
+        [5,4,4,4,4,3],
+        [6,5,5,5,5,4],
+        [7,6,5,5,5,5],
     ]
 
-    if (2 <= player1 <= 7 and 2 <= player2 <= 7):
-        return matrix[player1-2][player2-2]
+    if (2 <= players1[0].handicap <= 7 and 2 <= players2[0].handicap <= 7):
+        return matrix[players1[0].handicap-2][players2[0].handicap-2]
     else:
         raise TypeError
 

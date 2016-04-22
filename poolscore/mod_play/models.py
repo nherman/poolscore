@@ -5,6 +5,7 @@ from sqlalchemy.sql import select, func
 from poolscore import db
 from poolscore.mod_common import models as common_models
 from poolscore.mod_common.utils import Util, ModelUtil
+from poolscore.mod_common.rulesets import Rulesets
 
 class Tourney(common_models.Base):
     __tablename__ = 'tourney'
@@ -135,6 +136,17 @@ class Match(common_models.Base):
 
         return players
 
+    def _get_games_needed(self, players1, players2):
+        return Rulesets[self.tourney.ruleset].handicaper(players1, players2)
+
+    @property
+    def home_games_needed(self):
+        return self._get_games_needed(self.home_players, self.away_players)
+
+    @property
+    def away_games_needed(self):
+        return self._get_games_needed(self.away_players, self.home_players)
+
 
     # New instance instantiation procedure
     def __init__(self, tourney_id = None, events = None, data = None, home_score = 0, away_score = 0):
@@ -161,6 +173,8 @@ class Match(common_models.Base):
             d['games'].append(g.serialize)
         d['home_games_won'] = self.home_games_won
         d['away_games_won'] = self.away_games_won
+        d['home_games_needed'] = self.home_games_needed
+        d['away_games_needed'] = self.away_games_needed
         return d
 
     @property
