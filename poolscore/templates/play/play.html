@@ -378,7 +378,7 @@ function addMatchViewModel(options) {
             "onAdd": function() {}
         }, options);
 
-    function _isEmpty(v) { return (v == undefined || v == null || v == "");}
+    function _isEmpty(v) { return (v == undefined || v == null || v == "" || v == -1);}
 
     function _getPlayerId(o) {
         a = o.split('_');
@@ -403,6 +403,11 @@ function addMatchViewModel(options) {
 
     self.lag_winner = ko.observable();
     self.lag_loser = ko.observable();
+
+    self.resetForm = function() {
+        self.lag_winner(-1);
+        self.lag_loser(-1);
+    };
 
     self.canAdd = ko.computed(function() {
         var wid, lid;
@@ -457,6 +462,7 @@ function addMatchViewModel(options) {
             api_endpoint,
             data,
             function(json) {
+                self.resetForm();
                 options.onAdd(json);
             }
         );
@@ -487,13 +493,13 @@ function ViewModel() {
     self.matchTemplateOptions = ko.observable(initTemplateOptions);
 
     /* Render Add Match Form */
-    self.addMatch = new addMatchViewModel({
+    self.addMatchViewModel = new addMatchViewModel({
         "tourney_id": tourney_id,
         "onAdd": function(resp) {
-            console.log(resp);
-            if (typeof resp == "object" && resp.id !== undefined) {
-                self.matches.push(new Match(resp.id, {
-                    "json": resp,
+            matchJSON = resp.match || resp;
+            if (typeof matchJSON == "object" && matchJSON.id !== undefined) {
+                self.matches.push(new Match(matchJSON.id, {
+                    "json": matchJSON,
                     "tourney": self
                 }));
             }
@@ -505,7 +511,7 @@ function ViewModel() {
     self.tourney = new Tourney(tourney_id, {
         "init": function() {
             /* update add match form to include available players */
-            self.addMatch.init({
+            self.addMatchViewModel.init({
                 "home_players": self.tourney.home_team.players,
                 "away_players": self.tourney.away_team.players
             });
@@ -833,7 +839,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <!-- /ko -->
         <!-- /ko -->
 
-        <!-- ko with: addMatch -->
+        <!-- ko with: addMatchViewModel -->
             <tr class="top-row">
                 <td data-bind="template: { name: 'select_player_template', data: {
                     options:selectItems,
@@ -871,7 +877,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 
 <script type="text/html" id="select_player_template">
     <select required placeholder="Select a Player" data-bind="value: value">
-        <option default selected="selected" data-bind="text: placeholder">Select a Player</option>
+        <option default selected="selected" data-bind="text: placeholder, value: -1">Select a Player</option>
         <optgroup label="Home Team" data-bind="foreach: options.home">
             <option data-bind="text: label, value: value" ></option>
         </optgroup>
