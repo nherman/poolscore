@@ -15,7 +15,7 @@ def APA8BALL(players1, players2):
         [7,6,5,5,5,5],
     ]
 
-    if (2 <= players1[0].handicap <= 7 and 2 <= players2[0].handicap <= 7):
+    if (len(players1) > 0 and len(players2) > 0 and 2 <= players1[0].handicap <= 7 and 2 <= players2[0].handicap <= 7):
         return matrix[players1[0].handicap-2][players2[0].handicap-2]
     else:
         raise TypeError

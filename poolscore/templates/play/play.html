@@ -416,7 +416,7 @@ function addMatchViewModel(options) {
         }
         wid = _getPlayerId(this.lag_winner());
         lid = _getPlayerId(this.lag_loser());
-        if(wid.id == lid.id) return false;
+        if(wid.id == lid.id || wid.team == lid.team) return false;
         return true;
     }, self)
 
@@ -509,7 +509,10 @@ function ViewModel() {
 
     /* populate Tourney model */
     self.tourney = new Tourney(tourney_id, {
+
+        /* Tourney onInit callback */
         "init": function() {
+
             /* update add match form to include available players */
             self.addMatchViewModel.init({
                 "home_players": self.tourney.home_team.players,
@@ -802,14 +805,16 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
             <tr data-bind="template: {name: 'display_player_template', data: {
-                match: match,
-                player: match.lag_winner(),
-                team: match.events().lag()}}">
+                    match: match,
+                    player: match.lag_winner(),
+                    team: match.events().lag()},
+                if: match.lag_winner()}">
             </tr>
             <tr data-bind="template: {name: 'display_player_template', data: {
-                match: match,
-                player: match.lag_loser(),
-                team: (match.events().lag() == 'home') ? 'away' : 'home'}}">
+                    match: match,
+                    player: match.lag_loser(),
+                    team: (match.events().lag() == 'home') ? 'away' : 'home'},
+                if: match.lag_loser()}">
             </tr>
             <!-- ko if: match.in_progress() == true -->
             <!--

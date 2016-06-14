@@ -137,7 +137,12 @@ class Match(common_models.Base):
         return players
 
     def _get_games_needed(self, players1, players2):
-        return Rulesets[self.tourney.ruleset].handicaper(players1, players2)
+        try:
+            games_needed = Rulesets[self.tourney.ruleset].handicaper(players1, players2)
+        except TypeError:
+            games_needed = 0
+
+        return games_needed
 
     @property
     def home_games_needed(self):
