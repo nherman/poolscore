@@ -1,5 +1,10 @@
 app for scoring pool tounaments
 
-Init db with dev data:
-> sqlite3 /tmp/poolscore.db < poolscore/database/schema.sql
-> sqlite3 /tmp/poolscore.db < poolscore/database/bootstrap.sql
+# To run dev server:
+./start_poolscore.sh
+
+# Dev environment will automatically generate sqlite db in the application root
+app.db
+
+# Populate DB with test data:
+sqlite3 app.db < bootstrap-data/bootstrap-sqlite.sql
