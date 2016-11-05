@@ -1,10 +1,10 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import TextField, SelectField, SelectMultipleField, DateField, IntegerField, BooleanField, DateTimeField
 from wtforms.validators import Required, NumberRange, Optional
 
 from poolscore import app
 
-class TourneyForm(Form):
+class TourneyForm(FlaskForm):
     __abstract__ = True
 
     date = DateField('Date', [Required(message = 'Enter tourney date')])
@@ -24,7 +24,7 @@ class TourneyEditForm(TourneyForm):
     active = BooleanField('Active')
     events = TextField('Events')
 
-class MatchForm(Form):
+class MatchForm(FlaskForm):
     __abstract__ = True
 
     events = TextField('Events')
@@ -41,7 +41,7 @@ class MatchEditForm(MatchForm):
     winner_id = SelectField('Winner', coerce=int)
     active = BooleanField('Active')
 
-class GameForm(Form):
+class GameForm(FlaskForm):
     winner_id = SelectField('Winner', coerce=int)
     events = TextField('Events')
     data = TextField('Data')

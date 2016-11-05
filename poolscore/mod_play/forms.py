@@ -1,8 +1,8 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import SelectField, DateField, DateTimeField
 from wtforms.validators import Required, NumberRange, Optional
 
-class NewTourneyForm(Form):
+class NewTourneyForm(FlaskForm):
     __abstract__ = True
 
     home_team_id = SelectField('Home Team', [NumberRange(min=1,message = 'Select Home Team.')], coerce=int)
