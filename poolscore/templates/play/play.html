@@ -817,17 +817,26 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <tr class="active_pulse" data-bind="template: {name: 'display_player_template', data: {
-                    match: match,
-                    player: match.lag_winner(),
-                    team: match.events().lag()},
-                if: match.lag_winner()}">
+            <tr data-bind=" css: {'active_pulse': match.in_progress()},
+                            template: {
+                                name: 'display_player_template', data: {
+                                    match: match,
+                                    player: match.lag_winner(),
+                                    team: match.events().lag()
+                                },
+                                if: match.lag_winner()
+                            } ">
             </tr>
-            <tr class="active_pulse" data-bind="template: {name: 'display_player_template', data: {
-                    match: match,
-                    player: match.lag_loser(),
-                    team: (match.events().lag() == 'home') ? 'away' : 'home'},
-                if: match.lag_loser()}">
+            <tr data-bind=" css: {'active_pulse': match.in_progress()},
+                            template: {
+                                name: 'display_player_template',
+                                data: {
+                                    match: match,
+                                    player: match.lag_loser(),
+                                    team: (match.events().lag() == 'home') ? 'away' : 'home'
+                                },
+                                if: match.lag_loser()
+                            } ">
             </tr>
             <!-- ko if: match.in_progress() == true -->
             <!--
