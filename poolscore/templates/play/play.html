@@ -653,6 +653,15 @@ function Tourney(id, options) {
         }
     }
 
+/*
+    Insert call to super model here:
+
+        sModel.call(self, {  });
+
+        sModel performs commin init methods and adds functionality to self
+*/
+
+
     self.get = function(callback) {
         PS.API.get(api_endpoint,
             function(json) {
@@ -685,6 +694,10 @@ function Tourney(id, options) {
     /* initialize model data */
     _init();
 }
+/*
+    possible extend Tourney prototype here?
+    Tourney.prototype = Object.create(sModel.prototype);
+*/
 
 function Match(id, options) {
     var self = this,
@@ -804,13 +817,13 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <tr data-bind="template: {name: 'display_player_template', data: {
+            <tr class="active_pulse" data-bind="template: {name: 'display_player_template', data: {
                     match: match,
                     player: match.lag_winner(),
                     team: match.events().lag()},
                 if: match.lag_winner()}">
             </tr>
-            <tr data-bind="template: {name: 'display_player_template', data: {
+            <tr class="active_pulse" data-bind="template: {name: 'display_player_template', data: {
                     match: match,
                     player: match.lag_loser(),
                     team: (match.events().lag() == 'home') ? 'away' : 'home'},
