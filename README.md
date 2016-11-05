@@ -8,3 +8,4 @@ app.db
 
 # Populate DB with test data:
 sqlite3 app.db < bootstrap-data/bootstrap-sqlite.sql
+

@@ -9,7 +9,7 @@ from inspect import getmro
 from flask import request, redirect, \
                 g, url_for, session, \
                 render_template
-from flask.ext.sqlalchemy import Pagination
+from flask_sqlalchemy import Pagination
 from sqlalchemy.sql import text
 from sqlalchemy import inspect
 from sqlalchemy.sql.expression import asc as asc_expr, desc as desc_expr

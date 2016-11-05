@@ -12,7 +12,7 @@
 import os
 from datetime import timedelta
 from flask import Flask, g, render_template, redirect, url_for, session
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from .database import DbManager
 
 app = Flask(__name__)

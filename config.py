@@ -35,6 +35,11 @@ class Config(object):
     # returned to the pool, they are disconnected and discarded.
     # SQLALCHEMY_MAX_OVERFLOW = 10
 
+    # If set to True, Flask-SQLAlchemy will track modifications of objects and emit signals.
+    # The default is None, which enables tracking but issues a warning that it will be disabled
+    # by default in the future. This requires extra memory and should be disabled if not needed.
+    SQLALCHEMY_TRACK_MODIFICATIONS=False
+
     DATABASE_CONNECT_OPTIONS = {}
 
     # Application threads. A common general assumption is
