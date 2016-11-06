@@ -433,8 +433,7 @@ function addMatchViewModel(options) {
     }
 
     self.add = function() {
-        var api_endpoint = PS.API.path("tourneys/%s/matches.json", options.tourney_id),
-            data = {
+        var data = {
                 "match":{
                     "events": {
                         "lag": null
@@ -458,9 +457,7 @@ function addMatchViewModel(options) {
         _populateData(this.lag_loser(),false);
 
 
-        PS.API.post(
-            api_endpoint,
-            data,
+        PS.API.createMatch(options.tourney_id, data,
             function(json) {
                 self.resetForm();
                 options.onAdd(json);
@@ -529,9 +526,8 @@ function ViewModel() {
 
     /* get all Matches */
     self.matches = ko.observableArray();
-    matches_endpoint = PS.API.path("tourneys/%s/matches.json", tourney_id);
 
-    PS.API.get(matches_endpoint,
+    PS.API.getMatches(tourney_id,
         function(json) {
             if (json === undefined || typeof json != "object") return;
 
@@ -561,41 +557,91 @@ window.PS.API = (function() {
         return root + path;
     }
 
-    function _send(method, url, payload, callback, node) {
+    function _run(method, url, payload, callback) {
         var settings = {
-                type: method || "POST",
+                type: method,
                 url: url,
-                data: ko.toJSON(payload),
+                data: payload,
                 dataType: "json"
             };
 
-        if (url == undefined) return;
+        if (method == undefined || url == undefined) return;
+
+        if (typeof payload == 'object') {
+            if ($.isEmptyObject(payload)) {
+                settings.data = '';
+            } else {
+                settings.data = JSON.stringify(payload);
+            }
+        } else {
+            settings.data = payload;
+        }
 
         if (typeof callback == "function") {
             settings.success = callback;
         }
 
-        $.ajax(settings);
+        return $.ajax(settings);
     }
 
+    function _get(url, callback) {
+        return _run("GET", url, "", callback)
+    }
+
+    function _put(url, payload, callback) {
+        return _run("PUT", url, payload, callback)
+    }
+
+    function _post(url, payload, callback) {
+        return _run("POST", url, payload, callback)
+    }
+
+    function _delete(url, callback) {
+        return _run("DELETE", url, "", callback)
+    }
 
     return {
-        "path":_p,
-        "get": function(url, callback) {
-            if (typeof callback !== "function" || url == undefined) return;
+        getTourney: function(id, callback) {
+            var url = _p("tourneys/%s.json", id);
+            return _get(url, callback);
+        },
 
-            $.getJSON( url, function( json ) {
-                callback(json);
-            });
-            
+        updateTourney: function(id, data, callback) {
+            var url = _p("tourneys/%s.json", id);
+            return _put(url, data, callback);
         },
-        "put": function(url, payload, callback) {
-            _send("PUT", url, payload, callback)
+
+        getMatches: function(tourney_id, callback) {
+            var url = _p("tourneys/%s/matches.json", tourney_id);
+            return _get(url, callback);
         },
-        "post": function(url, payload, callback) {
-            _send("POST", url, payload, callback)
-        }
+
+        createMatch: function(tourney_id, data, callback) {
+            var url = _p("tourneys/%s/matches.json", tourney_id);
+            return _post(url, data, callback);
+        },
+
+        getMatch: function(tourney_id, match_id, callback) {
+            var url = _p("tourneys/%s/matches/%s.json", tourney_id, match_id);
+            return _get(url, callback);
+        },
+
+        updateMatch: function(id, data, callback) {
+            var url = _p("tourneys/%s.json", id);
+            return _put(url, data, callback);
+        },
+
+        getGame: function(id, callback) {
+            var url = _p("tourneys/%s.json", id);
+            return _get(url, callback);
+        },
+
+        updateGame: function(id, data, callback) {
+            var url = _p("tourneys/%s.json", id);
+            return _put(url, data, callback);
+        },
     };
+
 })();
 
 function superModel(config) {
@@ -610,7 +656,6 @@ function superModel(config) {
 
 function Tourney(id, options) {
     var self = this,
-        api_endpoint = PS.API.path("tourneys/%s.json", id),
         options = ko.utils.extend({
             "init": function() {},
         }, options),
@@ -662,14 +707,12 @@ function Tourney(id, options) {
 
 
     self.get = function(callback) {
-        PS.API.get(api_endpoint,
-            function(json) {
-                _mapData(json["tourney"]);
-                if (typeof callback == "function") {
-                    callback.call(self);
-                }
+        PS.API.getTourney(id, function(json) {
+            _mapData(json["tourney"]);
+            if (typeof callback == "function") {
+                callback.call(self);
             }
-        );
+        });
     };
 
     self.update = function(callback) {
@@ -680,13 +723,10 @@ function Tourney(id, options) {
         delete data["tourney"].home_team;
         delete data["tourney"].away_team;
 
-        PS.API.put(
-            api_endpoint,
-            data,
-            function(json) {
-                if (typeof callback == "function") {
-                    callback.call(self);
-                }
+        PS.API.updateTourney(id, data, function(json) {
+            if (typeof callback == "function") {
+                callback.call(self);
+            }
         });
     };
 
@@ -716,8 +756,7 @@ function Match(id, options) {
                     return ko.observable(ko.mapping.fromJS(events));
                 }
             }
-        },
-        api_endpoint = PS.API.path("tourneys/%s/matches/%s.json", options.tourney_id, id);
+        }
 
     function _isEmpty(v) { return (v == undefined || v == null || v == "");}
 
@@ -752,7 +791,7 @@ function Match(id, options) {
     self.games = ko.observableArray();
 
     self.get = function(callback) {
-        PS.API.get(api_endpoint,
+        PS.API.getMatch(options.tourney_id, id,
             function(json) {
                 ko.mapping.fromJS(json["match"], map_config, self);
                 _populateGames(json["games"]);
@@ -768,14 +807,13 @@ function Match(id, options) {
 
         data["match"] = ko.mapping.toJS(self);
 
-        PS.API.put(
-            api_endpoint,
-            data,
+        PS.API.updateMatch(options.tourney_id, id, data,
             function(json) {
                 if (typeof callback == "function") {
                     callback.call(self);
                 }
-        });
+            }
+        );
     };
 
     /* initialize model data */
