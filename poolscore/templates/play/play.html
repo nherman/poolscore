@@ -630,6 +630,16 @@ window.PS.API = (function() {
             var url = _p("tourneys/%s.json", id);
             return _put(url, data, callback);
         },
+/*
+        getGames: function(match_id, callback) {
+            var url = _p("tourneys/%s/matches.json", match_id);
+            return _get(url, callback);
+        },
+
+        createGame: function(tourney_id, data, callback) {
+            var url = _p("tourneys/%s/matches.json", tourney_id);
+            return _post(url, data, callback);
+        },
 
         getGame: function(id, callback) {
             var url = _p("tourneys/%s.json", id);
@@ -639,40 +649,23 @@ window.PS.API = (function() {
         updateGame: function(id, data, callback) {
             var url = _p("tourneys/%s.json", id);
             return _put(url, data, callback);
-        },
+        }
+*/
     };
 
 })();
 
-function superModel(config) {
-    var self = this;
-
-    /* process config */
-    self.modelName = config.modelName || "viewModel";
-    self.map = ko.utils.extend({}, config.map);
-
-}
-
-
-function Tourney(id, options) {
+/* Parent class for Tourney, Match & Game */
+function Entity(id, config) {
     var self = this,
-        options = ko.utils.extend({
+        config = ko.utils.extend({
             "init": function() {},
-        }, options),
-        map_config = {
-            'ignore': ['get','update','tourneyDate'],
-            'observe': ['date','events','winner_id','home_score','away_score','data'],
-            'date': {
-                create: function(options) {
-                    self.tourneyDate = ko.computed(function() {
-                        /* hack to disregard time zone. Needs to be fixed - probably in the data model */
-                        var date = new Date(self.date());
-                        var date2 = new Date(date.getTime() + date.getTimezoneOffset()*60*1000);
-                        return date2.toDateString();
-                    });                    
-                    return ko.observable(options.data);
-                }
-            },
+            "map_config": {}
+        }, config),
+        _map_config = {
+            /* TODO: remove prototype methods from ignore? */
+            'ignore': ['get','update', 'map', 'init', 'configuration', 'id'],
+            'observe': ['data','events'],
             'events': {
                 create: function(options) {
                     var events = options.data
@@ -684,59 +677,100 @@ function Tourney(id, options) {
             }
         };
 
-    function _mapData(json) {
-        ko.mapping.fromJS(json, map_config, self);
-    }
-
-    function _init() {
-        if (typeof options.json == "object") {
-            _mapData(options.json);
-            options.init();
-        } else {
-            self.get(options.init);
+    /* merge config.map_config with _map_config and copy merged object to config.map_config */
+    for (key in config.map_config) {
+        if (config.map_config.hasOwnProperty(key)) {
+            if (config.map_config[key] instanceof Array) {
+                _map_config[key] = _map_config[key].concat(config.map_config[key]);
+            } else {
+                _map_config[key] = config.map_config[key];                
+            }
         }
     }
 
-/*
-    Insert call to super model here:
-
-        sModel.call(self, {  });
-
-        sModel performs commin init methods and adds functionality to self
-*/
-
-
-    self.get = function(callback) {
-        PS.API.getTourney(id, function(json) {
-            _mapData(json["tourney"]);
-            if (typeof callback == "function") {
-                callback.call(self);
-            }
-        });
-    };
-
-    self.update = function(callback) {
-        var data = {};
-
-        /* wrap data in entity name node and remove extraneous objects */
-        data["tourney"] = ko.mapping.toJS(self);
-        delete data["tourney"].home_team;
-        delete data["tourney"].away_team;
-
-        PS.API.updateTourney(id, data, function(json) {
-            if (typeof callback == "function") {
-                callback.call(self);
-            }
-        });
-    };
+    self.id = id;
+    self.configuration = config;
+    self.configuration.map_config = _map_config;
 
     /* initialize model data */
-    _init();
+    self.init();
 }
-/*
-    possible extend Tourney prototype here?
-    Tourney.prototype = Object.create(sModel.prototype);
-*/
+
+Entity.prototype.map = function(json) {
+    ko.mapping.fromJS(json, this.configuration.map_config, this);
+};
+
+Entity.prototype.get = function() {
+    throw "get method not defined";
+};
+
+Entity.prototype.update = function() {
+    throw "update method not defined";
+};
+
+Entity.prototype.init = function() {
+    if (typeof this.configuration.json == "object") {
+        self.map(this.configuration.json);
+        this.configuration.init();
+    } else {
+        this.get(this.configuration.init);
+    }
+};
+
+
+function Tourney(id, options) {
+    var self = this,
+        options = ko.utils.extend({}, options),
+        map_config = {
+            'ignore': ['tourneyDate'],
+            'observe': ['date','winner_id','home_score','away_score'],
+            'date': {
+                create: function(options) {
+                    self.tourneyDate = ko.computed(function() {
+                        /* hack to disregard time zone. Needs to be fixed - probably in the data model */
+                        var date = new Date(self.date());
+                        var date2 = new Date(date.getTime() + date.getTimezoneOffset()*60*1000);
+                        return date2.toDateString();
+                    });                    
+                    return ko.observable(options.data);
+                }
+            }
+        };
+
+
+    Entity.call(self, id, {
+        "init": options.init,
+        "json": options.json,
+        "map_config": map_config
+    });
+}
+Tourney.prototype = Object.create(Entity.prototype);
+
+Tourney.prototype.get = function(callback) {
+    var self = this;
+    PS.API.getTourney(self.id, function(json) {
+        self.map(json["tourney"]);
+        if (typeof callback == "function") {
+            callback.call(self);
+        }
+    });
+};
+
+Tourney.prototype.update = function(callback) {
+    var self = this,
+        data = {};
+
+    /* wrap data in entity name node and remove extraneous objects */
+    data["tourney"] = ko.mapping.toJS(self);
+    delete data["tourney"].home_team;
+    delete data["tourney"].away_team;
+
+    PS.API.updateTourney(self.id, data, function(json) {
+        if (typeof callback == "function") {
+            callback.call(self);
+        }
+    });
+};
 
 function Match(id, options) {
     var self = this,
