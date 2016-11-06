@@ -468,7 +468,6 @@ function addMatchViewModel(options) {
         );
     };
 
-    self.init();
 }
 
 function ViewModel() {
@@ -706,7 +705,7 @@ function Match(id, options) {
             "tourney": {}
         }, options),
         map_config = {
-            'ignore': ['get','update', 'lag_winner', 'lag_loser', 'in_progress'],
+            'ignore': ['get','update', 'lag_winner', 'lag_loser', 'in_progress', 'games'],
             'observe': ['events','home_score','away_score','winner_id','data'],
             'events': {
                 create: function(options) {
@@ -726,6 +725,15 @@ function Match(id, options) {
         ko.mapping.fromJS(json, map_config, self);
     }
 
+    function _populateGames(games) {
+        ko.utils.arrayForEach(games, function(game){
+            self.games.push(new Game(game.id, {
+                "json": game,
+                "match": self
+            }));
+        });
+    }
+
     function _init() {
 
         /* initialize lag winner/loser */
@@ -741,11 +749,13 @@ function Match(id, options) {
     self.in_progress = ko.observable();
     self.lag_winner = ko.observable();
     self.lag_loser = ko.observable()
+    self.games = ko.observableArray();
 
     self.get = function(callback) {
         PS.API.get(api_endpoint,
             function(json) {
                 ko.mapping.fromJS(json["match"], map_config, self);
+                _populateGames(json["games"]);
                 if (typeof callback == "function") {
                     callback.call(self);
                 }
@@ -771,6 +781,7 @@ function Match(id, options) {
     /* initialize model data */
     if (typeof options.json == "object") {
         _mapData(options.json);
+        _populateGames(options.json["games"]);
         _init();
         options.init();
     } else {
@@ -781,8 +792,8 @@ function Match(id, options) {
     }
 }
 
-function Game() {
-
+function Game(id, options) {
+    console.log(options);
 }
 
 
@@ -800,7 +811,6 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
     <div id="tourney">
         <h6 class="text-center"><span data-bind="text: tourneyDate()"></span> <span data-bind="text: events().start_time()"></span></h6>
         <h3 class="text-center"><span data-bind="text: home_team.name"></span> <small>(Home)</small><br/><small>vs.</small><br/><span data-bind="text: away_team.name"></span> <small>(Away)</small></h3>
-        <a data-bind="click:update">hit me</a>
     </div>
 </script>
 
@@ -839,11 +849,11 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
                             } ">
             </tr>
             <!-- ko if: match.in_progress() == true -->
-            <!--
             <tr>
                 <td colspan="4">
                     <div data-bind="foreach: {data: games, as: 'game'}">
-                        <div style="border:1px solid #fafafa;">
+                        <div style="border:1px solid #fafafa;" data-bind="text: game">
+            <!--
                             <span>#<span data-bind="text: game.ordinal"></span></span>
                             <span>Innings: <span data-bind="text: game.events.innings"></span></span>
                             <span>home coach: <span data-bind="text: game.events.home_coaches"></span></span>
@@ -851,10 +861,12 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
                             <span>home safe: <span data-bind="text: game.events.home_safes"></span></span>
                             <span>away safe: <span data-bind="text: game.events.away_safes"></span></span>
                             <span>winning team: <span data-bind="text: game.winner_id"></span></span>
+            -->
                         </div>
                     </div>
                 </td>
             </tr>
+            <!--
             <tr>
                 <td colspan="4" data-bind="with: $root.utils.getActiveGame(match)">
                     <p>Edit Game #<span data-bind="text: ordinal"></span></p>
