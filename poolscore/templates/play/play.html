@@ -720,29 +720,25 @@ Entity.prototype.init = function() {
 
 function Tourney(id, options) {
     var self = this,
-        options = ko.utils.extend({}, options),
-        map_config = {
-            'ignore': ['tourneyDate'],
-            'observe': ['date','winner_id','home_score','away_score'],
-            'date': {
-                create: function(options) {
-                    self.tourneyDate = ko.computed(function() {
-                        /* hack to disregard time zone. Needs to be fixed - probably in the data model */
-                        var date = new Date(self.date());
-                        var date2 = new Date(date.getTime() + date.getTimezoneOffset()*60*1000);
-                        return date2.toDateString();
-                    });                    
-                    return ko.observable(options.data);
+        options = ko.utils.extend({
+            "map_config": {
+                'ignore': ['tourneyDate'],
+                'observe': ['date','winner_id','home_score','away_score'],
+                'date': {
+                    create: function(options) {
+                        self.tourneyDate = ko.computed(function() {
+                            /* hack to disregard time zone. Needs to be fixed - probably in the data model */
+                            var date = new Date(self.date());
+                            var date2 = new Date(date.getTime() + date.getTimezoneOffset()*60*1000);
+                            return date2.toDateString();
+                        });                    
+                        return ko.observable(options.data);
+                    }
                 }
             }
-        };
+        }, options);
 
-
-    Entity.call(self, id, {
-        "init": options.init,
-        "json": options.json,
-        "map_config": map_config
-    });
+    Entity.call(self, id, options);
 }
 Tourney.prototype = Object.create(Entity.prototype);
 
