@@ -440,7 +440,7 @@ function addMatchViewModel(options) {
                     }
                 },
                 "home_players": [],
-                "away_players": [],
+                "away_players": []
             };
 
         function _populateData(p,w) {
@@ -507,7 +507,7 @@ function ViewModel() {
     self.tourney = new Tourney(tourney_id, {
 
         /* Tourney onInit callback */
-        "init": function() {
+        "callback": function() {
 
             /* update add match form to include available players */
             self.addMatchViewModel.init({
@@ -532,7 +532,7 @@ function ViewModel() {
             if (json === undefined || typeof json != "object") return;
 
             ko.utils.arrayForEach(json["matches"], function(match){
-                self.matches.push(new Match(match.id, {
+                self.matches.push(new Match(tourney_id, match.id, {
                     "json": match,
                     "tourney": self
                 }));
@@ -655,16 +655,23 @@ window.PS.API = (function() {
 
 })();
 
+window.PS.utils = (function() {
+    return {
+        isEmpty: function(v) {
+            return (v == undefined || v == null || v == "");
+        }
+    };
+})();
+
 /* Parent class for Tourney, Match & Game */
 function Entity(id, config) {
     var self = this,
         config = ko.utils.extend({
-            "init": function() {},
+            "callback": function() {},
             "map_config": {}
         }, config),
         _map_config = {
-            /* TODO: remove prototype methods from ignore? */
-            'ignore': ['get','update', 'map', 'init', 'configuration', 'id'],
+            'ignore': ['configuration', 'id'],
             'observe': ['data','events'],
             'events': {
                 create: function(options) {
@@ -692,9 +699,23 @@ function Entity(id, config) {
     self.configuration = config;
     self.configuration.map_config = _map_config;
 
+    self.onBeforeMap();
+
     /* initialize model data */
-    self.init();
+    if (typeof self.configuration.json == "object") {
+        self.map(self.configuration.json);
+        self.onAfterMap(self.configuration.json);
+        self.configuration.callback();
+    } else {
+        self.get(function(json) {
+            self.onAfterMap(json);
+            self.configuration.callback();
+        });
+    }
 }
+
+Entity.prototype.onBeforeMap = function() {};
+Entity.prototype.onAfterMap = function() {};
 
 Entity.prototype.map = function(json) {
     ko.mapping.fromJS(json, this.configuration.map_config, this);
@@ -706,15 +727,6 @@ Entity.prototype.get = function() {
 
 Entity.prototype.update = function() {
     throw "update method not defined";
-};
-
-Entity.prototype.init = function() {
-    if (typeof this.configuration.json == "object") {
-        self.map(this.configuration.json);
-        this.configuration.init();
-    } else {
-        this.get(this.configuration.init);
-    }
 };
 
 
@@ -768,101 +780,123 @@ Tourney.prototype.update = function(callback) {
     });
 };
 
-function Match(id, options) {
+function Match(tourney_id, id, options) {
     var self = this,
         options = ko.utils.extend({
-            "init": function() {},
-            "tourney": {}
-        }, options),
-        map_config = {
-            'ignore': ['get','update', 'lag_winner', 'lag_loser', 'in_progress', 'games'],
-            'observe': ['events','home_score','away_score','winner_id','data'],
-            'events': {
-                create: function(options) {
-                    var events = options.data
-                    if(typeof events === "string") {
-                        events = ko.utils.parseJson(events);
-                    }
-                    return ko.observable(ko.mapping.fromJS(events));
-                }
+            "map_config": {
+                'ignore': ['tourney_id', 'lag_winner', 'lag_loser', 'in_progress', 'games'],
+                'observe': ['home_score','home_games_won','away_score','away_games_won','winner_id']
             }
-        }
+        }, options);
 
-    function _isEmpty(v) { return (v == undefined || v == null || v == "");}
-
-    function _mapData(json) {
-        ko.mapping.fromJS(json, map_config, self);
-    }
-
-    function _populateGames(games) {
-        ko.utils.arrayForEach(games, function(game){
-            self.games.push(new Game(game.id, {
-                "json": game,
-                "match": self
-            }));
-        });
-    }
-
-    function _init() {
-
-        /* initialize lag winner/loser */
-        lag_team = self.events().lag();
-        no_lag_team = (lag_team == "home") ? "away" : "home";
-        self.lag_winner(self[lag_team + "_players"][0]);
-        self.lag_loser(self[no_lag_team + "_players"][0]);
-
-        self.in_progress(_isEmpty(self.winner_id()))
-
-    }
-
+    self.tourney_id = tourney_id;
     self.in_progress = ko.observable();
     self.lag_winner = ko.observable();
     self.lag_loser = ko.observable()
     self.games = ko.observableArray();
 
-    self.get = function(callback) {
-        PS.API.getMatch(options.tourney_id, id,
-            function(json) {
-                ko.mapping.fromJS(json["match"], map_config, self);
-                _populateGames(json["games"]);
-                if (typeof callback == "function") {
-                    callback.call(self);
-                }
-            }
-        );
-    };
+    Entity.call(self, id, options);
 
-    self.update = function(callback) {
-        var data = {};
-
-        data["match"] = ko.mapping.toJS(self);
-
-        PS.API.updateMatch(options.tourney_id, id, data,
-            function(json) {
-                if (typeof callback == "function") {
-                    callback.call(self);
-                }
-            }
-        );
-    };
-
-    /* initialize model data */
-    if (typeof options.json == "object") {
-        _mapData(options.json);
-        _populateGames(options.json["games"]);
-        _init();
-        options.init();
-    } else {
-        self.get(function() {
-            _init();
-            options.init();
-        });
-    }
 }
+Match.prototype = Object.create(Entity.prototype);
 
-function Game(id, options) {
-    console.log(options);
+Match.prototype.onAfterMap = function(json) {
+    var self = this;
+
+    /* populate games array */
+    ko.utils.arrayForEach(json["games"], function(game){
+        self.games.push(new Game(self.tourney_id, self.id, game.id, {
+            "json": game
+        }));
+    });
+
+    /* initialize lag winner/loser */
+    lag_team = self.events().lag();
+    no_lag_team = (lag_team == "home") ? "away" : "home";
+    self.lag_winner(self[lag_team + "_players"][0]);
+    self.lag_loser(self[no_lag_team + "_players"][0]);
+
+    self.in_progress(window.PS.utils.isEmpty(self.winner_id()))
+};
+
+Match.prototype.get = function(callback) {
+    var self = this;
+
+    PS.API.getMatch(self.tourney_id, self.id,
+        function(json) {
+            self.map(json["match"]);
+            if (typeof callback == "function") {
+                callback.call(self);
+            }
+        }
+    );
+};
+
+Match.prototype.update = function(callback) {
+    var self = this,
+        data = {};
+
+    data["match"] = ko.mapping.toJS(self);
+
+    PS.API.updateMatch(self.tourney_id, self.id, data,
+        function(json) {
+            if (typeof callback == "function") {
+                callback.call(self);
+            }
+        }
+    );
+};
+
+function Game(tourney_id, match_id, id, options) {
+    var self = this,
+        options = ko.utils.extend({
+            "map_config": {
+                'ignore': ['tourney_id', 'match_id','in_progress'],
+                'observe': ['winner_id']
+            }
+        }, options);
+
+    self.tourney_id = tourney_id;
+    self.match_id = match_id;
+    self.in_progress = ko.observable();
+
+    Entity.call(self, id, options);
 }
+Game.prototype = Object.create(Entity.prototype);
+
+
+Game.prototype.onAfterMap = function(json) {
+    var self = this;
+    self.in_progress(window.PS.utils.isEmpty(self.winner_id()))
+};
+
+Game.prototype.get = function(callback) {
+    var self = this;
+
+    PS.API.getGame(self.tourney_id, self.match_id, self.id,
+        function(json) {
+            self.map(json["game"]);
+            if (typeof callback == "function") {
+                callback.call(self);
+            }
+        }
+    );
+};
+
+Game.prototype.update = function(callback) {
+    var self = this,
+        data = {};
+
+    data["game"] = ko.mapping.toJS(self);
+
+    PS.API.updateGame(self.tourney_id, self.match_id, self.id, data,
+        function(json) {
+            if (typeof callback == "function") {
+                callback.call(self);
+            }
+        }
+    );
+};
 
 
 //ko.applyBindings(new Tourney("{{ tourney_id }}"), document.getElementById('tourney'));
