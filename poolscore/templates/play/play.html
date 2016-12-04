@@ -494,7 +494,7 @@ function ViewModel() {
         "onAdd": function(resp) {
             matchJSON = resp.match || resp;
             if (typeof matchJSON == "object" && matchJSON.id !== undefined) {
-                self.matches.push(new Match(matchJSON.id, {
+                self.matches.push(new Match(tourney_id, matchJSON.id, {
                     "json": matchJSON,
                     "tourney": self
                 }));
@@ -929,6 +929,9 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
+            <!-- ko text: (function() { console.log(match); })(); -->
+            <!-- /ko -->
+
             <tr data-bind=" css: {'active_pulse': match.in_progress()},
                             template: {
                                 name: 'display_player_template', data: {
@@ -954,16 +957,16 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <tr>
                 <td colspan="4">
                     <div data-bind="foreach: {data: games, as: 'game'}">
-                        <div style="border:1px solid #fafafa;" data-bind="text: game">
-            <!--
+                    <!-- ko text: (function() { console.log(game); })(); -->
+                    <!-- /ko -->
+                        <div style="border:1px solid #fafafa;">
                             <span>#<span data-bind="text: game.ordinal"></span></span>
-                            <span>Innings: <span data-bind="text: game.events.innings"></span></span>
-                            <span>home coach: <span data-bind="text: game.events.home_coaches"></span></span>
-                            <span>away coach: <span data-bind="text: game.events.away_coaches"></span></span>
-                            <span>home safe: <span data-bind="text: game.events.home_safes"></span></span>
-                            <span>away safe: <span data-bind="text: game.events.away_safes"></span></span>
-                            <span>winning team: <span data-bind="text: game.winner_id"></span></span>
-            -->
+                            <span>Innings: <span data-bind="text: game.events().innings()"></span></span>
+                            <span>home coach: <span data-bind="text: game.events().home_coaches()"></span></span>
+                            <span>away coach: <span data-bind="text: game.events().away_coaches()"></span></span>
+                            <span>home safe: <span data-bind="text: game.events().home_safes()"></span></span>
+                            <span>away safe: <span data-bind="text: game.events().away_safes()"></span></span>
+                            <span>winning team: <span data-bind="text: game.winner_id()"></span></span>
                         </div>
                     </div>
                 </td>
