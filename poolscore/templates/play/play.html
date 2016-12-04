@@ -540,6 +540,11 @@ function ViewModel() {
         }
     );
 
+    /* display game edit view */
+    self.editGame = function(game) {
+        console.log(game);
+        /*TODO: swap match template for game edit_game_template */
+    }
 
 }
 
@@ -953,37 +958,38 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
                                 if: match.lag_loser()
                             } ">
             </tr>
-            <!-- ko if: match.in_progress() == true -->
-            <tr>
-                <td colspan="4">
-                    <div data-bind="foreach: {data: games, as: 'game'}">
-                    <!-- ko text: (function() { console.log(game); })(); -->
-                    <!-- /ko -->
-                        <div style="border:1px solid #fafafa;">
-                            <span>#<span data-bind="text: game.ordinal"></span></span>
-                            <span>Innings: <span data-bind="text: game.events().innings()"></span></span>
-                            <span>home coach: <span data-bind="text: game.events().home_coaches()"></span></span>
-                            <span>away coach: <span data-bind="text: game.events().away_coaches()"></span></span>
-                            <span>home safe: <span data-bind="text: game.events().home_safes()"></span></span>
-                            <span>away safe: <span data-bind="text: game.events().away_safes()"></span></span>
-                            <span>winning team: <span data-bind="text: game.winner_id()"></span></span>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            <!--
-            <tr>
-                <td colspan="4" data-bind="with: $root.utils.getActiveGame(match)">
-                    <p>Edit Game #<span data-bind="text: ordinal"></span></p>
-                    <button class="btn btn-default" data-bind="click: $root.utils.eventIncrement($data,'innings')">+</button>
 
-                </td>
+            <!-- ko if: match.in_progress() == true -->
+            <!-- ko foreach: {data: games, as: 'game'} -->
+                <!-- ko text: (function() { console.log(game); })(); -->
+                <!-- /ko -->
+                <!-- ko text: (function() { console.log(game.events()); })(); -->
+                <!-- /ko -->
+                <tr data-bind="click: $root.editGame">
+                    <td colspan="4" data-bind="template: {
+                                    name: 'display_game_template',
+                                    data: {
+                                        game: game
+                                    }
+                                }">
+                    </td>
+                </tr>
+            <!-- /ko -->
+
+            <tr>
+                <td colspan="4"><button class="btn btn-default">New Game</button></td>
             </tr>
-            -->
+
+            <tr>
+                <td colspan="4"></td>
+            </tr>
             <!-- /ko -->
         <!-- /ko -->
 
         <!-- ko with: addMatchViewModel -->
+            <tr>
+                <td colspan="4"><h5>Next Match:</h5></td>
+            </tr>
             <tr class="top-row">
                 <td data-bind="template: { name: 'select_player_template', data: {
                     options:selectItems,
@@ -1005,6 +1011,9 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
     </table>
 </script>
 
+<script type="text/html" id="game_template">
+</script>
+
 <script type="text/html" id="display_player_template">
     <td>
         <span style="font-weight:bold;" data-bind="text: (team == 'home') ? 'H' : 'A'"></span>&nbsp;
@@ -1017,6 +1026,46 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
     <td data-bind="text: match[team+'_games_won']"></td>
     <td data-bind="text: match[team+'_score']"></td>
 </script>
+
+<script type="text/html" id="display_game_template">
+    <table>
+        <tr>
+            <td style="background-color: #fafafa;" rowspan="2">
+                <span style="font-weight:bold;">#<span data-bind="text: game.ordinal"></span></span>
+            </td>
+            <td rowspan="2">
+                <span>Innings: <span data-bind="text: game.events().innings()"></span></span><br>
+                <span>winner: <span data-bind="text: game.winner_id()"></span></span>
+            </td>
+            <td>
+                <span style="font-weight:bold;">H</span>&nbsp;
+                <span>coaches: <span data-bind="text: game.events().home_coaches()"></span></span>
+                <span>safes: <span data-bind="text: game.events().home_safes()"></span></span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span style="font-weight:bold;">A</span>&nbsp;
+                <span>coaches: <span data-bind="text: game.events().away_coaches()"></span></span>
+                <span>safes: <span data-bind="text: game.events().away_safes()"></span></span>
+            </td>
+        </tr>
+    </table>
+</script>
+
+<script type="text/html" id="edit_game_template">
+
+            <!--
+            <tr>
+                <td colspan="4" data-bind="with: $root.utils.getActiveGame(match)">
+                    <p>Edit Game #<span data-bind="text: ordinal"></span></p>
+                    <button class="btn btn-default" data-bind="click: $root.utils.eventIncrement($data,'innings')">+</button>
+
+                </td>
+            </tr>
+            -->
+</script>
+
 
 
 <script type="text/html" id="select_player_template">
