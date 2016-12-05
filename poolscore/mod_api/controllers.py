@@ -8,12 +8,6 @@ from flask import Blueprint, request, render_template, \
             send_from_directory, jsonify
 
 from sqlalchemy import exc, func
-'''
-from werkzeug.http import parse_content_range_header, parse_options_header
-from werkzeug.utils import secure_filename
-from sqlalchemy.sql import label
-from boto.exception import BotoServerError, JSONResponseError
-'''
 
 from poolscore import db
 from poolscore import app
@@ -22,17 +16,6 @@ from poolscore.mod_common.utils import Util, ModelUtil, ApiError
 from poolscore.mod_common.rulesets import Rulesets
 from poolscore.mod_auth.models import User
 from poolscore.mod_play.models import Tourney, Match, MatchPlayer, Game
-
-'''
-from grizzly.mod_common.utils import Util, ModelUtil, SecurityUtil, \
-            RegexConverter, ApiError, add_app_url_map_converter, VERIFICATION_TOKEN_TYPE
-from grizzly.mod_common.lookups import LookupUtil
-from grizzly.mod_common.producer import ProducerUtil
-from grizzly.mod_common.shorten import UrlShortener
-from grizzly.mod_common.passwords.validators import PasswordValidator, ValidationError
-
-from kodiak.services.cloudsearch import CloudSearch
-'''
 
 
 mod_api = Blueprint('api', __name__, url_prefix = '/api/v1.0')
@@ -241,7 +224,7 @@ def tourneys(id, json_serializer_property=None):
 def tourneys_count():
     return _process_count_request(klass = Tourney)
 
-# tourney matches
+# matches
 @mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', methods = ['GET', 'POST'])
 @SecurityUtil.requires_auth()
@@ -361,4 +344,79 @@ def match(tourney_id, match_id):
                             additional_attributes = additional_attributes,
                             json_serializer_property = json_serializer_property)
 
+# games
+@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/game/<int:game_id>.json', methods = ['GET', 'POST'])
+@SecurityUtil.requires_auth()
+def game(tourney_id, match_id, game_id):
+    tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
+    if not tourney:
+        raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
+
+    additional_attributes = dict(match_id = match_id)
+    query = None
+
+    if game_id:
+        query = Game.secure_query().filter(Game.match_id == match_id and Game.id == game_id)
+
+    else:
+        if request.method == "POST":
+            ###
+            # Create new game for match
+            #
+            # attributes format:
+            # {
+            #   "game": {
+            #       "events": {
+            #           game_event: "",
+            #           ...
+            #      },
+            #       game_attribute: "",
+            #       ...
+            #   }
+            # }
+            ###
+
+            attributes = request.get_json(force = True, silent = True, cache = False)
+            game_attributes = ModelUtil._find_attrs_by_class_name(Game, attributes)
+
+            #Enforce format and serialize game events
+            events = Rulesets[tourney.ruleset].game_events
+            if "events" in game_attributes:
+                for label in events:
+                    if label in game_attributes["events"]:
+                        events[label] = game_attributes["events"][label]
+
+            #add entity events as string
+            additional_attributes["events"] = json.dumps(events)
+
+            try:
+                #Create game entity
+                game = ModelUtil.create_model(Game, attributes, additional_attributes = additional_attributes)
+                if not game:
+                    raise ApiError('Game cannot be created. Invalid json format', status_code = 400)
+
+                db.session.add(game)
+                db.session.commit()
+
+                game_id = game.id
+
+            except exc.SQLAlchemyError as ex:
+                db.session.rollback()
+                app.logger.error("Game cannot be created", exc_info = ex)
+                raise ApiError('Game cannot be created - [%s]' % ex.message, status_code = 400)
+
+
+            http_resp = jsonify({"game": game.serialize})
+            http_resp.status_code = 201
+            return http_resp
+
+        else:
+            query = Game.secure_query().filter(Game.match_id == match_id)
+
+
+    return _process_request(klass = Game,
+                            id = game_id,
+                            query = query,
+                            additional_attributes = additional_attributes)
 

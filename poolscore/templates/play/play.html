@@ -606,13 +606,13 @@ window.PS.API = (function() {
     }
 
     return {
-        getTourney: function(id, callback) {
-            var url = _p("tourneys/%s.json", id);
+        getTourney: function(tourney_id, callback) {
+            var url = _p("tourneys/%s.json", tourney_id);
             return _get(url, callback);
         },
 
-        updateTourney: function(id, data, callback) {
-            var url = _p("tourneys/%s.json", id);
+        updateTourney: function(tourney_id, data, callback) {
+            var url = _p("tourneys/%s.json", tourney_id);
             return _put(url, data, callback);
         },
 
@@ -631,32 +631,31 @@ window.PS.API = (function() {
             return _get(url, callback);
         },
 
-        updateMatch: function(id, data, callback) {
-            var url = _p("tourneys/%s.json", id);
+        updateMatch: function(tourney_id, match_id, data, callback) {
+            var url = _p("tourneys/%s/matches/%s.json", tourney_id, match_id);
             return _put(url, data, callback);
         },
-/*
-        getGames: function(match_id, callback) {
-            var url = _p("tourneys/%s/matches.json", match_id);
+
+        getGames: function(tourney_id, match_id, callback) {
+            var url = _p("tourneys/%s/match/%s/games.json", tourney_id, match_id);
             return _get(url, callback);
         },
 
-        createGame: function(tourney_id, data, callback) {
-            var url = _p("tourneys/%s/matches.json", tourney_id);
+        createGame: function(tourney_id, match_id, data, callback) {
+            var url = _p("tourneys/%s/matches/%s/games.json", tourney_id, match_id);
             return _post(url, data, callback);
         },
 
-        getGame: function(id, callback) {
-            var url = _p("tourneys/%s.json", id);
+        getGame: function(tourney_id, match_id, game_id, callback) {
+            var url = _p("tourneys/%s/matches/%s/games/%s.json", tourney_id, match_id, game_id);
             return _get(url, callback);
         },
 
-        updateGame: function(id, data, callback) {
-            var url = _p("tourneys/%s.json", id);
+        updateGame: function(tourney_id, match_id, game_id, data, callback) {
+            var url = _p("tourneys/%s/matches/%s/games/%s.json", tourney_id, match_id, game_id);
             return _put(url, data, callback);
         }
-*/
-    };
+    }
 
 })();
 
