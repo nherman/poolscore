@@ -167,6 +167,7 @@ class Match(common_models.Base):
     @property
     def serialize_deep(self):
         d = Util.to_serializable_dict(self, self.__class__)
+        d['ordinal'] = self.ordinal
         d['home_players'] = []
         for p in self.home_players:
             d['home_players'].append(p.serialize)
@@ -189,6 +190,7 @@ class Match(common_models.Base):
     @property
     def serialize_shallow(self):
         d = Util.to_serializable_dict(self, self.__class__)
+        d['ordinal'] = self.ordinal
         return d
 
 
