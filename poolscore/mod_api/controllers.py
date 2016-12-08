@@ -226,7 +226,7 @@ def tourneys_count():
 
 # matches
 @mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
-@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', methods = ['GET', 'POST'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
 def match(tourney_id, match_id):
     tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
@@ -346,7 +346,7 @@ def match(tourney_id, match_id):
 
 # games
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
-@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/game/<int:game_id>.json', methods = ['GET', 'POST'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games/<int:game_id>.json', methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
 def game(tourney_id, match_id, game_id):
     tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
