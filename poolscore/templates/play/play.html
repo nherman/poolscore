@@ -481,7 +481,7 @@ function ViewModel() {
             if (typeof matchJSON == "object" && matchJSON.id !== undefined) {
                 self.matches.push(new Match(matchJSON.id, {
                     "json": matchJSON,
-                    "tourney": self
+                    "tourney": self.tourney
                 }));
             }
         }
@@ -519,7 +519,7 @@ function ViewModel() {
             ko.utils.arrayForEach(json["matches"], function(match){
                 self.matches.push(new Match(match.id, {
                     "json": match,
-                    "tourney": self
+                    "tourney": self.tourney
                 }));
             });
         }
@@ -527,9 +527,6 @@ function ViewModel() {
 
     /* display game edit view */
     self.editGame = function(game) {
-        console.log(game);
-        /*TODO: swap match template for game edit_game_template */
-
         self.matchTemplateOptions({
             "name": "edit_game_template",
             "data": {
@@ -537,11 +534,11 @@ function ViewModel() {
                 "match": game.match
             }
         });
-    }
+    };
 
     self.displayMatch = function() {
         self.matchTemplateOptions(matchTemplateOptions);
-    }
+    };
 
 }
 
@@ -672,7 +669,7 @@ function Entity(id, config) {
             "map_config": {}
         }, config),
         _map_config = {
-            'ignore': ['configuration', 'id'],
+            'ignore': ['configuration', 'id','ordinal'],
             'observe': ['data','events'],
             'events': {
                 create: function(options) {
@@ -729,6 +726,25 @@ Entity.prototype.get = function() {
 Entity.prototype.update = function() {
     throw "update method not defined";
 };
+function _incEvent(name, num) {
+    try {
+        this.events()[name](this.events()[name]()+num);
+        if (this.events()[name]() < 0) {
+            /* sanity check: no negative events */
+            this.events()[name](0);
+        }
+    } catch(e) {
+        return;
+    }
+
+    this.update();
+}
+Entity.prototype.eventIncrement = function(name) {
+    _incEvent.call(this, name, 1);
+}
+Entity.prototype.eventDecrement = function(name) {
+    _incEvent.call(this, name, -1);
+}
 
 
 function Tourney(id, options) {
@@ -885,7 +901,9 @@ Game.prototype.get = function(callback) {
         }
     );
 };
-
+/*
+    TODO: remove '&' from 'break & run' event name. I think it's breaking updates
+*/
 Game.prototype.update = function(callback) {
     var self = this,
         data = {};
@@ -1052,36 +1070,28 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 </script>
 
 <script type="text/html" id="edit_game_template">
-<a href="#" data-bind="click: $root.displayMatch">close</a><br>
-<span>Match: #<span data-bind="text: match.ordinal"></span></span>&nbsp;
-<span>Game: #<span data-bind="text: game.ordinal"></span></span>&nbsp;
-<span>in progress: <span data-bind="text: game.in_progress"></span></span><br>
-<span data-bind="with: match.lag_winner()">
-    <span data-bind="text: first_name"></span>
-    <span data-bind="text: last_name"></span>
-</span>
-&nbsp;vs.&nbsp;
-<span data-bind="with: match.lag_loser()">
-    <span data-bind="text: first_name"></span>
-    <span data-bind="text: last_name"></span>
-</span>
+    <a href="#" data-bind="click: $root.displayMatch">close</a><br>
+    <span>Match: #<span data-bind="text: match.ordinal"></span></span>&nbsp;
+    <span>Game: #<span data-bind="text: game.ordinal"></span></span>&nbsp;
+    <span>in progress: <span data-bind="text: game.in_progress"></span></span><br>
+    <span data-bind="with: match.lag_winner()">
+        <span data-bind="text: first_name"></span>
+        <span data-bind="text: last_name"></span>
+    </span>
+    &nbsp;vs.&nbsp;
+    <span data-bind="with: match.lag_loser()">
+        <span data-bind="text: first_name"></span>
+        <span data-bind="text: last_name"></span>
+    </span>
 
-<br><br>
+    <br><br>
 
+    Innings: <span data-bind="text: game.events().innings"></span> 
+            <a class="btn btn-default" href="#" data-bind="click: function() {
+                game.eventIncrement('innings');
+            }">+</a>
 
-
-            <!--
-            <tr>
-                <td colspan="4" data-bind="with: $root.utils.getActiveGame(match)">
-                    <p>Edit Game #<span data-bind="text: ordinal"></span></p>
-                    <button class="btn btn-default" data-bind="click: $root.utils.eventIncrement($data,'innings')">+</button>
-
-                </td>
-            </tr>
-            -->
 </script>
-
-
 
 <script type="text/html" id="select_player_template">
     <select required placeholder="Select a Player" data-bind="value: value">
