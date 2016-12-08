@@ -3,21 +3,6 @@
 
 {% block script %}
 <script type="text/javascript">
-/* TODO?
-    Create local models for each entity: tourney, match, player, game
-
-    Populate local models with entities or collections of entities
-
-    bind each entity/collection to a section of markup?
-
-    posible models:
-        tourney
-        match (matches?)
-        game (games?)
-        player (players?)
-        newMatch viewmodel
-
-*/
 
 function NewTourneyModel() {
     var self = this,
@@ -494,7 +479,7 @@ function ViewModel() {
         "onAdd": function(resp) {
             matchJSON = resp.match || resp;
             if (typeof matchJSON == "object" && matchJSON.id !== undefined) {
-                self.matches.push(new Match(tourney_id, matchJSON.id, {
+                self.matches.push(new Match(matchJSON.id, {
                     "json": matchJSON,
                     "tourney": self
                 }));
@@ -532,7 +517,7 @@ function ViewModel() {
             if (json === undefined || typeof json != "object") return;
 
             ko.utils.arrayForEach(json["matches"], function(match){
-                self.matches.push(new Match(tourney_id, match.id, {
+                self.matches.push(new Match(match.id, {
                     "json": match,
                     "tourney": self
                 }));
@@ -544,6 +529,18 @@ function ViewModel() {
     self.editGame = function(game) {
         console.log(game);
         /*TODO: swap match template for game edit_game_template */
+
+        self.matchTemplateOptions({
+            "name": "edit_game_template",
+            "data": {
+                "game": game,
+                "match": game.match
+            }
+        });
+    }
+
+    self.displayMatch = function() {
+        self.matchTemplateOptions(matchTemplateOptions);
     }
 
 }
@@ -784,16 +781,16 @@ Tourney.prototype.update = function(callback) {
     });
 };
 
-function Match(tourney_id, id, options) {
+function Match(id, options) {
     var self = this,
         options = ko.utils.extend({
             "map_config": {
-                'ignore': ['tourney_id', 'lag_winner', 'lag_loser', 'in_progress', 'games'],
+                'ignore': ['tourney', 'lag_winner', 'lag_loser', 'in_progress', 'games'],
                 'observe': ['home_score','home_games_won','away_score','away_games_won','winner_id']
             }
         }, options);
 
-    self.tourney_id = tourney_id;
+    self.tourney = options.tourney;
     self.in_progress = ko.observable();
     self.lag_winner = ko.observable();
     self.lag_loser = ko.observable()
@@ -809,7 +806,9 @@ Match.prototype.onAfterMap = function(json) {
 
     /* populate games array */
     ko.utils.arrayForEach(json["games"], function(game){
-        self.games.push(new Game(self.tourney_id, self.id, game.id, {
+        self.games.push(new Game(game.id, {
+            "tourney": self.tourney,
+            "match": self,
             "json": game
         }));
     });
@@ -826,7 +825,7 @@ Match.prototype.onAfterMap = function(json) {
 Match.prototype.get = function(callback) {
     var self = this;
 
-    PS.API.getMatch(self.tourney_id, self.id,
+    PS.API.getMatch(self.tourney.id, self.id,
         function(json) {
             self.map(json["match"]);
             if (typeof callback == "function") {
@@ -842,7 +841,7 @@ Match.prototype.update = function(callback) {
 
     data["match"] = ko.mapping.toJS(self);
 
-    PS.API.updateMatch(self.tourney_id, self.id, data,
+    PS.API.updateMatch(self.tourney.id, self.id, data,
         function(json) {
             if (typeof callback == "function") {
                 callback.call(self);
@@ -851,17 +850,17 @@ Match.prototype.update = function(callback) {
     );
 };
 
-function Game(tourney_id, match_id, id, options) {
+function Game(id, options) {
     var self = this,
         options = ko.utils.extend({
             "map_config": {
-                'ignore': ['tourney_id', 'match_id','in_progress'],
+                'ignore': ['tourney', 'match','in_progress'],
                 'observe': ['winner_id']
             }
         }, options);
 
-    self.tourney_id = tourney_id;
-    self.match_id = match_id;
+    self.tourney = options.tourney;
+    self.match = options.match;
     self.in_progress = ko.observable();
 
     Entity.call(self, id, options);
@@ -877,7 +876,7 @@ Game.prototype.onAfterMap = function(json) {
 Game.prototype.get = function(callback) {
     var self = this;
 
-    PS.API.getGame(self.tourney_id, self.match_id, self.id,
+    PS.API.getGame(self.tourney.id, self.match.id, self.id,
         function(json) {
             self.map(json["game"]);
             if (typeof callback == "function") {
@@ -893,7 +892,7 @@ Game.prototype.update = function(callback) {
 
     data["game"] = ko.mapping.toJS(self);
 
-    PS.API.updateGame(self.tourney_id, self.match_id, self.id, data,
+    PS.API.updateGame(self.tourney.id, self.match.id, self.id, data,
         function(json) {
             if (typeof callback == "function") {
                 callback.call(self);
@@ -964,7 +963,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
                 <!-- /ko -->
                 <!-- ko text: (function() { console.log(game.events()); })(); -->
                 <!-- /ko -->
-                <tr data-bind="click: $root.editGame">
+                <tr data-bind="click: $root.editGame, css: {'active_pulse': game.in_progress()}">
                     <td colspan="4" data-bind="template: {
                                     name: 'display_game_template',
                                     data: {
@@ -1053,6 +1052,23 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 </script>
 
 <script type="text/html" id="edit_game_template">
+<a href="#" data-bind="click: $root.displayMatch">close</a><br>
+<span>Match: #<span data-bind="text: match.ordinal"></span></span>&nbsp;
+<span>Game: #<span data-bind="text: game.ordinal"></span></span>&nbsp;
+<span>in progress: <span data-bind="text: game.in_progress"></span></span><br>
+<span data-bind="with: match.lag_winner()">
+    <span data-bind="text: first_name"></span>
+    <span data-bind="text: last_name"></span>
+</span>
+&nbsp;vs.&nbsp;
+<span data-bind="with: match.lag_loser()">
+    <span data-bind="text: first_name"></span>
+    <span data-bind="text: last_name"></span>
+</span>
+
+<br><br>
+
+
 
             <!--
             <tr>
