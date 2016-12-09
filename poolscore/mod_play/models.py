@@ -115,6 +115,10 @@ class Match(common_models.Base):
     all_games = db.relationship("Game", backref = db.backref("match"), lazy="dynamic")
 
     @property
+    def ruleset(self):
+        return self.tourney.ruleset
+
+    @property
     def games(self):
         return self.all_games.filter(Game.deleted != True).all();
 
@@ -246,6 +250,10 @@ class Game(common_models.Base):
     data = db.Column(db.Text, nullable = True)
 
     winner = db.relationship("Team")
+
+    @property
+    def ruleset(self):
+        return self.match.ruleset
 
     # Ordinal - position in match order that this game occured
     @property
