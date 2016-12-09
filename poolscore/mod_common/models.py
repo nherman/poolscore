@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from flask import g
 
-from poolscore.mod_common.utils import Util
+from poolscore.mod_common.utils import Util, SecurityUtil
 from poolscore import db
 from poolscore import app
 
@@ -63,7 +63,7 @@ class Base(db.Model):
         return False
 
     def has_permission(self, user_id = None):
-        return self.__class__.has_entityUser(row_id = self.id, user_id = user_id)
+        return SecurityUtil.is_admin() or self.__class__.has_entityUser(row_id = self.id, user_id = user_id)
 
     def grant_permission(self, user_id, connection = None):
         if user_id != None:
