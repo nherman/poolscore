@@ -353,11 +353,26 @@ def game(tourney_id, match_id, game_id):
     if not tourney:
         raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
 
+    attributes = request.get_json(force = True, silent = True, cache = False)
+    game_attributes = ModelUtil._find_attrs_by_class_name(Game, attributes)
+
     additional_attributes = dict(match_id = match_id)
     query = None
 
     if game_id:
         query = Game.secure_query().filter(Game.match_id == match_id and Game.id == game_id)
+
+        if request.method == "PUT":
+            #Enforce format and serialize game events
+            events = Rulesets[tourney.ruleset].game_events
+            if "events" in game_attributes:
+                for label in events:
+                    if label in game_attributes["events"]:
+                        events[label] = game_attributes["events"][label]
+
+            #add entity events as string
+            additional_attributes["events"] = json.dumps(events)
+
 
     else:
         if request.method == "POST":
@@ -376,9 +391,6 @@ def game(tourney_id, match_id, game_id):
             #   }
             # }
             ###
-
-            attributes = request.get_json(force = True, silent = True, cache = False)
-            game_attributes = ModelUtil._find_attrs_by_class_name(Game, attributes)
 
             #Enforce format and serialize game events
             events = Rulesets[tourney.ruleset].game_events
