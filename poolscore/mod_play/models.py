@@ -16,22 +16,31 @@ class Tourney(common_models.Base):
 
     # Tourney Date
     date = db.Column(db.DateTime, nullable = False)
+
     # Home Team ID
     home_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable = False)
+
     # Away Team ID
     away_team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable = False)
+
     # Ruleset Name
     ruleset = db.Column(db.String(128), nullable = False)
+
     # Scoring Method Name
     scoring_method = db.Column(db.String(128), nullable = False)
+
     # Winning Team ID
     winner_id =  db.Column(db.Integer, nullable = True)
+
     # Home Team Score
     home_score =  db.Column(db.Integer, nullable = True)
+
     # Away Team Score
     away_score =  db.Column(db.Integer, nullable = True)
+
     # Events
     events = db.Column(db.Text, nullable = True)
+
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
@@ -84,20 +93,26 @@ class Match(common_models.Base):
 
     # Tourney ID
     tourney_id = db.Column(db.Integer, db.ForeignKey('tourney.id'), nullable = False)
+
+    # Tourney - property created by backref via Tourney entity
+
     #Home Score
     home_score = db.Column(db.Integer, nullable = False)
+
     #Away Score
     away_score = db.Column(db.Integer, nullable = False)
+
     # Winner (team id)
     winner_id = db.Column(db.Integer, nullable = True)
+
     # Events
     events = db.Column(db.Text, nullable = True)
+
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
     players = db.relationship('MatchPlayer', cascade = "all, delete-orphan")
     all_games = db.relationship("Game", backref = db.backref("match"), lazy="dynamic")
-    #tourney propery created by backref viw Tourney entity
 
     @property
     def games(self):
@@ -216,12 +231,17 @@ class Game(common_models.Base):
         'events',
     ]
 
-    #Match ID
+    # Match ID
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable = False)
+
+    # Match - property created by backref via Match entity
+
     # Winner (team id)
     winner_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable = True)
+
     # Events
     events = db.Column(db.Text, nullable = True)
+
     # Data (?)
     data = db.Column(db.Text, nullable = True)
 
