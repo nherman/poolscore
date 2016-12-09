@@ -179,20 +179,36 @@ def load_pager(*args, **kwargs):
     g._pager = Util.build_pager(request)
 
 #Ensure that events dict has all required events before serializing
-def put_events_callback(klass, id, method, attributes):
-    if klass and attributes and method == "PUT":
+def before_http_action_events_callback(klass=None,
+                        id=None,
+                        method=None,
+                        attributes=None):
+
+    if klass and attributes:
         klass_name = ModelUtil.underscore(klass.__name__)
         klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
         if klass_attributes and 'events' in klass_attributes:
-            #Enforce tourney event format
-            entity = klass.secure_query().filter(klass.id == id).first()
+
+            # Get entity or parent
+            entity = None
+            entity_klass = klass
             ruleset = None
-            if hasattr(entity, "match"):
-                entity = entity.match
-            if hasattr(entity, "tourney"):
-                entity = entity.tourney
-            if hasattr(entity, "ruleset"):
+            if (klass_name == "tourney"):
+                rulset = klass_attributes["ruleset"]
+            else:
+                if (id==None):
+                    if (klass_name == "game"):
+                        entity_klass = Match
+                        entity_klass.id = attributes["match_id"]
+                    elif (klass_name == "match"):
+                        entity_klass = Tourney
+                        entity_klass.id = attributes["tourney_id"]
+                    else:
+                        raise ApiError('Entity has no events. Entity not allowed.', status_code = 400)
+
+                entity = klass.secure_query().filter(klass.id == id).first()
                 ruleset = entity.ruleset
+
 
             if (ruleset != None):
                 events = Rulesets[ruleset][klass_name + "_events"]
@@ -211,8 +227,8 @@ def put_events_callback(klass, id, method, attributes):
 @SecurityUtil.requires_auth()
 def tourneys(id, json_serializer_property=None):
     before_http_action_callback = None
-    if request.method == "PUT":
-        before_http_action_callback = put_events_callback
+    if request.method == "POST" or request.method == "PUT":
+        before_http_action_callback = before_http_action_events_callback
 
     return _process_request(klass = Tourney, 
                             id = id,
@@ -353,8 +369,9 @@ def game(tourney_id, match_id, game_id):
     if not tourney:
         raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
 
-    attributes = request.get_json(force = True, silent = True, cache = False)
-    game_attributes = ModelUtil._find_attrs_by_class_name(Game, attributes)
+    before_http_action_callback = None
+    if request.method == "POST" or request.method == "PUT":
+        before_http_action_callback = before_http_action_events_callback
 
     additional_attributes = dict(match_id = match_id)
     query = None
@@ -362,73 +379,13 @@ def game(tourney_id, match_id, game_id):
     if game_id:
         query = Game.secure_query().filter(Game.match_id == match_id and Game.id == game_id)
 
-        if request.method == "PUT":
-            #Enforce format and serialize game events
-            events = Rulesets[tourney.ruleset].game_events
-            if "events" in game_attributes:
-                for label in events:
-                    if label in game_attributes["events"]:
-                        events[label] = game_attributes["events"][label]
-
-            #add entity events as string
-            additional_attributes["events"] = json.dumps(events)
-
-
-    else:
-        if request.method == "POST":
-            ###
-            # Create new game for match
-            #
-            # attributes format:
-            # {
-            #   "game": {
-            #       "events": {
-            #           game_event: "",
-            #           ...
-            #      },
-            #       game_attribute: "",
-            #       ...
-            #   }
-            # }
-            ###
-
-            #Enforce format and serialize game events
-            events = Rulesets[tourney.ruleset].game_events
-            if "events" in game_attributes:
-                for label in events:
-                    if label in game_attributes["events"]:
-                        events[label] = game_attributes["events"][label]
-
-            #add entity events as string
-            additional_attributes["events"] = json.dumps(events)
-
-            try:
-                #Create game entity
-                game = ModelUtil.create_model(Game, attributes, additional_attributes = additional_attributes)
-                if not game:
-                    raise ApiError('Game cannot be created. Invalid json format', status_code = 400)
-
-                db.session.add(game)
-                db.session.commit()
-
-                game_id = game.id
-
-            except exc.SQLAlchemyError as ex:
-                db.session.rollback()
-                app.logger.error("Game cannot be created", exc_info = ex)
-                raise ApiError('Game cannot be created - [%s]' % ex.message, status_code = 400)
-
-
-            http_resp = jsonify({"game": game.serialize})
-            http_resp.status_code = 201
-            return http_resp
-
-        else:
-            query = Game.secure_query().filter(Game.match_id == match_id)
+    elif request.method == "GET":
+        query = Game.secure_query().filter(Game.match_id == match_id)
 
 
     return _process_request(klass = Game,
                             id = game_id,
                             query = query,
+                            before_http_action_callback = before_http_action_callback,
                             additional_attributes = additional_attributes)
 
