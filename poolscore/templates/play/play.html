@@ -669,7 +669,7 @@ function Entity(id, config) {
             "map_config": {}
         }, config),
         _map_config = {
-            'ignore': ['configuration', 'id','ordinal'],
+            'ignore': ['configuration','id','ordinal'],
             'observe': ['data','events'],
             'events': {
                 create: function(options) {
@@ -706,6 +706,7 @@ function Entity(id, config) {
         self.configuration.callback();
     } else {
         self.get(function(json) {
+            self.configuration.json = json; //save raw data
             self.onAfterMap(json);
             self.configuration.callback();
         });
@@ -732,6 +733,7 @@ function _incEvent(name, num) {
         if (this.events()[name]() < 0) {
             /* sanity check: no negative events */
             this.events()[name](0);
+            return;
         }
     } catch(e) {
         return;
@@ -835,7 +837,8 @@ Match.prototype.onAfterMap = function(json) {
     self.lag_winner(self[lag_team + "_players"][0]);
     self.lag_loser(self[no_lag_team + "_players"][0]);
 
-    self.in_progress(window.PS.utils.isEmpty(self.winner_id()))
+    self.in_progress(window.PS.utils.isEmpty(self.winner_id()));
+    self.ordinal = self.configuration.json.ordinal;
 };
 
 Match.prototype.get = function(callback) {
@@ -886,7 +889,8 @@ Game.prototype = Object.create(Entity.prototype);
 
 Game.prototype.onAfterMap = function(json) {
     var self = this;
-    self.in_progress(window.PS.utils.isEmpty(self.winner_id()))
+    self.in_progress(window.PS.utils.isEmpty(self.winner_id()));
+    self.ordinal = self.configuration.json.ordinal;
 };
 
 Game.prototype.get = function(callback) {
@@ -1090,6 +1094,9 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <a class="btn btn-default" href="#" data-bind="click: function() {
                 game.eventIncrement('innings');
             }">+</a>
+            <a class="btn btn-default" href="#" data-bind="click: function() {
+                game.eventDecrement('innings');
+            }">-</a>
 
 </script>
 
