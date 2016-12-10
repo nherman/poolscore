@@ -729,7 +729,7 @@ Entity.prototype.update = function() {
 };
 function _incEvent(name, num) {
     try {
-        this.events()[name](this.events()[name]()+num);
+        this.events()[name](this.events()[name]()*1+num);
         if (this.events()[name]() < 0) {
             /* sanity check: no negative events */
             this.events()[name](0);
