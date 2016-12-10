@@ -869,6 +869,26 @@ Match.prototype.update = function(callback) {
     );
 };
 
+Match.prototype.addGame = function(callback) {
+    var self = this,
+        data = {"game":{}};
+
+    if (self.lag_winner() !== undefined) {
+        data["game"]["events"] = {
+            "breaker":self.lag_winner().id
+        };
+    }
+    //TODO: api is throwing 500 error on this call
+    PS.API.createGame(self.tourney.id, self.id, data,
+        function(json) {
+            if (typeof callback == "function") {
+                callback.call(self);
+            }
+        }
+    );
+
+}
+
 function Game(id, options) {
     var self = this,
         options = ko.utils.extend({
@@ -954,7 +974,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <!-- ko text: (function() { console.log(match); })(); -->
+            <!-- ko text: (function() { console.log(match); console.log(match.lag_winner()); })(); -->
             <!-- /ko -->
 
             <tr data-bind=" css: {'active_pulse': match.in_progress()},
@@ -997,7 +1017,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <!-- /ko -->
 
             <tr>
-                <td colspan="4"><button class="btn btn-default">New Game</button></td>
+                <td colspan="4"><button class="btn btn-default" data-bind="click: addGame">New Game</button></td>
             </tr>
 
             <tr>
