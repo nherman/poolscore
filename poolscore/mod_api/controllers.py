@@ -179,11 +179,8 @@ def load_pager(*args, **kwargs):
     g._pager = Util.build_pager(request)
 
 #Ensure that events dict has all required events before serializing
-def before_http_action_events_callback(klass=None,
-                        id=None,
-                        method=None,
-                        attributes=None):
-
+#Assig to before_http_action_callback for POST or PUT request
+def update_events(klass=None, id=None, method=None, attributes=None):
     if klass and attributes:
         klass_name = ModelUtil.underscore(klass.__name__)
         klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
@@ -228,7 +225,7 @@ def before_http_action_events_callback(klass=None,
 def tourneys(id, json_serializer_property=None):
     before_http_action_callback = None
     if request.method == "POST" or request.method == "PUT":
-        before_http_action_callback = before_http_action_events_callback
+        before_http_action_callback = update_events
 
     return _process_request(klass = Tourney, 
                             id = id,
@@ -371,7 +368,7 @@ def game(tourney_id, match_id, game_id):
 
     before_http_action_callback = None
     if request.method == "POST" or request.method == "PUT":
-        before_http_action_callback = before_http_action_events_callback
+        before_http_action_callback = update_events
 
     additional_attributes = dict(match_id = match_id)
     query = None
