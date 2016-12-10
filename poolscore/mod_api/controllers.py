@@ -81,7 +81,7 @@ def _process_request(klass = None, query = None,
         attributes = request.get_json(force = True, silent = True, cache = False)
         if not attributes:
             raise ApiError('Invalid json syntax', status_code = 400)
-        before_http_action_callback(klass, id, method, attributes)
+        before_http_action_callback(klass, id, method, attributes, additional_attributes)
         # TODO: IntegrityError: (raised as a result of Query-invoked autoflush; consider 
         # using a session.no_autoflush block if this flush is occurring prematurely) (IntegrityError)
         # Added no_autoflush to avoid issues with child fetching inside of the create_model call.
@@ -106,7 +106,7 @@ def _process_request(klass = None, query = None,
         attributes = request.get_json(force = True, silent = True, cache = False)
         if not attributes:
             raise ApiError('Invalid json syntax', status_code = 400)
-        before_http_action_callback(klass, id, method, attributes)
+        before_http_action_callback(klass, id, method, attributes, additional_attributes)
         if query:
             item = query.first()
         else:
@@ -180,13 +180,13 @@ def load_pager(*args, **kwargs):
 
 #Ensure that events dict has all required events before serializing
 #Assig to before_http_action_callback for POST or PUT request
-def update_events(klass=None, id=None, method=None, attributes=None):
+def update_events(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
     if klass and attributes:
         klass_name = ModelUtil.underscore(klass.__name__)
         klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
         if klass_attributes and 'events' in klass_attributes:
 
-            # Get entity or parent
+            # Get ruleset from entity or parent
             entity = None
             entity_klass = klass
             ruleset = None
@@ -196,14 +196,14 @@ def update_events(klass=None, id=None, method=None, attributes=None):
                 if (id==None):
                     if (klass_name == "game"):
                         entity_klass = Match
-                        entity_klass.id = attributes["match_id"]
+                        id = additional_attributes["match_id"]
                     elif (klass_name == "match"):
                         entity_klass = Tourney
-                        entity_klass.id = attributes["tourney_id"]
+                        id = additional_attributes["tourney_id"]
                     else:
                         raise ApiError('Entity has no events. Entity not allowed.', status_code = 400)
 
-                entity = klass.secure_query().filter(klass.id == id).first()
+                entity = entity_klass.secure_query().filter(entity_klass.id == id).first()
                 ruleset = entity.ruleset
 
 
@@ -342,7 +342,7 @@ def match(tourney_id, match_id):
                             json_serializer_property = json_serializer_property)
 
 # games
-@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games.json', defaults = {'game_id': None}, methods = ['GET', 'POST'])
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games/<int:game_id>.json', methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
 def game(tourney_id, match_id, game_id):
