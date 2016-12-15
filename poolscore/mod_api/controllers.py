@@ -206,15 +206,15 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
                 entity = entity_klass.secure_query().filter(entity_klass.id == id).first()
                 ruleset = entity.ruleset
 
-
+            # Update default events dict with event values from attributes
             if (ruleset != None):
                 events = Rulesets[ruleset][klass_name + "_events"]
-                for label in events:
-                    if label not in klass_attributes["events"]:
-                        klass_attributes["events"][label] = ""
+                for label in klass_attributes["events"]:
+                    if label in events:
+                        events[label] = klass_attributes["events"][label]
 
             #convert events dict to string before writing to DB
-            klass_attributes["events"] = json.dumps(klass_attributes["events"])
+            klass_attributes["events"] = json.dumps(events)
             attributes[klass_name] = klass_attributes
 
 
