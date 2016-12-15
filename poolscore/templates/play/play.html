@@ -1047,7 +1047,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <!-- /ko -->
 
             <tr>
-                <td colspan="4"><button class="btn btn-default" data-bind="visible: !hasGameInProgress, click: addGame">New Game</button></td>
+                <td colspan="4"><button class="btn btn-default" data-bind="visible: !hasGameInProgress(), click: addGame">New Game</button></td>
             </tr>
 
             <tr>
@@ -1139,7 +1139,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
     </span>
 
     <br><br>
-
+    <p>
     Innings: <span data-bind="text: game.events().innings"></span> 
             <a class="btn btn-default" href="#" data-bind="click: function() {
                 game.eventIncrement('innings');
@@ -1147,6 +1147,57 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <a class="btn btn-default" href="#" data-bind="click: function() {
                 game.eventDecrement('innings');
             }">-</a>
+    </p>
+
+    <div class="row">
+        <div class="col-xs-5 col-xs-offset-1">
+            Home Safes: <span data-bind="text: game.events().home_safes"></span> 
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventIncrement('home_safes');
+                    }">+</a>
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventDecrement('home_safes');
+                    }">-</a>
+        </div>
+        <div class="col-xs-5 col-xs-offset-1">
+            Away Safes: <span data-bind="text: game.events().away_safes"></span> 
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventIncrement('away_safes');
+                    }">+</a>
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventDecrement('away_safes');
+                    }">-</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-5 col-xs-offset-1">
+            Home Coaches: <span data-bind="text: game.events().home_coaches"></span> 
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventIncrement('home_coaches');
+                    }">+</a>
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventDecrement('home_coaches');
+                    }">-</a>
+        </div>
+        <div class="col-xs-5 col-xs-offset-1">
+            Away Coaches: <span data-bind="text: game.events().away_coaches"></span> 
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventIncrement('away_coaches');
+                    }">+</a>
+                    <a class="btn btn-default" href="#" data-bind="click: function() {
+                        game.eventDecrement('away_coaches');
+                    }">-</a>
+        </div>
+    </div>
+
+    <p>
+        <form>
+            <select name="special_event_option" class="form-control"
+                    data-bind="options:game.events().special_event_options, value: game.events().special_event">
+            </select>
+        </form>
+    </p>
 
 </script>
 
