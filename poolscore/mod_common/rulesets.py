@@ -46,10 +46,8 @@ apa8ball_game_events = {
     "home_safes": 0,
     "away_coaches": 0,
     "away_safes": 0,
-    "8_break": False,
-    "break_run": False,
-    "early_8": False,
-    "scratch_8": False
+    "special_event_options": (None,"8_break","break_run","early_8","scratch_8","forfeit"),
+    "special_event": None
 }
 
 Rulesets = {
