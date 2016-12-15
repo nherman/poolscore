@@ -446,6 +446,7 @@ function addMatchViewModel(options) {
             function(json) {
                 self.resetForm();
                 options.onAdd(json);
+                //TODO create game
             }
         );
     };
@@ -477,12 +478,14 @@ function ViewModel() {
     self.addMatchViewModel = new addMatchViewModel({
         "tourney_id": tourney_id,
         "onAdd": function(resp) {
-            matchJSON = resp.match || resp;
+            var match, matchJSON = resp.match || resp;
             if (typeof matchJSON == "object" && matchJSON.id !== undefined) {
-                self.matches.push(new Match(matchJSON.id, {
+                match = new Match(matchJSON.id, {
                     "json": matchJSON,
                     "tourney": self.tourney
-                }));
+                });
+                match.addGame();
+                self.matches.push(match);
             }
         }
     });
@@ -814,6 +817,16 @@ function Match(id, options) {
     self.lag_loser = ko.observable()
     self.games = ko.observableArray();
 
+    self.hasGameInProgress = ko.computed(function() {
+        var i=0;
+        for (;i<self.games().length;i++) {
+            if (self.games()[i].in_progress()) {
+                return true;
+            }
+        }
+        return false;
+    });
+
     Entity.call(self, id, options);
 
 }
@@ -871,22 +884,41 @@ Match.prototype.update = function(callback) {
 
 Match.prototype.addGame = function(callback) {
     var self = this,
+        breaker_id,
         data = {"game":{}};
 
-    if (self.lag_winner() !== undefined) {
+    if (self.games().length === 0) {
+
+        /* First game. Breaker == lag winner */
+        if (self.lag_winner() !== undefined) {
+            breaker_id = self.lag_winner().id;
+        }
+
+    } else {
+
+        /* Sanity check: one game at a time */
+        if (self.games()[self.games().length-1].in_progress()) {
+            return;
+        }
+
+        /* breaker is the last game's winner */
+        breaker_id = self.games()[self.games().length-1].events().winner_id();
+
+    }
+
+    if (breaker_id !== undefined) {
         data["game"]["events"] = {
-            "breaker":self.lag_winner().id
+            "breaker":breaker_id
         };
     }
-    //TODO: api is throwing 500 error on this call
+
     PS.API.createGame(self.tourney.id, self.id, data,
-        function(json) {
+        function() {
             if (typeof callback == "function") {
-                callback.call(self);
+                callback.apply(self, arguments);
             }
         }
     );
-
 }
 
 function Game(id, options) {
@@ -1015,7 +1047,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <!-- /ko -->
 
             <tr>
-                <td colspan="4"><button class="btn btn-default" data-bind="click: addGame">New Game</button></td>
+                <td colspan="4"><button class="btn btn-default" data-bind="visible: !hasGameInProgress, click: addGame">New Game</button></td>
             </tr>
 
             <tr>
