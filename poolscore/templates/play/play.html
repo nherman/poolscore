@@ -532,10 +532,7 @@ function ViewModel() {
     self.editGame = function(game) {
         self.matchTemplateOptions({
             "name": "edit_game_template",
-            "data": {
-                "game": game,
-                "match": game.match
-            }
+            "data": game
         });
     };
 
@@ -776,12 +773,18 @@ function Tourney(id, options) {
 }
 Tourney.prototype = Object.create(Entity.prototype);
 
+Tourney.prototype.onAfterMap = function(json) {
+    console.log(json);
+    self.home_team_id = json.home_team_id;
+    self.away_team_id = json.away_team_id;
+};
+
 Tourney.prototype.get = function(callback) {
     var self = this;
     PS.API.getTourney(self.id, function(json) {
         self.map(json["tourney"]);
         if (typeof callback == "function") {
-            callback.call(self);
+            callback.call(self, json);
         }
     });
 };
@@ -844,6 +847,8 @@ Match.prototype.onAfterMap = function(json) {
         }));
     });
 
+    /* get teams
+
     /* initialize lag winner/loser */
     lag_team = self.events().lag();
     no_lag_team = (lag_team == "home") ? "away" : "home";
@@ -861,7 +866,7 @@ Match.prototype.get = function(callback) {
         function(json) {
             self.map(json["match"]);
             if (typeof callback == "function") {
-                callback.call(self);
+                callback.call(self, json);
             }
         }
     );
@@ -952,7 +957,7 @@ Game.prototype.get = function(callback) {
         function(json) {
             self.map(json["game"]);
             if (typeof callback == "function") {
-                callback.call(self);
+                callback.call(self, json);
             }
         }
     );
@@ -971,6 +976,23 @@ Game.prototype.update = function(callback) {
             }
         }
     );
+};
+
+Game.prototype.setWinner = function(team) {
+    var self = this;
+    // set winner id
+    self.winner_id(self.match.tourney[team + "_team_id"]);
+
+    // set in progress
+    self.in_progress(false);
+
+    //update game
+    self.update();
+
+    // update match
+    self.match.update();
+    //TODO: match update should calculate games won and update display, progress, end match, etc.
+
 };
 
 
@@ -1123,70 +1145,77 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
     </table>
 </script>
 
+{# edit_game_template requries game context #}
 <script type="text/html" id="edit_game_template">
     <a href="#" data-bind="click: $root.displayMatch">close</a><br>
     <span>Match: #<span data-bind="text: match.ordinal"></span></span>&nbsp;
-    <span>Game: #<span data-bind="text: game.ordinal"></span></span>&nbsp;
-    <span>in progress: <span data-bind="text: game.in_progress"></span></span><br>
-    <span data-bind="with: match.lag_winner()">
-        <span data-bind="text: first_name"></span>
-        <span data-bind="text: last_name"></span>
+    <span>Game: #<span data-bind="text: ordinal"></span></span>&nbsp;
+    <span>in progress: <span data-bind="text: in_progress"></span></span><br>
+    <span data-bind="with: match">
+        <span data-bind="style: {'font-weight': tourney.home_team_id == $parent.winner_id() ? 'bold' : 'normal'}">
+            <span data-bind="text: home_players[0].first_name"></span>
+            <span data-bind="text: home_players[0].last_name"></span>
+            <span data-bind="visible: tourney.home_team_id == $parent.winner_id, text: '(winner)'"></span>
+        </span>
     </span>
     &nbsp;vs.&nbsp;
-    <span data-bind="with: match.lag_loser()">
-        <span data-bind="text: first_name"></span>
-        <span data-bind="text: last_name"></span>
+    <span data-bind="with: match">
+        <span data-bind="style: {'font-weight': tourney.away_team_id == $parent.winner_id() ? 'bold' : 'normal'}">
+            <span data-bind="text: away_players[0].first_name"></span>
+            <span data-bind="text: away_players[0].last_name"></span>
+            <span data-bind="visible: tourney.away_team_id == $parent.winner_id, text: '(winner)'"></span>
+        </span>
     </span>
 
     <br><br>
     <p>
-    Innings: <span data-bind="text: game.events().innings"></span> 
+    Innings: <span data-bind="text: events().innings"></span> 
             <a class="btn btn-default" href="#" data-bind="click: function() {
-                game.eventIncrement('innings');
+                eventIncrement('innings');
             }">+</a>
             <a class="btn btn-default" href="#" data-bind="click: function() {
-                game.eventDecrement('innings');
+                eventDecrement('innings');
             }">-</a>
     </p>
 
     <div class="row">
         <div class="col-xs-5 col-xs-offset-1">
-            Home Safes: <span data-bind="text: game.events().home_safes"></span> 
+            Home Safes: <span data-bind="text: events().home_safes"></span> 
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventIncrement('home_safes');
+                        eventIncrement('home_safes');
                     }">+</a>
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventDecrement('home_safes');
+                        eventDecrement('home_safes');
                     }">-</a>
         </div>
         <div class="col-xs-5 col-xs-offset-1">
-            Away Safes: <span data-bind="text: game.events().away_safes"></span> 
+            Away Safes: <span data-bind="text: events().away_safes"></span> 
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventIncrement('away_safes');
+                        eventIncrement('away_safes');
                     }">+</a>
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventDecrement('away_safes');
+                        eventDecrement('away_safes');
                     }">-</a>
         </div>
     </div>
 
     <div class="row">
         <div class="col-xs-5 col-xs-offset-1">
-            Home Coaches: <span data-bind="text: game.events().home_coaches"></span> 
+            Home Coaches: <span data-bind="text: events().home_coaches"></span> 
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventIncrement('home_coaches');
+                        eventIncrement('home_coaches');
                     }">+</a>
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventDecrement('home_coaches');
+                        eventDecrement('home_coaches');
                     }">-</a>
         </div>
         <div class="col-xs-5 col-xs-offset-1">
-            Away Coaches: <span data-bind="text: game.events().away_coaches"></span> 
+            Away Coaches: <span data-bind="text: events().away_coaches"></span> 
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventIncrement('away_coaches');
+                        eventIncrement('away_coaches');
                     }">+</a>
                     <a class="btn btn-default" href="#" data-bind="click: function() {
-                        game.eventDecrement('away_coaches');
+                        eventDecrement('away_coaches');
                     }">-</a>
         </div>
     </div>
@@ -1194,10 +1223,33 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
     <p>
         <form>
             <select name="special_event_option" class="form-control"
-                    data-bind="options:game.events().special_event_options, value: game.events().special_event">
+                    data-bind="options:events().special_event_options, value: events().special_event, event { change: update }">
             </select>
         </form>
     </p>
+
+    <p data-bind="text: winner_id"></p>
+
+    <div class="row">
+        <div class="col-xs-5 col-xs-offset-1">
+            <button class="btn" data-bind="click: function() {
+                    setWinner('home');
+                    $root.displayMatch();
+                }, css: {
+                    'btn-success':match.tourney.home_team_id == winner_id(),
+                    'btn-default':match.tourney.home_team_id != winner_id()
+                }">Home Wins</button>
+        </div>
+        <div class="col-xs-5 col-xs-offset-1">
+            <button class="btn" data-bind="click: function() {
+                    setWinner('away');
+                    $root.displayMatch();
+                }, css: {
+                    'btn-success':match.tourney.away_team_id == winner_id(),
+                    'btn-default':match.tourney.away_team_id != winner_id()
+            }">Away Wins</button>
+        </div>
+    </div>
 
 </script>
 
