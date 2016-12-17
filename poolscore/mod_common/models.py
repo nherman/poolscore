@@ -20,7 +20,7 @@ class Base(db.Model):
     ]
 
     # These attributes are ignored for the UPDATE statements
-    IGNORE_ATTRIBUTES_ON_UPDATE = ['id', 'date_created', 'date_modified']
+    IGNORE_ATTRIBUTES_ON_UPDATE = ['id', 'date_created', 'date_modified', 'ordinal']
 
     id = db.Column(db.Integer, primary_key = True)
     date_created = db.Column(db.DateTime, default = db.func.current_timestamp())

@@ -91,6 +91,16 @@ class Match(common_models.Base):
         'events',
     ]
 
+    IGNORE_ATTRIBUTES_ON_UPDATE = [
+        'players',
+        'home_players',
+        'away_players',
+        'home_games_won',
+        'away_games_won',
+        'home_games_needed',
+        'away_games_needed'
+    ]
+
     # Tourney ID
     tourney_id = db.Column(db.Integer, db.ForeignKey('tourney.id'), nullable = False)
 
