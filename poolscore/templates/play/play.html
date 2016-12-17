@@ -800,7 +800,7 @@ Tourney.prototype.update = function(callback) {
 
     PS.API.updateTourney(self.id, data, function(json) {
         if (typeof callback == "function") {
-            callback.call(self);
+            callback.call(self, json);
         }
     });
 };
@@ -881,7 +881,7 @@ Match.prototype.update = function(callback) {
     PS.API.updateMatch(self.tourney.id, self.id, data,
         function(json) {
             if (typeof callback == "function") {
-                callback.call(self);
+                callback.call(self, json);
             }
         }
     );
@@ -972,7 +972,7 @@ Game.prototype.update = function(callback) {
     PS.API.updateGame(self.tourney.id, self.match.id, self.id, data,
         function(json) {
             if (typeof callback == "function") {
-                callback.call(self);
+                callback.call(self, json);
             }
         }
     );
