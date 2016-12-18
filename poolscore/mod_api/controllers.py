@@ -163,16 +163,6 @@ def _process_request(klass = None, query = None,
         raise ApiError('Response object is empty. Unable to continue processing', status_code = 500)
     return http_resp
 
-def _generic_update(entity):
-    with db.session.no_autoflush:
-        try:
-            db.session.merge(entity)
-            db.session.commit()
-        except exc.SQLAlchemyError as ex:
-            db.session.rollback()
-            app.logger.error("Resource cannot be updated", exc_info = ex)
-            raise ApiError('Resource cannot be updated - [%s]' % ex.message, status_code = 400)
-    return entity
 
 @mod_api.before_request
 def load_pager(*args, **kwargs):
