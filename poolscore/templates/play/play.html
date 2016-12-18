@@ -907,7 +907,7 @@ Match.prototype.addGame = function(callback) {
         }
 
         /* breaker is the last game's winner */
-        breaker_id = self.games()[self.games().length-1].events().winner_id();
+        breaker_id = self.games()[self.games().length-1].winner_id();
 
     }
 
@@ -918,7 +918,16 @@ Match.prototype.addGame = function(callback) {
     }
 
     PS.API.createGame(self.tourney.id, self.id, data,
-        function() {
+        function(json) {
+            console.log(json);
+            if (json !== undefined && typeof json === "object" && json.hasOwnProperty('game')) {
+                self.games.push(new Game(json.game.id, {
+                    "tourney": self.tourney,
+                    "match": self,
+                    "json": json.game
+                }));
+            }
+
             if (typeof callback == "function") {
                 callback.apply(self, arguments);
             }
@@ -987,11 +996,11 @@ Game.prototype.setWinner = function(team) {
     self.in_progress(false);
 
     //update game
-    self.update();
+    self.update(function(json) {
+        self.match.get();
+    });
 
-    // update match
-    self.match.update();
-    //TODO: match update should calculate games won and update display, progress, end match, etc.
+    //TODO: update match status if match is complete
 
 };
 
