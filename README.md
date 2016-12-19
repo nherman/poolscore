@@ -14,12 +14,12 @@ sqlite3 app.db < bootstrap-data/bootstrap-sqlite.sql
 
 In the step 1 we create a new virtual environment.
 ```
-virtualenv --verbose --python python2.7 /path/to/poolscore-virtenv
+virtualenv --verbose --python python2.7 ./poolscore-virtenv
 ```
 
 In the step 2 we activate newly created environment and install python packages using pip tool.
 ```
-cd /path/to/moosetalk-py-virtenv
+cd ./poolscore-virtenv
 
 source ./bin/activate
 
