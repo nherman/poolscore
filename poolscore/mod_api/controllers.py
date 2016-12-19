@@ -7,7 +7,7 @@ from flask import Blueprint, request, render_template, \
             flash, g, redirect, url_for, \
             send_from_directory, jsonify
 
-from sqlalchemy import exc, func
+from sqlalchemy import exc, func, and_
 
 from poolscore import db
 from poolscore import app
@@ -348,7 +348,7 @@ def game(tourney_id, match_id, game_id):
     query = None
 
     if game_id:
-        query = Game.secure_query().filter(Game.match_id == match_id and Game.id == game_id)
+        query = Game.secure_query().filter(and_(Game.match_id == match_id, Game.id == game_id))
 
     elif request.method == "GET":
         query = Game.secure_query().filter(Game.match_id == match_id)
