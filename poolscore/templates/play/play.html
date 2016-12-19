@@ -321,15 +321,18 @@ function Entity(id, config) {
             'ignore': ['configuration','id','ordinal'],
             'observe': ['data','events'],
             'events': {
-                create: function(options) {
-                    var events = options.data
-                    if(typeof events === "string") {
-                        events = ko.utils.parseJson(events);
-                    }
-                    return ko.observable(ko.mapping.fromJS(events));
-                }
+                'create': eventFieldMapHandler,
+                'update': eventFieldMapHandler
             }
         };
+
+    function eventFieldMapHandler(options) {
+        var events = options.data
+        if(typeof events === "string") {
+            events = ko.utils.parseJson(events);
+        }
+        return ko.observable(ko.mapping.fromJS(events));
+    }
 
     /* merge config.map_config with _map_config and copy merged object to config.map_config */
     for (key in config.map_config) {
@@ -487,6 +490,7 @@ Match.prototype.onAfterMap = function(json) {
     var self = this;
 
     /* populate games array */
+    self.games().length = 0;
     ko.utils.arrayForEach(json["games"], function(game){
         self.games.push(new Game(game.id, {
             "tourney": self.tourney,
@@ -686,9 +690,6 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
-            <!-- ko text: (function() { console.log(match); console.log(match.events()); })(); -->
-            <!-- /ko -->
-
             <tr data-bind=" css: {'active_pulse': match.in_progress()},
                             template: {
                                 name: 'display_player_template', data: {
@@ -713,10 +714,6 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
 
             <!-- ko if: match.in_progress() == true -->
             <!-- ko foreach: {data: games, as: 'game'} -->
-                <!-- ko text: (function() { console.log(game); })(); -->
-                <!-- /ko -->
-                <!-- ko text: (function() { console.log(game.events()); })(); -->
-                <!-- /ko -->
                 <tr data-bind="click: $root.editGame, css: {'active_pulse': game.in_progress()}">
                     <td colspan="4" data-bind="template: {
                                     name: 'display_game_template',
