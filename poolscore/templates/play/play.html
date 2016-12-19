@@ -481,8 +481,14 @@ function Match(id, options) {
         return false;
     });
 
-    Entity.call(self, id, options);
+    self.canAdd = ko.computed(function() {
+        var json = options.json;
+        return json.home_games_won < json.home_games_needed &&
+            json.away_games_won < json.away_games_needed;
 
+    });
+
+    Entity.call(self, id, options);
 }
 Match.prototype = Object.create(Entity.prototype);
 
@@ -557,6 +563,14 @@ Match.prototype.addGame = function(callback) {
 
         /* Sanity check: one game at a time */
         if (self.games()[self.games().length-1].in_progress()) {
+            return;
+        }
+
+        /* Sanity check: match complete? */
+        if (
+            self.match.configuration.json.home_games_won >= self.match.configuration.json.home_games_needed ||
+            self.match.configuration.json.away_games_won >= self.match.configuration.json.away_games_needed
+            ) {
             return;
         }
 
@@ -726,7 +740,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             <!-- /ko -->
 
             <tr>
-                <td colspan="4"><button class="btn btn-default" data-bind="visible: !hasGameInProgress(), click: addGame">New Game</button></td>
+                <td colspan="4"><button class="btn btn-default" data-bind="visible: canAdd() && !hasGameInProgress(), click: addGame">New Game</button></td>
             </tr>
 
             <tr>
