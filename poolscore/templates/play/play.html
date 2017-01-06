@@ -568,8 +568,8 @@ Match.prototype.addGame = function(callback) {
 
         /* Sanity check: match complete? */
         if (
-            self.match.configuration.json.home_games_won >= self.match.configuration.json.home_games_needed ||
-            self.match.configuration.json.away_games_won >= self.match.configuration.json.away_games_needed
+            self.configuration.json.home_games_won >= self.configuration.json.home_games_needed ||
+            self.configuration.json.away_games_won >= self.configuration.json.away_games_needed
             ) {
             return;
         }
