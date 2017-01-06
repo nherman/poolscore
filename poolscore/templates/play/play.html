@@ -666,10 +666,36 @@ Game.prototype.setWinner = function(team) {
 
     //update game
     self.update(function(json) {
-        self.match.get();
+        //self.match.get();
+        /*
+            we should probably wait until match gets updated to reload it. In fact, update match (all entities?) to update with server data on update. If we calculate match points on the controller this will eliminate the need to do an extra get to pull the match point info. 
+        */
     });
 
-    //TODO: update match status if match is complete
+    /* TODO
+
+    Update match so that it subscribes to game.in_progress. when in_progress == false, match should check for:
+
+     * is match over?
+        * update match.winner_id
+        * update "sweep" event
+        * update match.in_progress
+        * set match points (? or perhaps this should be done in the controller as part of before_http_action_callback call on match update ?)
+     * "rubber" event?
+
+     Tourney should, in turn, subscribe to match.in_progress. when in_progress == false then tourney should check for... tourney complete? maybe nothing?
+
+     * create utility for determining match points. maybe that should be somehow downloaded with ruleset?
+
+
+    if (self.match[team + "_games_won"]++ >= self.match[team + "_games_needed"]) {
+        self.match.in_progress(false);
+        self.match.winner_id(self.match.tourney[team + "_team_id"]);
+        self.match.update();
+    }
+
+    */
+
 
 };
 

@@ -169,7 +169,7 @@ def load_pager(*args, **kwargs):
     g._pager = Util.build_pager(request)
 
 #Ensure that events dict has all required events before serializing
-#Assig to before_http_action_callback for POST or PUT request
+#Assign to before_http_action_callback for POST or PUT request
 def update_events(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
     if klass and attributes:
         klass_name = ModelUtil.underscore(klass.__name__)
@@ -231,7 +231,9 @@ def tourneys_count():
 @mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
+# TODO: match needs to update_events on PUSH and PUT. Possibly this should become part of _process_request?
 def match(tourney_id, match_id):
+
     tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
     if not tourney:
         raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
