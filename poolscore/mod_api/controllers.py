@@ -14,6 +14,7 @@ from poolscore import app
 from poolscore.mod_common.utils import SecurityUtil
 from poolscore.mod_common.utils import Util, ModelUtil, ApiError
 from poolscore.mod_common.rulesets import Rulesets
+from poolscore.mod_common.scoring import Scoring
 from poolscore.mod_auth.models import User
 from poolscore.mod_play.models import Tourney, Match, MatchPlayer, Game
 
@@ -207,6 +208,26 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
             klass_attributes["events"] = json.dumps(events)
             attributes[klass_name] = klass_attributes
 
+def calculate_match_score(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
+    if klass:
+        klass_name = ModelUtil.underscore(klass.__name__)
+        klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
+        if (klass_attributes["winner_id"] != None):
+            match = klass.secure_query().filter(klass.id == id).first()
+            if match:
+                try:
+                    scores = Scoring[match.ruleset](team1_games = match.home_games_won,
+                                               team1_needed = match.home_game_needed,
+                                               team2_games = match.away_games_won,
+                                               team2_needed = match.away_game_needed)
+
+                    klass_attributes["home_score"], klass_attributes["away_score"] = scores
+
+                    attributes["match"] = klass_attributes
+                except TypeError:
+                    pass
+
+            
 
 # tourneys
 @mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET'])
@@ -237,6 +258,10 @@ def match(tourney_id, match_id):
     tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
     if not tourney:
         raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
+
+    before_http_action_callback = None
+    if request.method == "PUT":
+        before_http_action_callback = calculate_match_score
 
     additional_attributes = dict(tourney_id = tourney_id)
     json_serializer_property = None
@@ -330,6 +355,7 @@ def match(tourney_id, match_id):
     return _process_request(klass = Match,
                             id = match_id,
                             query = query,
+                            before_http_action_callback = before_http_action_callback,
                             additional_attributes = additional_attributes,
                             json_serializer_property = json_serializer_property)
 

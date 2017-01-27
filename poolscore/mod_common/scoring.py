@@ -2,11 +2,21 @@ from functools import wraps
 
 def scoringDecorator(f):
     @wraps(f)
-    def decorated(player1_games, player1_required, player2_games, player2_required):
-        if ((player1_games < player1_required or player2_games < player2_required)
-            and (player1_games == player1_required or player2_games == player2_required)):
+    def decorated(team1_games,
+                  team1_needed,
+                  team2_games,
+                  team2_needed):
 
-            return f(player1_games=player1_games, player1_required=player1_required, player2_games=player2_games, player2_required=player2_required)
+        if (
+            (team1_games < team1_needed or team2_games < team2_needed)
+            and
+            (team1_games == team1_needed or team2_games == team2_needed)
+           ):
+
+            return f(team1_games=team1_games,
+                     team1_needed=team1_needed,
+                     team2_games=team2_games,
+                     team2_needed=team2_needed)
 
         else:
             raise TypeError
@@ -17,7 +27,7 @@ def scoringDecorator(f):
 @scoringDecorator
 def STANDARD(**kwargs):
     '''One point for a win'''
-    if (args[player1_games] == args[player2_required]):
+    if (kwargs[team1_games] == kwargs[team1_needed]):
         return (1,0)
     else:
         return (0,1)
@@ -29,24 +39,24 @@ def APA8BALL(**kwargs):
     p1 = 0
     p2 = 0
 
-    if (kwargs["player1_games"] == kwargs["player1_required"]):
+    if (kwargs["team1_games"] == kwargs["team1_needed"]):
         p1 = 2
-        if (kwargs["player2_games"] == 0):
+        if (kwargs["team2_games"] == 0):
             p1 = p1+1
-        elif (kwargs["player2_required"] - kwargs["player2_games"] == 1):
+        elif (kwargs["team2_needed"] - kwargs["team2_games"] == 1):
             p2 = 1
 
     else:
         p2 = 2
-        if (kwargs["player1_games"] == 0):
+        if (kwargs["team1_games"] == 0):
             p2 = p2 + 1
-        elif (kwargs["player1_required"] - kwargs["player1_games"] == 1):
+        elif (kwargs["team1_needed"] - kwargs["team1_games"] == 1):
             p1 = 1
 
     return (p1,p2)
 
 #public
-SCORING = {
+Scoring = {
     "STANDARD":STANDARD,
     "APA8BALL":APA8BALL
 }
