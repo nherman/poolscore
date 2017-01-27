@@ -547,8 +547,13 @@ Match.prototype.update = function(callback) {
     );
 };
 
+Match.prototype.updateStatus = function(callback) {
+    //
+};
+
 Match.prototype.addGame = function(callback) {
     var self = this,
+        game,
         breaker_id,
         data = {"game":{}};
 
@@ -588,11 +593,31 @@ Match.prototype.addGame = function(callback) {
     PS.API.createGame(self.tourney.id, self.id, data,
         function(json) {
             if (json !== undefined && typeof json === "object" && json.hasOwnProperty('game')) {
-                self.games.push(new Game(json.game.id, {
-                    "tourney": self.tourney,
-                    "match": self,
-                    "json": json.game
-                }));
+
+                game = new Game(json.game.id, {
+                                "tourney": self.tourney,
+                                "match": self,
+                                "json": json.game
+                            });
+
+                game.in_progress.subscribe(function(in_progress) {
+                    if (!in_progress) {
+                        /* when the game ends, update the match */
+
+                        /* TODO:
+                            if (game is over):
+                                set winner
+                                set score - need scoring utility (do this first)
+                                update match
+
+                            else:
+                                self.get();
+
+                        */
+                    }
+                });
+
+                self.games.push(game);
             }
 
             if (typeof callback == "function") {
@@ -661,11 +686,11 @@ Game.prototype.setWinner = function(team) {
     // set winner id
     self.winner_id(self.match.tourney[team + "_team_id"]);
 
-    // set in progress
-    self.in_progress(false);
-
     //update game
     self.update(function(json) {
+        // set in progress. This prompts Match to update, sets score. TODO: write match update
+        self.in_progress(false);
+
         //self.match.get();
         /*
             we should probably wait until match gets updated to reload it. In fact, update match (all entities?) to update with server data on update. If we calculate match points on the controller this will eliminate the need to do an extra get to pull the match point info. 
@@ -685,7 +710,7 @@ Game.prototype.setWinner = function(team) {
 
      Tourney should, in turn, subscribe to match.in_progress. when in_progress == false then tourney should check for... tourney complete? maybe nothing?
 
-     * create utility for determining match points. maybe that should be somehow downloaded with ruleset?
+     * create utility for determining match points. It's silly to have rulesets & scoring only on the server side. There's so much league specific stuff in this code.
 
 
     if (self.match[team + "_games_won"]++ >= self.match[team + "_games_needed"]) {
