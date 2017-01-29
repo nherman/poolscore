@@ -600,23 +600,6 @@ Match.prototype.addGame = function(callback) {
                                 "json": json.game
                             });
 
-                game.in_progress.subscribe(function(in_progress) {
-                    if (!in_progress) {
-                        /* when the game ends, update the match */
-
-                        /* TODO:
-                            if (game is over):
-                                set winner
-                                set score - need scoring utility (do this first)
-                                update match
-
-                            else:
-                                self.get();
-
-                        */
-                    }
-                });
-
                 self.games.push(game);
             }
 
@@ -639,6 +622,65 @@ function Game(id, options) {
     self.tourney = options.tourney;
     self.match = options.match;
     self.in_progress = ko.observable();
+
+    self.in_progress.subscribe(function(in_progress) {
+        var match = self.match,
+            team,
+            loser;
+
+        if (!in_progress) {
+            console.log(match);
+            /* when the game ends, update the match */
+
+            /* figure out which team won game*/
+            if (self.winner_id !== undefined) {
+                if (self.winner_id() == match.tourney["home_team_id"]) {
+                    team = "home";
+
+                } else if (self.winner_id() == match.tourney["away_team_id"]) {
+                    team = "away";
+                }
+            }
+
+            /* increment games won */
+            match[team + "_games_won"](match[team + "_games_won"]()+1);
+
+
+            if (match[team + "_games_won"]() >= match.configuration.json[team + "_games_needed"]) {
+                /* we have a match winner! set winner_id */
+                match.winner_id = match.tourney[team + "_team_id"];
+
+                /* who lost? */
+                loser = (team == "home") ? "away" : "home"
+
+
+                if (match[loser + "_games_won"]() == 0) {
+                    /* set sweep */
+                    match[team + "_score"](3);
+                    match.events().sweep(true);
+                } else {
+                    match[team + "_score"](2);
+
+                    if (match[loser + "_games_won"]()+1 == match.configuration.json[loser + "_games_needed"]) {
+                        /* set rubber */
+                        match[loser + "_score"](1);
+                        match.events().rubber(true);
+                    }
+                }
+
+                /* end match */
+                match.in_progress(false);
+
+                /* push state to storage */
+                match.update();
+
+            } else {
+                /* match still in progress. get latest match data without updating */
+                match.get();
+            }
+
+        }
+    });
 
     Entity.call(self, id, options);
 }
