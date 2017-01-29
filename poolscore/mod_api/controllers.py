@@ -208,24 +208,24 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
             klass_attributes["events"] = json.dumps(events)
             attributes[klass_name] = klass_attributes
 
-def calculate_match_score(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
-    if klass:
-        klass_name = ModelUtil.underscore(klass.__name__)
-        klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
-        if (klass_attributes["winner_id"] != None):
-            match = klass.secure_query().filter(klass.id == id).first()
-            if match:
-                try:
-                    scores = Scoring[match.ruleset](team1_games = match.home_games_won,
-                                               team1_needed = match.home_game_needed,
-                                               team2_games = match.away_games_won,
-                                               team2_needed = match.away_game_needed)
+# def calculate_match_score(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
+#     if klass:
+#         klass_name = ModelUtil.underscore(klass.__name__)
+#         klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
+#         if (klass_attributes["winner_id"] != None):
+#             match = klass.secure_query().filter(klass.id == id).first()
+#             if match:
+#                 try:
+#                     scores = Scoring[match.ruleset](team1_games = match.home_games_won,
+#                                                team1_needed = match.home_game_needed,
+#                                                team2_games = match.away_games_won,
+#                                                team2_needed = match.away_game_needed)
 
-                    klass_attributes["home_score"], klass_attributes["away_score"] = scores
+#                     klass_attributes["home_score"], klass_attributes["away_score"] = scores
 
-                    attributes["match"] = klass_attributes
-                except TypeError:
-                    pass
+#                     attributes["match"] = klass_attributes
+#                 except TypeError:
+#                     pass
 
             
 
@@ -261,7 +261,7 @@ def match(tourney_id, match_id):
 
     before_http_action_callback = None
     if request.method == "PUT":
-        before_http_action_callback = calculate_match_score
+        before_http_action_callback = update_events
 
     additional_attributes = dict(tourney_id = tourney_id)
     json_serializer_property = None
