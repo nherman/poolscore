@@ -432,7 +432,7 @@ Tourney.prototype.get = function(callback) {
     var self = this;
     PS.API.getTourney(self.id, function(json) {
         self.map(json["tourney"]);
-        self.configuration.json = json; //save raw data
+        self.configuration.json = json["tourney"]; //save raw data
         self.onAfterMap(json["tourney"]);
         if (typeof callback == "function") {
             callback.call(self, json);
@@ -523,7 +523,7 @@ Match.prototype.get = function(callback) {
     PS.API.getMatch(self.tourney.id, self.id,
         function(json) {
             self.map(json["match"]);
-            self.configuration.json = json; //save raw data
+            self.configuration.json = json["match"]; //save raw data
             self.onAfterMap(json["match"]);
             if (typeof callback == "function") {
                 callback.call(self, json);
@@ -623,13 +623,22 @@ function Game(id, options) {
     self.match = options.match;
     self.in_progress = ko.observable();
 
+    Entity.call(self, id, options);
+}
+Game.prototype = Object.create(Entity.prototype);
+
+
+Game.prototype.onAfterMap = function(json) {
+    var self = this;
+    self.ordinal = self.configuration.json.ordinal;
+
+    self.in_progress(window.PS.utils.isEmpty(self.winner_id()));
     self.in_progress.subscribe(function(in_progress) {
         var match = self.match,
             team,
             loser;
 
         if (!in_progress) {
-            console.log(match);
             /* when the game ends, update the match */
 
             /* figure out which team won game*/
@@ -645,14 +654,12 @@ function Game(id, options) {
             /* increment games won */
             match[team + "_games_won"](match[team + "_games_won"]()+1);
 
-
             if (match[team + "_games_won"]() >= match.configuration.json[team + "_games_needed"]) {
                 /* we have a match winner! set winner_id */
                 match.winner_id = match.tourney[team + "_team_id"];
 
                 /* who lost? */
                 loser = (team == "home") ? "away" : "home"
-
 
                 if (match[loser + "_games_won"]() == 0) {
                     /* set sweep */
@@ -681,16 +688,6 @@ function Game(id, options) {
 
         }
     });
-
-    Entity.call(self, id, options);
-}
-Game.prototype = Object.create(Entity.prototype);
-
-
-Game.prototype.onAfterMap = function(json) {
-    var self = this;
-    self.in_progress(window.PS.utils.isEmpty(self.winner_id()));
-    self.ordinal = self.configuration.json.ordinal;
 };
 
 Game.prototype.get = function(callback) {
@@ -699,7 +696,7 @@ Game.prototype.get = function(callback) {
     PS.API.getGame(self.tourney.id, self.match.id, self.id,
         function(json) {
             self.map(json["game"]);
-            self.configuration.json = json; //save raw data
+            self.configuration.json = json["game"]; //save raw data
             self.onAfterMap(json["game"]);
             if (typeof callback == "function") {
                 callback.call(self, json);
