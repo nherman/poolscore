@@ -348,7 +348,7 @@ def match(tourney_id, match_id):
             return http_resp
 
         else:
-            query = Match.secure_query().filter(Match.tourney_id == tourney_id)
+            query = Match.secure_query().filter(Match.tourney_id == tourney_id).order_by(Match.id)
             json_serializer_property = "serialize_deep"
 
 
