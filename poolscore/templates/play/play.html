@@ -623,6 +623,66 @@ function Game(id, options) {
     self.match = options.match;
     self.in_progress = ko.observable();
 
+    options.callback = function() {
+        self.in_progress(window.PS.utils.isEmpty(self.winner_id()));
+        self.in_progress.extend({ notify: 'always' }); //run subscription callbacks if value doesn't change
+        self.in_progress.subscribe(function(in_progress) {
+            var match = self.match,
+                team,
+                loser;
+
+            if (!self.in_progress()) {
+                /* when the game ends, update the match */
+
+                /* figure out which team won game*/
+                if (self.winner_id !== undefined) {
+                    if (self.winner_id() == match.tourney["home_team_id"]) {
+                        team = "home";
+
+                    } else if (self.winner_id() == match.tourney["away_team_id"]) {
+                        team = "away";
+                    }
+                }
+
+                /* increment games won */
+                match[team + "_games_won"](match[team + "_games_won"]()+1);
+
+                if (match[team + "_games_won"]() >= match.configuration.json[team + "_games_needed"]) {
+                    /* we have a match winner! set winner_id */
+                    match.winner_id(match.tourney[team + "_team_id"]);
+
+                    /* who lost? */
+                    loser = (team == "home") ? "away" : "home"
+
+                    if (match[loser + "_games_won"]() == 0) {
+                        /* set sweep */
+                        match[team + "_score"](3);
+                        match.events().sweep(true);
+                    } else {
+                        match[team + "_score"](2);
+
+                        if (match[loser + "_games_won"]()+1 == match.configuration.json[loser + "_games_needed"]) {
+                            /* set rubber */
+                            match[loser + "_score"](1);
+                            match.events().rubber(true);
+                        }
+                    }
+
+                    /* end match */
+                    match.in_progress(false);
+
+                    /* push state to storage */
+                    match.update();
+
+                } else {
+                    /* match still in progress. get latest match data without updating */
+                    match.get();
+                }
+
+            }
+        });
+    }
+
     Entity.call(self, id, options);
 }
 Game.prototype = Object.create(Entity.prototype);
@@ -631,63 +691,6 @@ Game.prototype = Object.create(Entity.prototype);
 Game.prototype.onAfterMap = function(json) {
     var self = this;
     self.ordinal = self.configuration.json.ordinal;
-
-    self.in_progress(window.PS.utils.isEmpty(self.winner_id()));
-    self.in_progress.subscribe(function(in_progress) {
-        var match = self.match,
-            team,
-            loser;
-
-        if (!in_progress) {
-            /* when the game ends, update the match */
-
-            /* figure out which team won game*/
-            if (self.winner_id !== undefined) {
-                if (self.winner_id() == match.tourney["home_team_id"]) {
-                    team = "home";
-
-                } else if (self.winner_id() == match.tourney["away_team_id"]) {
-                    team = "away";
-                }
-            }
-
-            /* increment games won */
-            match[team + "_games_won"](match[team + "_games_won"]()+1);
-
-            if (match[team + "_games_won"]() >= match.configuration.json[team + "_games_needed"]) {
-                /* we have a match winner! set winner_id */
-                match.winner_id = match.tourney[team + "_team_id"];
-
-                /* who lost? */
-                loser = (team == "home") ? "away" : "home"
-
-                if (match[loser + "_games_won"]() == 0) {
-                    /* set sweep */
-                    match[team + "_score"](3);
-                    match.events().sweep(true);
-                } else {
-                    match[team + "_score"](2);
-
-                    if (match[loser + "_games_won"]()+1 == match.configuration.json[loser + "_games_needed"]) {
-                        /* set rubber */
-                        match[loser + "_score"](1);
-                        match.events().rubber(true);
-                    }
-                }
-
-                /* end match */
-                match.in_progress(false);
-
-                /* push state to storage */
-                match.update();
-
-            } else {
-                /* match still in progress. get latest match data without updating */
-                match.get();
-            }
-
-        }
-    });
 };
 
 Game.prototype.get = function(callback) {
@@ -794,9 +797,11 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
         <tbody>
 
         <!-- ko foreach: {data: matches, as: 'match'} -->
+            <tr><td data-bind="css: {'active_pulse': match.in_progress()}, text: match.lag_winner().first_name"></td></tr>        
             <tr data-bind=" css: {'active_pulse': match.in_progress()},
                             template: {
-                                name: 'display_player_template', data: {
+                                name: 'display_player_template',
+                                data: {
                                     match: match,
                                     player: match.lag_winner(),
                                     team: match.events().lag()
@@ -817,6 +822,7 @@ ko.applyBindings(new ViewModel(), document.getElementById('main'));
             </tr>
 
             <!-- ko if: match.in_progress() == true -->
+            <tr><td data-bind="text: match.in_progress()"></td></tr>
             <!-- ko foreach: {data: games, as: 'game'} -->
                 <tr data-bind="click: $root.editGame, css: {'active_pulse': game.in_progress()}">
                     <td colspan="4" data-bind="template: {

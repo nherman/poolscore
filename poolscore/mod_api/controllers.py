@@ -268,7 +268,7 @@ def match(tourney_id, match_id):
     query = None
 
     if match_id:
-        query = Match.secure_query().filter(Match.tourney_id == tourney_id and Match.id == match_id)
+        query = Match.secure_query().filter(and_(Match.tourney_id == tourney_id, Match.id == match_id))
         json_serializer_property = "serialize_deep"
 
     else:
