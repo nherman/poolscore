@@ -208,24 +208,24 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
             klass_attributes["events"] = json.dumps(events)
             attributes[klass_name] = klass_attributes
 
-# def calculate_match_score(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
-#     if klass:
-#         klass_name = ModelUtil.underscore(klass.__name__)
-#         klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
-#         if (klass_attributes["winner_id"] != None):
-#             match = klass.secure_query().filter(klass.id == id).first()
-#             if match:
-#                 try:
-#                     scores = Scoring[match.ruleset](team1_games = match.home_games_won,
-#                                                team1_needed = match.home_game_needed,
-#                                                team2_games = match.away_games_won,
-#                                                team2_needed = match.away_game_needed)
+def calculate_match_score(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
+    if klass:
+        klass_name = ModelUtil.underscore(klass.__name__)
+        klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
+        if (klass_attributes["winner_id"] != None):
+            match = klass.secure_query().filter(klass.id == id).first()
+            if match:
+                try:
+                    scores = Scoring[match.ruleset](team1_games = match.home_games_won,
+                                               team1_needed = match.home_game_needed,
+                                               team2_games = match.away_games_won,
+                                               team2_needed = match.away_game_needed)
 
-#                     klass_attributes["home_score"], klass_attributes["away_score"] = scores
+                    klass_attributes["home_score"], klass_attributes["away_score"] = scores
 
-#                     attributes["match"] = klass_attributes
-#                 except TypeError:
-#                     pass
+                    attributes["match"] = klass_attributes
+                except TypeError:
+                    pass
 
             
 
@@ -248,31 +248,42 @@ def tourneys(id, json_serializer_property=None):
 def tourneys_count():
     return _process_count_request(klass = Tourney)
 
-# matches
+# Matches
+# GET all Matches for tourney
+# GET Match by ID
+# Update Match by ID (PUT)
+# Crate Match for Tourney (POST)
 @mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
-@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', methods = ['GET', 'PUT'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', defaults = {'json_serializer_property': 'serialize_deep'}, methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
-# TODO: match needs to update_events on PUSH and PUT. Possibly this should become part of _process_request?
 def match(tourney_id, match_id):
-
     tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
     if not tourney:
         raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
 
     before_http_action_callback = None
-    if request.method == "PUT":
-        before_http_action_callback = update_events
-
-    additional_attributes = dict(tourney_id = tourney_id)
     json_serializer_property = None
     query = None
+    additional_attributes = dict(tourney_id = tourney_id)
+
+    #format events properly and update match score
+    if request.method == "PUT":
+        def match_put_callback(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
+            update_events(klass=klass, id=id, method=method, attributes=attributes, additional_attributes=additional_attributes)
+            calculate_match_score(klass=klass, id=id, method=method, attributes=attributes, additional_attributes=additional_attributes)
+
+        before_http_action_callback = match_put_callback
+
 
     if match_id:
-        query = Match.secure_query().filter(and_(Match.tourney_id == tourney_id, Match.id == match_id))
-        json_serializer_property = "serialize_deep"
+        #PUT or GET for a specific Game
+        query = Match.secure_query().filter(and_(Match.id == match_id))
 
-    else:
-        if request.method == "POST":
+    elif request.method == "GET":
+        #GET all Matches for Tourney
+        query = Match.secure_query().filter(Match.tourney_id == tourney_id).order_by(Match.id)
+
+    elif request.method == "POST":
             ###
             # Create new match for tourney
             #
@@ -347,10 +358,6 @@ def match(tourney_id, match_id):
             http_resp.status_code = 201
             return http_resp
 
-        else:
-            query = Match.secure_query().filter(Match.tourney_id == tourney_id).order_by(Match.id)
-            json_serializer_property = "serialize_deep"
-
 
     return _process_request(klass = Match,
                             id = match_id,
@@ -359,27 +366,34 @@ def match(tourney_id, match_id):
                             additional_attributes = additional_attributes,
                             json_serializer_property = json_serializer_property)
 
-# games
+# Games
+# GET all games for match
+# GET game by ID
+# PUT game update
+# POST create new game
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games.json', defaults = {'game_id': None}, methods = ['GET', 'POST'])
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>/games/<int:game_id>.json', methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
 def game(tourney_id, match_id, game_id):
-    tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
-    if not tourney:
-        raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
+    match = Match.secure_query().filter(Match.id == match_id).first()
+    if not match:
+        raise ApiError("Resource not found for match id {}".format(match_id), status_code = 404)
 
     before_http_action_callback = None
+    query = None
+    additional_attributes = dict(match_id = match_id)
+
+    #format events properly
     if request.method == "POST" or request.method == "PUT":
         before_http_action_callback = update_events
 
-    additional_attributes = dict(match_id = match_id)
-    query = None
-
     if game_id:
-        query = Game.secure_query().filter(and_(Game.match_id == match_id, Game.id == game_id))
+        #PUT or GET for a specific Game
+        query = Game.secure_query().filter(and_(Game.id == game_id))
 
     elif request.method == "GET":
-        query = Game.secure_query().filter(Game.match_id == match_id)
+        #GET all games for match
+        query = Game.secure_query().filter(Game.match_id == match_id).order_by(Game.id)
 
 
     return _process_request(klass = Game,
