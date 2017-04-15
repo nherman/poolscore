@@ -176,30 +176,20 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
         klass_name = ModelUtil.underscore(klass.__name__)
         klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
         if klass_attributes and 'events' in klass_attributes:
-
-            # Get ruleset from entity or parent
-            entity = None
-            entity_klass = klass
             ruleset = None
-            if (klass_name == "tourney"):
+
+            # get ruleset from attributes or entity
+            if ('ruleset' in klass_attributes):
                 rulset = klass_attributes["ruleset"]
             else:
-                if (id==None):
-                    if (klass_name == "game"):
-                        entity_klass = Match
-                        id = additional_attributes["match_id"]
-                    elif (klass_name == "match"):
-                        entity_klass = Tourney
-                        id = additional_attributes["tourney_id"]
-                    else:
-                        raise ApiError('Entity has no events. Entity not allowed.', status_code = 400)
-
-                entity = entity_klass.secure_query().filter(entity_klass.id == id).first()
+                entity = klass.secure_query().filter(klass.id == id).first()
                 ruleset = entity.ruleset
 
-            # Update default events dict with event values from attributes
             if (ruleset != None):
+                # Get default event dict
                 events = Rulesets[ruleset][klass_name + "_events"]
+
+                # Update events dict with new values
                 for label in klass_attributes["events"]:
                     if label in events:
                         events[label] = klass_attributes["events"][label]
@@ -267,13 +257,8 @@ def match(tourney_id, match_id):
     additional_attributes = dict(tourney_id = tourney_id)
 
     #format events properly and update match score
-    if request.method == "PUT":
-        def match_put_callback(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
-            update_events(klass=klass, id=id, method=method, attributes=attributes, additional_attributes=additional_attributes)
-            calculate_match_score(klass=klass, id=id, method=method, attributes=attributes, additional_attributes=additional_attributes)
-
-        before_http_action_callback = match_put_callback
-
+    if request.method == "POST" or request.method == "PUT":
+        before_http_action_callback = update_events
 
     if match_id:
         #PUT or GET for a specific Game
@@ -304,16 +289,6 @@ def match(tourney_id, match_id):
 
             attributes = request.get_json(force = True, silent = True, cache = False)
             match_attributes = ModelUtil._find_attrs_by_class_name(Match, attributes)
-
-            #Enforce format and serialize match events
-            events = Rulesets[tourney.ruleset].match_events
-            if "events" in match_attributes:
-                for label in events:
-                    if label in match_attributes["events"]:
-                        events[label] = match_attributes["events"][label]
-
-            #add entity events as string
-            additional_attributes["events"] = json.dumps(events)
 
             try:
                 #Create match entity
