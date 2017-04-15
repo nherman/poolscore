@@ -27,7 +27,7 @@ def login():
         if user and user.active and user.check_password(form.password.data):
             SecurityUtil.create_session(user)
             flash('Welcome %s %s' % (user.first_name, user.last_name), 'info')
-            return redirect(url_for('index'))
+            return redirect(url_for('home.index'))
         flash('Wrong username or password', 'error')
     return render_template("auth/login.html", form = form)
 
@@ -35,4 +35,4 @@ def login():
 def logout():
     SecurityUtil.invalidate_session()
     flash('You were logged out', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('home.index'))

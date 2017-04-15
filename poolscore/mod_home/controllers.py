@@ -8,7 +8,7 @@ from poolscore.mod_play.models import Tourney
 
 
 
-mod_home = Blueprint('home', __name__, url_prefix = '/home')
+mod_home = Blueprint('home', __name__)
 
 @mod_home.route('/', methods = ['GET'])
 @SecurityUtil.requires_auth()
