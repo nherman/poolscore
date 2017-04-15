@@ -14,7 +14,8 @@ class Config(object):
     # SQLite for this example
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + SQLITE_DATABASE_PATH
     #DATABASE = 'sqlite:///' + SQLITE_DATABASE_PATH
-    DATABASE = os.path.join(BASE_DIR, '/tmp/poolscore.db')
+    # DATABASE = os.path.join(BASE_DIR, '/tmp/poolscore.db')
+    DATABASE = SQLITE_DATABASE_PATH
 
     # Enable query monitoring
     # SQLALCHEMY_ECHO = True
