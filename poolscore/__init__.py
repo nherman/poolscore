@@ -66,11 +66,6 @@ def not_found(error):
 def not_found(error):
     return render_template('403.html'), 403
 
-# Global index page (redirect to the home index)
-@app.route('/', methods = ['GET'])
-def index():
-    return redirect(url_for('home.index'), code = 301)
-
 
 # Import a module using its blueprint handler variable
 from mod_auth.controllers import mod_auth as auth_module
