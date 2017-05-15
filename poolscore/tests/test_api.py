@@ -7,18 +7,20 @@ import poolscore
 class APITestCase(unittest.TestCase):
 
     def setUp(self):
-        # self.db_fd, poolscore.app.config['DATABASE'] = tempfile.mkstemp()
-        # poolscore.app.config['TESTING'] = True
+        print("start setup")
+        self.db_fd, poolscore.app.config['DATABASE'] = tempfile.mkstemp()
+        print(poolscore.app.config['DATABASE'])
+        poolscore.app.config['TESTING'] = True
         poolscore.app.config['CSRF_ENABLED'] = False
         poolscore.app.config['WTF_CSRF_ENABLED'] = False
         self.app = poolscore.app.test_client()
-        # with poolscore.app.app_context():
-        #     poolscore.db.create_all()
+        with poolscore.app.app_context():
+             poolscore.db.create_all()
 
 
-    # def tearDown(self):
-    #     os.close(self.db_fd)
-    #     os.unlink(poolscore.app.config['DATABASE'])
+    def tearDown(self):
+        os.close(self.db_fd)
+        os.unlink(poolscore.app.config['DATABASE'])
 
     def login(self, username, password):
         return self.app.post('/auth/login/', data=dict(
