@@ -14,7 +14,6 @@ from datetime import timedelta
 from flask import Flask, g, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from .database import DbManager
-print("__init__")
 app = Flask(__name__)
 ps_env = os.getenv('PS_ENV', 'Dev') + 'Config'
 app.config.from_object('config.' + ps_env)

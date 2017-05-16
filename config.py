@@ -125,18 +125,6 @@ class TestConfig(Config):
     # Database is created inside of the unittest class setUpClass call.
     FORCE_SQLALCHEMY_CREATE_TABLES = False
 
-    # SQLite tests
-    # DATABASE_NAME = 'app-test.db'
-    # SQLITE_DATABASE_PATH = os.path.join(Config.BASE_DIR, DATABASE_NAME)
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + SQLITE_DATABASE_PATH
-
-    # MySql tests (create empty db before running tests)
-    DATABASE_NAME = ''
-    SQLALCHEMY_POOL_SIZE = 1
-    SQLALCHEMY_DATABASE_URI = 'mysql://username:password@localhost/' + DATABASE_NAME
-    # DATABASE_CONNECT_OPTIONS = {'isolation_level': 'READ UNCOMMITTED'}
-
-    RESERVED_USERNAMES = ("reserved", "test.reserved",)
 
 class StageConfig(Config):
     DATABASE_NAME = ''
