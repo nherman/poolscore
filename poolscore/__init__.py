@@ -14,9 +14,7 @@ from datetime import timedelta
 from flask import Flask, g, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from .database import DbManager
-
 app = Flask(__name__)
-#app.config.from_object('config')
 ps_env = os.getenv('PS_ENV', 'Dev') + 'Config'
 app.config.from_object('config.' + ps_env)
 app.permanent_session_lifetime = timedelta(minutes=30)
@@ -95,7 +93,3 @@ for key, fn in filters.items():
 
 #initialize routes
 #from . import routes
-
-# This will create the database file using SQLAlchemy
-if app.config.get('FORCE_SQLALCHEMY_CREATE_TABLES', False):
-    db.create_all()
