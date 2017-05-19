@@ -196,28 +196,7 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
 
             #convert events dict to string before writing to DB
             klass_attributes["events"] = json.dumps(events)
-            attributes[klass_name] = klass_attributes
-
-def calculate_match_score(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
-    if klass:
-        klass_name = ModelUtil.underscore(klass.__name__)
-        klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
-        if (klass_attributes["winner_id"] != None):
-            match = klass.secure_query().filter(klass.id == id).first()
-            if match:
-                try:
-                    scores = Scoring[match.ruleset](team1_games = match.home_games_won,
-                                               team1_needed = match.home_game_needed,
-                                               team2_games = match.away_games_won,
-                                               team2_needed = match.away_game_needed)
-
-                    klass_attributes["home_score"], klass_attributes["away_score"] = scores
-
-                    attributes["match"] = klass_attributes
-                except TypeError:
-                    pass
-
-            
+            attributes[klass_name] = klass_attributes            
 
 # tourneys
 @mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET'])
