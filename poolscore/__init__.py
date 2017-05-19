@@ -23,38 +23,6 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 # by modules and controllers
 db = SQLAlchemy(app)
 
-###
-# Attach DB instance to flask context
-###
-def get_db():
-    db = getattr(g, 'db', None)
-    if db is None:
-        db = g.db = DbManager().open(db_config=app.config['DATABASE'])
-    return db
-
-
-def close_db():
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
-
-
-@app.before_request
-def before_request():
-    '''init db connection on each request'''
-    get_db()
-
-
-@app.teardown_request
-def teardown_request(exception):
-    '''close connection on each response'''
-    close_db()
-
-
-###
-# Routes
-###
-
 # HTTP error handling
 @app.errorhandler(404)
 def not_found(error):
@@ -89,7 +57,3 @@ for key, fn in globals.items():
     app.jinja_env.globals[key] = fn
 for key, fn in filters.items():
     app.jinja_env.filters[key] = fn
-
-
-#initialize routes
-#from . import routes
