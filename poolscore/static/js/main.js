@@ -1,3 +1,10 @@
+define(['jquery',
+        'knockout'],
+function($, ko) {
+
+    // 'use strict';
+
+
 window.PS = window.PS || (function() {
     var root = "/api/v1.0/";
         endpoints = {
@@ -277,17 +284,21 @@ window.PS.sModel = function(config) {
     });
 };
 
+console.log('main');
+
 /* binds enter key to function */
-ko.bindingHandlers.enterkey = {
-    init: function (element, valueAccessor, allBindings, viewModel) {
-        var callback = valueAccessor();
-        $(element).keypress(function (event) {
-            var keyCode = (event.which ? event.which : event.keyCode);
-            if (keyCode === 13) {
-                callback.call(viewModel);
-                return false;
-            }
-            return true;
-        });
-    }
-};
+// ko.bindingHandlers.enterkey = {
+//     init: function (element, valueAccessor, allBindings, viewModel) {
+//         var callback = valueAccessor();
+//         $(element).keypress(function (event) {
+//             var keyCode = (event.which ? event.which : event.keyCode);
+//             if (keyCode === 13) {
+//                 callback.call(viewModel);
+//                 return false;
+//             }
+//             return true;
+//         });
+//     }
+// };
+
+});

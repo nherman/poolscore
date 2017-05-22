@@ -7,6 +7,14 @@
     <title>poolScore</title>
 
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/libs/require-2.2.0.js') }}"></script>
+
+    <script>
+        requirejs(["{{ url_for('static', filename='js/init.js') }}"], function (init) {
+            {% block require_main %}{% endblock %}
+        });
+    </script>
+
 </head>
 <body class="{{ body_class }}">
     <header>
@@ -55,13 +63,6 @@
         <div data-bind="html:content">Loading&hellip;</div>
     </div>
 
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
-    <!-- TODO: Remove? -->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
         {% block script %}{% endblock %}
 
