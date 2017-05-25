@@ -1,5 +1,11 @@
 /* API service */
-window.PS.API = (function() {
+
+define(['jquery',
+        'knockout'],
+function($, ko) {
+
+    'use strict';
+
     var root = "/api/v1.0/";
 
     function _p(path) {
@@ -108,4 +114,4 @@ window.PS.API = (function() {
         }
     }
 
-})();
+});

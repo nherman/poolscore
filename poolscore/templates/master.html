@@ -7,7 +7,7 @@
     <title>poolScore</title>
 
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/libs/require-2.2.0.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/require-2.3.3.js') }}"></script>
 
     <script>
         requirejs(["{{ url_for('static', filename='js/init.js') }}"], function (init) {
@@ -51,18 +51,26 @@
 
     </div>
 
-    <script type="text/html" id="alert_template">
-        <div data-bind="css: css" role="alert">
-            <button type="button" class="close" data-bind="click: cancel" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <div class="text-center" data-bind="html: content">sdsdf</div>
+    {# knockout will ignore this block if $data.alerts isn't defined #}
+    <!-- ko with: $data.alerts -->
+    <div class="ps-alerts" data-bind="template: {
+        name: 'alert-template',
+        foreach: list(),
+        as: 'alert',
+        afterRender: function(element) {$(element).slideDown(500);},
+        beforeRemove: function(element) {$(element).slideUp(500);}
+    }">
+    </div>
+    <!-- /ko -->
+    <script type="text/html" id="alert-template">
+        <div role="alert" data-bind="css: alert.css">
+            <button type="button" class="close" aria-label="Close" data-bind="click: alert.dismiss">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 data-bind="visible: alert.header != '', html: alert.header"></h4>
+            <div data-bind="visible: alert.body != '', html: alert.body"></div>
         </div>
     </script>
-    <div id="alerts" data-bind="template: alertTemplateOptions"></div>
-
-    <div id="loading" data-bind="visible:isLoading" style="display:none;">
-        <div data-bind="html:content">Loading&hellip;</div>
-    </div>
-
 
         {% block script %}{% endblock %}
 
