@@ -180,7 +180,7 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
 
             # get ruleset from attributes or entity
             if ('ruleset' in klass_attributes):
-                rulset = klass_attributes["ruleset"]
+                ruleset = klass_attributes["ruleset"]
             else:
                 entity = klass.secure_query().filter(klass.id == id).first()
                 ruleset = entity.ruleset
@@ -198,8 +198,13 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
             klass_attributes["events"] = json.dumps(events)
             attributes[klass_name] = klass_attributes            
 
-# tourneys
-@mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET'])
+# Tourneys
+# GET all Tourneys
+# GET Tourney by ID
+# Update Tourney (PUT)
+# Create Tourney (POST)
+# Note: _process_request can't handle mircoseconds on dates. Tourney date must be in "%Y%m%dT%H:%M:%S" format
+@mod_api.route('/tourneys.json', defaults = {'id': None}, methods = ['GET', 'POST'])
 @mod_api.route('/tourneys/<int:id>.json', defaults = {'json_serializer_property': 'serialize_deep'}, methods = ['GET','PUT'])
 @SecurityUtil.requires_auth()
 def tourneys(id, json_serializer_property=None):
@@ -221,7 +226,7 @@ def tourneys_count():
 # GET all Matches for tourney
 # GET Match by ID
 # Update Match by ID (PUT)
-# Crate Match for Tourney (POST)
+# Create Match for Tourney (POST)
 @mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', defaults = {'json_serializer_property': 'serialize_deep'}, methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
@@ -235,7 +240,7 @@ def match(tourney_id, match_id):
     query = None
     additional_attributes = dict(tourney_id = tourney_id)
 
-    #format events properly and update match score
+    #format events properly
     if request.method == "POST" or request.method == "PUT":
         before_http_action_callback = update_events
 
