@@ -22,7 +22,7 @@ function($, ko, api, utils, alerts, entity) {
         function _isEmpty(v) { return (v == undefined || v == null || v == "" || v == -1);}
 
         function _getPlayerId(o) {
-            a = o.split('_');
+            var a = o.split('_');
             return {
                 "team": a[0],
                 "id": a[1]

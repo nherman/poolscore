@@ -199,15 +199,17 @@ function(ko, utils, api, mapping) {
 
         /* populate games array */
         self.games().length = 0;
-        ko.utils.arrayForEach(json["games"], function(game){
-            self.games.push(new Game(game.id, {
-                "tourney": self.tourney,
-                "match": self,
-                "json": game
-            }));
-        });
+        if (json["games"] !== undefined) {
+            ko.utils.arrayForEach(json["games"], function(game){
+                self.games.push(new Game(game.id, {
+                    "tourney": self.tourney,
+                    "match": self,
+                    "json": game
+                }));
+            });
+        }
 
-        /* get teams
+        /* get teams */
 
         /* initialize lag winner/loser */
         lag_team = self.events().lag();
