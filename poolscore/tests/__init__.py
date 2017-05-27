@@ -3,6 +3,9 @@ import unittest
 import tempfile
 
 from sqlite3 import dbapi2 as sqlite3
+from datetime import datetime
+
+from flask import json
 
 from poolscore import app
 from poolscore import db
@@ -44,4 +47,29 @@ class BaseTestCase(unittest.TestCase):
 
     def logout(self):
         return self.client.get('/auth/logout/', follow_redirects=True)
+
+    def createTourney(self):
+        timestamp = datetime.now()
+        tourney_date = timestamp.strftime("%Y%m%dT%H:%M:%S")
+        tourney_start_time = timestamp.strftime("%I:%M %p")
+        events = dict(
+                     start_time = tourney_start_time,
+                     coin_toss = "HOME",
+                     player_choice = "HOME"
+                 )
+        tourney = dict(
+                      date=tourney_date,
+                      home_team_id=1,
+                      away_team_id=2,
+                      scoring_method="APA8BALL",
+                      ruleset="APA8BALL",
+                      events = events
+                  )
+        request = json.dumps(dict(tourney=tourney))
+        res = self.client.post('/api/v1.0/tourneys.json', data=request)
+        self.assertEqual(res.status_code, 201)
+        data = json.loads(res.data)
+        self.assertTrue('tourney' in data)
+
+        return data['tourney']
 

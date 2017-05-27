@@ -1,5 +1,5 @@
 from flask import json
-from datetime import date, time, datetime
+from datetime import datetime
 
 from poolscore.tests import BaseTestCase
 
@@ -8,26 +8,7 @@ class APITestCase(BaseTestCase):
     def test_tourney_create_edit_delete(self):
         self.login('nick', 'password')
 
-        #Create a Tourney
-        timestamp = datetime.now()
-        tourney_date = timestamp.strftime("%Y%m%dT%H:%M:%S")
-        tourney_start_time = timestamp.strftime("%I:%M %p")
-        events = dict(
-                     start_time = tourney_start_time,
-                     coin_toss = "HOME",
-                     player_choice = "HOME"
-                 )
-        tourney = data=dict(
-                      date=tourney_date,
-                      home_team_id=1,
-                      away_team_id=2,
-                      scoring_method="APA8BALL",
-                      ruleset="APA8BALL",
-                      events = events
-                  )
-        request = json.dumps(dict(tourney=tourney))
-        res = self.client.post('/api/v1.0/tourneys.json', data=request)
-        self.assertEqual(res.status_code, 201)
+        self.createTourney()
 
         #Get Tourney List
         res = self.client.get('/api/v1.0/tourneys.json')
@@ -37,9 +18,19 @@ class APITestCase(BaseTestCase):
         self.assertTrue('tourneys' in data)
         self.assertEqual(len(data['tourneys']), 1)
         self.assertTrue('id' in data['tourneys'][0])
+        tourney_id = data['tourneys'][0]['id']
+
+
+        #Get Tourney Count
+        res = self.client.get('/api/v1.0/tourneys/count.json')
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data)
+        self.assertTrue('count' in data)
+        self.assertEqual(data['count'], 1)
+
 
         #Get One Tourney
-        tourney_id = data['tourneys'][0]['id']
         res = self.client.get('/api/v1.0/tourneys/{}.json'.format(tourney_id))
         self.assertEqual(res.status_code, 200)
 
@@ -93,6 +84,28 @@ class APITestCase(BaseTestCase):
         data = json.loads(res.data)
         self.assertTrue('tourneys' in data)
         self.assertEqual(len(data['tourneys']), 0)
+
+    def test_match_create_edit_delete(self):
+        self.login('nick', 'password')
+        tourney = self.createTourney()
+
+            ###
+            # Create new match for tourney
+            #
+            # attributes format:
+            # {
+            #   "match": {
+            #       "events": {
+            #           match_event: "",
+            #           ...
+            #      },
+            #       match_attribute: "",
+            #       ...
+            #   },
+            #   "home_players": [],
+            #   "away_players": [],
+            # }
+            ###
 
 
 
