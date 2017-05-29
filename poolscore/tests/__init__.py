@@ -73,3 +73,22 @@ class BaseTestCase(unittest.TestCase):
 
         return data['tourney']
 
+    def createMatch(self, tourney_id, match=None):
+        if match is None:
+            events = dict(
+                lag = "HOME"
+            )
+            match = dict(
+                home_players=[1],
+                away_players=[2],
+                events = events
+            )
+
+        request = json.dumps(dict(match=match))
+
+        res = self.client.post('/api/v1.0/tourneys/{}/matches.json'.format(tourney_id), data=request)
+        self.assertEqual(res.status_code, 201)
+        data = json.loads(res.data)
+        self.assertTrue('match' in data)
+
+        return data['match']

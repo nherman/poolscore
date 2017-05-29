@@ -87,25 +87,37 @@ class APITestCase(BaseTestCase):
 
     def test_match_create_edit_delete(self):
         self.login('nick', 'password')
-        tourney = self.createTourney()
 
-            ###
-            # Create new match for tourney
-            #
-            # attributes format:
-            # {
-            #   "match": {
-            #       "events": {
-            #           match_event: "",
-            #           ...
-            #      },
-            #       match_attribute: "",
-            #       ...
-            #   },
-            #   "home_players": [],
-            #   "away_players": [],
-            # }
-            ###
+        tourney = self.createTourney()
+        self.createMatch(tourney["id"])
+
+        #Get Match List
+        res = self.client.get('/api/v1.0/tourneys/{}/matches.json'.format(tourney["id"]))
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data)
+        self.assertTrue('matches' in data)
+        self.assertEqual(len(data['matches']), 1)
+        self.assertTrue('id' in data['matches'][0])
+        match_id = data['matches'][0]['id']
+
+        #Get One Match
+        res = self.client.get('/api/v1.0/tourneys/{}/matches/{}.json'.format(tourney["id"], match_id))
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data)
+        print(data)
+        self.assertTrue('match' in data)
+        match = data['match']
+        self.assertEqual(match['tourney_id'], tourney["id"])
+        self.assertTrue('home_players' in match)
+        self.assertEqual(match['home_players'][0]['id'], 1)
+        self.assertTrue('away_players' in match)
+        self.assertEqual(match['away_players'][0]['id'], 2)
+        self.assertTrue('events' in match)
+        self.assertTrue('lag' in match['events'])
+        self.assertEqual(tourney['events']['lag'], "HOME")
+        self.assertNotEqual(tourney['events']['sweep'], None)
 
 
 

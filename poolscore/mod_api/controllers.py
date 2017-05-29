@@ -230,13 +230,12 @@ def tourneys_count():
 @mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', defaults = {'json_serializer_property': 'serialize_deep'}, methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
-def match(tourney_id, match_id):
+def match(tourney_id, match_id, json_serializer_property=None):
     tourney = Tourney.secure_query().filter(Tourney.id == tourney_id).first()
     if not tourney:
         raise ApiError("Resource not found for tourney id {}".format(tourney_id), status_code = 404)
 
     before_http_action_callback = None
-    json_serializer_property = None
     query = None
     additional_attributes = dict(tourney_id = tourney_id)
 
@@ -265,9 +264,9 @@ def match(tourney_id, match_id):
             #      },
             #       match_attribute: "",
             #       ...
-            #   },
-            #   "home_players": [],
-            #   "away_players": [],
+            #      "home_players": [],
+            #      "away_players": [],
+            #   }
             # }
             ###
 
@@ -302,10 +301,10 @@ def match(tourney_id, match_id):
                         db.session.add(matchplayer)
 
                 #Assign Home Player(s)
-                assign_players(attributes["home_players"], True)
+                assign_players(match_attributes["home_players"], True)
 
                 #Assign Away Player(s)
-                assign_players(attributes["away_players"], False)
+                assign_players(match_attributes["away_players"], False)
             
                 db.session.commit()
             except exc.SQLAlchemyError as ex:
