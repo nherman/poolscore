@@ -106,7 +106,6 @@ class APITestCase(BaseTestCase):
         self.assertEqual(res.status_code, 200)
 
         data = json.loads(res.data)
-        print(data)
         self.assertTrue('match' in data)
         match = data['match']
         self.assertEqual(match['tourney_id'], tourney["id"])
@@ -116,9 +115,29 @@ class APITestCase(BaseTestCase):
         self.assertEqual(match['away_players'][0]['id'], 2)
         self.assertTrue('events' in match)
         self.assertTrue('lag' in match['events'])
-        self.assertEqual(tourney['events']['lag'], "HOME")
-        self.assertNotEqual(tourney['events']['sweep'], None)
+        self.assertEqual(match['events']['lag'], "HOME")
+        self.assertNotEqual(match['events']['sweep'], None)
 
+        #Modify Match
+        events = dict(
+                    rubber = True
+                 )
+        match = dict(
+                    winner_id=2,
+                    active=0,
+                    events=events
+                  )
+        request = json.dumps(dict(match=match))
+        res = self.client.put('/api/v1.0/tourneys/{}/matches/{}.json'.format(tourney["id"], match_id), data=request)
+        self.assertEqual(res.status_code, 200)
 
+        data = json.loads(res.data)
+        self.assertTrue('match' in data)
+        match = data['match']
+        self.assertNotEqual(match['events']['rubber'], None)
+        self.assertEqual(match['events']['rubber'], True)
+        self.assertEqual(match['winner_id'], 2) #NEED MODEL CHANGE HERE. winner_id currently ois int of team id. change to HOME or AWAY
+        self.assertEqual(match['active'], 0)
+        self.assertEqual(match['deleted'], 0)
 
 

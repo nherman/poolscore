@@ -273,6 +273,12 @@ def match(tourney_id, match_id, json_serializer_property=None):
             attributes = request.get_json(force = True, silent = True, cache = False)
             match_attributes = ModelUtil._find_attrs_by_class_name(Match, attributes)
 
+            before_http_action_callback(klass=Match,
+                                        id=None,
+                                        method=request.method,
+                                        attributes=attributes,
+                                        additional_attributes=additional_attributes)
+
             try:
                 #Create match entity
                 match = ModelUtil.create_model(Match, attributes, additional_attributes = additional_attributes)

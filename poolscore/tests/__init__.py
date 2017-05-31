@@ -81,6 +81,7 @@ class BaseTestCase(unittest.TestCase):
             match = dict(
                 home_players=[1],
                 away_players=[2],
+                ruleset="APA8BALL",
                 events = events
             )
 
