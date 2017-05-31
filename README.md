@@ -1,7 +1,7 @@
 app for scoring pool tounaments
 
 #### To run dev server:
-./start_poolscore.sh
+./run.py
 
 Dev environment will automatically generate sqlite db in the application root (app.db)
 
