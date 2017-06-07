@@ -355,8 +355,33 @@ def game(tourney_id, match_id, game_id):
     additional_attributes = dict(match_id = match_id)
 
     #format events properly
-    if request.method == "POST" or request.method == "PUT":
+    if request.method == "PUT":
         before_http_action_callback = update_events_callback
+
+    if request.method == "POST":
+        # populate game events
+        attributes = request.get_json(force = True, silent = True, cache = False)
+        attributes["game"]["events"] = update_events(match.ruleset, "game", attributes["game"])
+
+        try:
+            #Create game entity
+            game = ModelUtil.create_model(Game, attributes, additional_attributes = additional_attributes)
+            if not match:
+                raise ApiError('Game cannot be created. Invalid json format', status_code = 400)
+
+            db.session.add(game)
+            db.session.commit()
+
+            game_id = game.id
+
+        except exc.SQLAlchemyError as ex:
+            db.session.rollback()
+            app.logger.error("Game cannot be created", exc_info = ex)
+            raise ApiError('Game cannot be created - [%s]' % ex.message, status_code = 400)
+
+        http_resp = jsonify({"game": game.serialize})
+        http_resp.status_code = 201
+        return http_resp
 
     if game_id:
         #PUT or GET for a specific Game
