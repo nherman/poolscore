@@ -140,4 +140,21 @@ class APITestCase(BaseTestCase):
         self.assertEqual(match['active'], 0)
         self.assertEqual(match['deleted'], 0)
 
+        #"Delete" Match
+        match = dict(deleted=True)
+        request = json.dumps(dict(match=match))
+        res = self.client.put('/api/v1.0/tourneys/{}/matches/{}.json'.format(tourney["id"], match_id), data=request)
+        self.assertEqual(res.status_code, 200)
 
+        data = json.loads(res.data)
+        self.assertTrue('match' in data)
+        match = data['match']
+        self.assertEqual(match['deleted'], 1)
+
+        #Confirm Match list is empty
+        res = self.client.get('/api/v1.0/tourneys/{}/matches.json'.format(tourney["id"]))
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data)
+        self.assertTrue('matches' in data)
+        self.assertEqual(len(data['matches']), 0)
