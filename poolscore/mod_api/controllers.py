@@ -171,7 +171,7 @@ def load_pager(*args, **kwargs):
 
 #Ensure that events dict has all required events before serializing
 #Assign to before_http_action_callback for POST or PUT request
-def update_events(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
+def update_events_callback(klass=None, id=None, method=None, attributes=None, additional_attributes=None):
     if klass and attributes:
         klass_name = ModelUtil.underscore(klass.__name__)
         klass_attributes = ModelUtil._find_attrs_by_class_name(klass, attributes)
@@ -179,24 +179,32 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
             ruleset = None
 
             # get ruleset from attributes or entity
-            if ('ruleset' in klass_attributes):
+            if (klass_attributes and 'ruleset' in klass_attributes):
                 ruleset = klass_attributes["ruleset"]
+            elif(additional_attributes and 'ruleset' in additional_attributes):
+                ruleset = additional_attributes["ruleset"]
             else:
                 entity = klass.secure_query().filter(klass.id == id).first()
                 ruleset = entity.ruleset
 
             if (ruleset != None):
-                # Get default event dict
-                events = Rulesets[ruleset][klass_name + "_events"]
+                events = update_events(ruleset, klass_name, klass_attributes)
 
-                # Update events dict with new values
-                for label in klass_attributes["events"]:
-                    if label in events:
-                        events[label] = klass_attributes["events"][label]
+                #convert events dict to string before writing to DB
+                klass_attributes["events"] = json.dumps(events)
+                attributes[klass_name] = klass_attributes            
 
-            #convert events dict to string before writing to DB
-            klass_attributes["events"] = json.dumps(events)
-            attributes[klass_name] = klass_attributes            
+def update_events(ruleset, klass_name, klass_attributes={}):
+    if ("events" in klass_attributes):
+        # Get default event dict
+        events = Rulesets[ruleset][klass_name + "_events"]
+
+        # Update events dict with new values
+        for label in klass_attributes["events"]:
+            if label in events:
+                events[label] = klass_attributes["events"][label]
+
+        return events
 
 # Tourneys
 # GET all Tourneys
@@ -210,7 +218,7 @@ def update_events(klass=None, id=None, method=None, attributes=None, additional_
 def tourneys(id, json_serializer_property=None):
     before_http_action_callback = None
     if request.method == "POST" or request.method == "PUT":
-        before_http_action_callback = update_events
+        before_http_action_callback = update_events_callback
 
     return _process_request(klass = Tourney, 
                             id = id,
@@ -240,8 +248,8 @@ def match(tourney_id, match_id, json_serializer_property=None):
     additional_attributes = dict(tourney_id = tourney_id)
 
     #format events properly
-    if request.method == "POST" or request.method == "PUT":
-        before_http_action_callback = update_events
+    if request.method == "PUT":
+        before_http_action_callback = update_events_callback
 
     if match_id:
         #PUT or GET for a specific Game
@@ -273,11 +281,10 @@ def match(tourney_id, match_id, json_serializer_property=None):
             attributes = request.get_json(force = True, silent = True, cache = False)
             match_attributes = ModelUtil._find_attrs_by_class_name(Match, attributes)
 
-            before_http_action_callback(klass=Match,
-                                        id=None,
-                                        method=request.method,
-                                        attributes=attributes,
-                                        additional_attributes=additional_attributes)
+            # populate match events
+            events = update_events(tourney.ruleset, "match", match_attributes)
+            match_attributes["events"] = json.dumps(events)
+            attributes["match"] = match_attributes            
 
             try:
                 #Create match entity
@@ -349,7 +356,7 @@ def game(tourney_id, match_id, game_id):
 
     #format events properly
     if request.method == "POST" or request.method == "PUT":
-        before_http_action_callback = update_events
+        before_http_action_callback = update_events_callback
 
     if game_id:
         #PUT or GET for a specific Game
