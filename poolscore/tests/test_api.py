@@ -158,3 +158,10 @@ class APITestCase(BaseTestCase):
         data = json.loads(res.data)
         self.assertTrue('matches' in data)
         self.assertEqual(len(data['matches']), 0)
+
+    def test_game_create_edit_delete(self):
+        self.login('nick', 'password')
+
+        tourney = self.createTourney()
+        match = self.createMatch(tourney["id"])
+        self.createGame(tourney["id"], match["id"])

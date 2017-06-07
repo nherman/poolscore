@@ -49,6 +49,14 @@ class BaseTestCase(unittest.TestCase):
         return self.client.get('/auth/logout/', follow_redirects=True)
 
     def createTourney(self):
+        """
+            APA Tourney events:
+
+            "coin_toss": None,
+            "player_choice": None,
+            "start_time": None,
+            "end_time": None
+        """
         timestamp = datetime.now()
         tourney_date = timestamp.strftime("%Y%m%dT%H:%M:%S")
         tourney_start_time = timestamp.strftime("%I:%M %p")
@@ -74,6 +82,13 @@ class BaseTestCase(unittest.TestCase):
         return data['tourney']
 
     def createMatch(self, tourney_id, match=None):
+        """
+            APA Match events:
+
+            "lag": None,
+            "sweep": False,
+            "rubber": False
+        """
         if match is None:
             events = dict(
                 lag = "HOME"
@@ -81,7 +96,6 @@ class BaseTestCase(unittest.TestCase):
             match = dict(
                 home_players=[1],
                 away_players=[2],
-                ruleset="APA8BALL",
                 events = events
             )
 
@@ -93,3 +107,33 @@ class BaseTestCase(unittest.TestCase):
         self.assertTrue('match' in data)
 
         return data['match']
+
+    def createGame(self, tourney_id, match_id, game=None):
+        """
+            APA Game events:
+
+            "breaker":None,
+            "innings": 0,
+            "home_coaches": 0,
+            "home_safes": 0,
+            "away_coaches": 0,
+            "away_safes": 0,
+            "special_event_options": (None,"8_break","break_run","early_8","scratch_8","forfeit"),
+            "special_event": None
+        """
+        if game is None:
+            events = dict(
+                breaker = "HOME"
+            )
+            game = dict(
+                events = events
+            )
+
+        request = json.dumps(dict(game=game))
+
+        res = self.client.post('/api/v1.0/tourneys/{}/matches/{}/games.json'.format(tourney_id, match_id), data=request)
+        self.assertEqual(res.status_code, 201)
+        data = json.loads(res.data)
+        self.assertTrue('game' in data)
+
+        return data['game']
