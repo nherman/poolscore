@@ -165,3 +165,39 @@ class APITestCase(BaseTestCase):
         tourney = self.createTourney()
         match = self.createMatch(tourney["id"])
         self.createGame(tourney["id"], match["id"])
+
+        #Get Game List
+        res = self.client.get('/api/v1.0/tourneys/{}/matches/{}/games.json'.format(tourney["id"], match["id"]))
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data)
+        self.assertTrue('games' in data)
+        self.assertEqual(len(data['games']), 1)
+        self.assertTrue('id' in data['games'][0])
+        game_id = data['games'][0]['id']
+
+        #Get One Game
+        res = self.client.get('/api/v1.0/tourneys/{}/matches/{}/games/{}.json'.format(tourney["id"], match["id"], game_id))
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data)
+        self.assertTrue('game' in data)
+        game = data['game']
+        self.assertEqual(game['match_id'], tourney["id"])
+        self.assertTrue('winner_id' in game)
+        self.assertEqual(game['winner_id'], 0)
+        self.assertTrue('events' in game)
+
+
+        # TODO test is breaking here. game['events'] not iterable - returning None?
+        self.assertTrue('breaker' in game['events'])
+        self.assertEqual(game['events']['breaker'], "HOME")
+        self.assertEqual(game['events']['special_event'], None)
+        self.assertEqual(game['events']['innings'], 0)
+        self.assertEqual(game['events']['home_coaches'], 0)
+        self.assertEqual(game['events']['home_safes'], 0)
+        self.assertEqual(game['events']['away_coaches'], 0)
+        self.assertEqual(game['events']['away_safes'], 0)
+
+
+
