@@ -359,14 +359,18 @@ def game(tourney_id, match_id, game_id):
         before_http_action_callback = update_events_callback
 
     if request.method == "POST":
-        # populate game events
         attributes = request.get_json(force = True, silent = True, cache = False)
-        attributes["game"]["events"] = update_events(match.ruleset, "game", attributes["game"])
+        game_attributes = ModelUtil._find_attrs_by_class_name(Game, attributes)
+
+        # populate game events
+        events = update_events(match.ruleset, "game", game_attributes)
+        game_attributes["events"] = json.dumps(events)
+        attributes["game"] = game_attributes
 
         try:
             #Create game entity
             game = ModelUtil.create_model(Game, attributes, additional_attributes = additional_attributes)
-            if not match:
+            if not game:
                 raise ApiError('Game cannot be created. Invalid json format', status_code = 400)
 
             db.session.add(game)

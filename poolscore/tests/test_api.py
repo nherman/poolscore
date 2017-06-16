@@ -188,8 +188,6 @@ class APITestCase(BaseTestCase):
         self.assertEqual(game['winner_id'], 0)
         self.assertTrue('events' in game)
 
-
-        # TODO test is breaking here. game['events'] not iterable - returning None?
         self.assertTrue('breaker' in game['events'])
         self.assertEqual(game['events']['breaker'], "HOME")
         self.assertEqual(game['events']['special_event'], None)
