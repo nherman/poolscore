@@ -8,7 +8,7 @@ function($, ko) {
 
     var root = "/api/v1.0/";
 
-    function _p(path) {
+    function _path(path) {
         var i=1;
         if (path === undefined) return "";
 
@@ -63,53 +63,63 @@ function($, ko) {
     }
 
     return {
+        createTourney: function(data, callback) {
+            var url = _path("tourneys.json");
+            return _post(url, data, callback);
+        },
+
+        getTourneys: function(callback) {
+            var url = _path("tourneys.json");
+            return _get(url, callback);
+        },
+
         getTourney: function(tourney_id, callback) {
-            var url = _p("tourneys/%s.json", tourney_id);
+            var url = _path("tourneys/%s.json", tourney_id);
             return _get(url, callback);
         },
 
         updateTourney: function(tourney_id, data, callback) {
-            var url = _p("tourneys/%s.json", tourney_id);
+            var url = _path("tourneys/%s.json", tourney_id);
             return _put(url, data, callback);
         },
 
         getMatches: function(tourney_id, callback) {
-            var url = _p("tourneys/%s/matches.json", tourney_id);
+            var url = _path("tourneys/%s/matches.json", tourney_id);
             return _get(url, callback);
         },
 
         createMatch: function(tourney_id, data, callback) {
-            var url = _p("tourneys/%s/matches.json", tourney_id);
+            var url = _path("tourneys/%s/matches.json", tourney_id);
             return _post(url, data, callback);
         },
 
         getMatch: function(tourney_id, match_id, callback) {
-            var url = _p("tourneys/%s/matches/%s.json", tourney_id, match_id);
+            var url = _path("tourneys/%s/matches/%s.json", tourney_id, match_id);
             return _get(url, callback);
         },
 
         updateMatch: function(tourney_id, match_id, data, callback) {
-            var url = _p("tourneys/%s/matches/%s.json", tourney_id, match_id);
+            var url = _path("tourneys/%s/matches/%s.json", tourney_id, match_id);
             return _put(url, data, callback);
         },
 
         getGames: function(tourney_id, match_id, callback) {
-            var url = _p("tourneys/%s/match/%s/games.json", tourney_id, match_id);
+            var url = _path("tourneys/%s/match/%s/games.json", tourney_id, match_id);
             return _get(url, callback);
         },
 
         createGame: function(tourney_id, match_id, data, callback) {
-            var url = _p("tourneys/%s/matches/%s/games.json", tourney_id, match_id);
+            var url = _path("tourneys/%s/matches/%s/games.json", tourney_id, match_id);
             return _post(url, data, callback);
         },
 
         getGame: function(tourney_id, match_id, game_id, callback) {
-            var url = _p("tourneys/%s/matches/%s/games/%s.json", tourney_id, match_id, game_id);
+            var url = _path("tourneys/%s/matches/%s/games/%s.json", tourney_id, match_id, game_id);
             return _get(url, callback);
         },
 
         updateGame: function(tourney_id, match_id, game_id, data, callback) {
-            var url = _p("tourneys/%s/matches/%s/games/%s.json", tourney_id, match_id, game_id);
+            var url = _path("tourneys/%s/matches/%s/games/%s.json", tourney_id, match_id, game_id);
             return _put(url, data, callback);
         }
     }
