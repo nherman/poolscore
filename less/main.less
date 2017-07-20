@@ -1,5 +1,5 @@
-
-@login-top-offset:          -250px;
+@login-top-offset:    -250px;
+@highlight-color:     #3066e0;
 
 html {
     height: 100%;
@@ -11,12 +11,14 @@ body {
     padding-top:50px;
     padding-bottom:50px;
 }
+
+/* Header & Nav */
 header {
   position:fixed;
   top:0;
   left:0;
   background-color: #ddd;
-  height:50px;
+  height:55px;
   width:100%;
   padding:0 20px;
   z-index:1000;
@@ -58,18 +60,12 @@ header .logo {
   }
 }
 
-
-.flash-message {
-  .alert;
-  .alert-info;
-  .text-center;
-  margin-top:15px;
-
-  @media (min-width: @container-sm) {
-    margin-top:0;
-  }
+.ps-header-content {
+  color: @highlight-color;
 }
 
+
+/* Page Body */
 .container {
     position: relative;
     z-index:1;
@@ -84,20 +80,16 @@ header .logo {
   margin-bottom: 50px;
 }
 
-//Login
-.login-context .main {
-    max-width:390px;
+/* Alerts & Messages*/
+.flash-message {
+  .alert;
+  .alert-info;
+  .text-center;
+  margin-top:15px;
 
-    @media (min-width: @screen-sm-min) {
-        top:50%;
-        width: 390px;
-        margin-top: @login-top-offset;
-    }
-}
-
-.login-context .form-horizontal {
-  display:block;
-  padding: @grid-gutter-width @grid-gutter-width+15;
+  @media (min-width: @container-sm) {
+    margin-top:0;
+  }
 }
 
 #loading {
@@ -117,7 +109,38 @@ header .logo {
     }
 }
 
-//play
+.ps-alerts {
+    .container;
+    position:fixed;
+    right: 0;
+    left: 0;
+    top: 20px;
+    max-width: 480px;
+    z-index: 1100;
+
+    .alert {
+      display:none;
+    }
+
+}
+
+/* Login */
+.login-context .main {
+    max-width:390px;
+
+    @media (min-width: @screen-sm-min) {
+        top:50%;
+        width: 390px;
+        margin-top: @login-top-offset;
+    }
+}
+
+.login-context .form-horizontal {
+  display:block;
+  padding: @grid-gutter-width @grid-gutter-width+15;
+}
+
+/* play */
 .match_list {
   width: 100%;
   margin-top: 2em;
@@ -155,11 +178,11 @@ header .logo {
   }
 }
 
+/* animation */
 .active_pulse {
   animation: bg_pulse 4s infinite;
 }
 
-//animations
 @-webkit-keyframes pulse {
     0% { color: @link-color; }
     15% { color: darken(@link-color, 30%); }
@@ -197,17 +220,3 @@ header .logo {
     transform: rotate(90deg);  
 }
 
-.ps-alerts {
-    .container;
-    position:fixed;
-    right: 0;
-    left: 0;
-    top: 20px;
-    max-width: 480px;
-    z-index: 1100;
-
-    .alert {
-      display:none;
-    }
-
-}

@@ -79,3 +79,8 @@ def play(tourney_id):
         return SecurityUtil.not_found_error_response()
 
     return render_template('play/play.html', tourney_id = tourney_id)
+
+@mod_play.route('/mock', methods = ['GET'])
+@SecurityUtil.requires_auth()
+def mock():
+    return render_template('play/tourney.html')

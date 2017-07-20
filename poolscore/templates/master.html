@@ -24,6 +24,7 @@
                 <div class="nav-header">
                     <a class="navbar-brand logo" href="/">PoolScore</a>
                 </div>
+
                 {% if session.logged_in %}
                 <div class="dropdown pull-right">
                     <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-menu-hamburger"></span></a>
@@ -38,6 +39,9 @@
                     </ul>
                 </div>
                 {% endif %}
+
+                <p class="navbar-text text-center ps-header-content" data-bind="text:ps-header-content">{{header_content}}</p>
+
             </div>
         </nav>
     </header>
