@@ -40,7 +40,7 @@
                 </div>
                 {% endif %}
 
-                <p class="navbar-text text-center ps-header-content" data-bind="text:ps-header-content">{{header_content}}</p>
+                <p class="navbar-text text-center ps-header-content" data-bind="text:ps-header-content">{{header_content|safe}}</p>
 
             </div>
         </nav>

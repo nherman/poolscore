@@ -1,7 +1,224 @@
 {% extends "master.html" %}
-{% set header_content = "Tourney #1 : Match #1 : Game #1" %}
+{% set header_content = "Tourney <span class='badge'>555</span> : Match <span class='badge'>5</span> : Game <span class='badge'>5</span>" %}
 
 {% block body %}
+<dl class="scoreboard">
+    <dt><h2>THE HEROS FROM PLANET NERO<small>Home Team</small></h2><dt>
+    <dd>15</dd>
+    <dt><h2>THE ZEROS<small>Away Team</small></h2><dt>
+    <dd>0</dd>
+</dl>
 
+<div class="roster">
+    <div class="team">
+        <h6 class="team-title">Home Team</h6>
+        00405 &nbsp; The Heros from Planet Zero
+        <table>
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Player #</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>44222</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>23455</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12121</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>56755</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>67677</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>34335</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>34533</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="team">
+        <h6 class="team-title">Away Team</h6>
+        00405 &nbsp; The Zeros
+        <table>
+            <thead>
+                <tr>
+                    <th>SL</th>
+                    <th>Player #</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>12345</td>
+                    <td>Tramp, Lady &amp;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="matches">
+    <h6 class="matches-title">Matches</h6>
+
+    <div class="match started complete">
+        <div class="match-num">#1</div>
+        <table>
+            <tr class="match-player lagger">
+                <td class="match-team">05</td>
+                <td class="match-player-name">Tramp, Lady &amp;</td>
+                <td class="match-games-needed">3</td>
+                <td class="match-games-won">3</td>
+                <td class="match-points-won">2</td>
+            </tr>
+            <tr class="match-player">
+                <td class="match-team">06</td>
+                <td class="match-player-name">Sky, Blue</td>
+                <td class="match-games-needed">3</td>
+                <td class="match-games-won">2</td>
+                <td class="match-points-won">1</td>
+            </tr>
+        </table>
+    </div>
+    <div class="match started">
+        <div class="match-num">#2</div>
+        <table>
+            <tr class="match-player lagger">
+                <td class="match-team">05</td>
+                <td class="match-player-name">Minion, Filet</td>
+                <td class="match-games-needed">3</td>
+                <td class="match-games-won">1</td>
+                <td class="match-points-won">0</td>
+            </tr>
+            <tr class="match-player">
+                <td class="match-team">06</td>
+                <td class="match-player-name">Sky, Blue</td>
+                <td class="match-games-needed">3</td>
+                <td class="match-games-won">0</td>
+                <td class="match-points-won">0</td>
+            </tr>
+        </table>
+    </div>
+    <div class="match new">
+        <div class="match-num">#3</div>
+        <div class="match-select-players">
+            <select name="match-3-select-lag-winner" id="match-3-select-lag-winner">
+                <option default selected="selected" value="-1">Select Lag Winner</option>
+                <optgroup label="Home Team">
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                </optgroup>
+                <optgroup label="Away Team">
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                </optgroup>
+            </select>
+            <select name="match-3-select-lag-loser" id="match-3-select-lag-loser">
+                <option default selected="selected" value="-1">Select Lag Loser</option>
+                <optgroup label="Home Team">
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                </optgroup>
+                <optgroup label="Away Team">
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                    <option value="player-12345">Sky, Blue</option>
+                    <option value="player-12345">Minion, Filet</option>
+                    <option value="player-12345">Tramp, Lady &amp;</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="match-start">
+            <button id="match-3-start" class="btn btn-sm btn-primary">Start Match #3</button>
+        </div>
+    </div>
+</div>
+
+<button id="tourney-1-end" class="btn btn-lg btn-primary">End Tourney #1</button>
 
 {% endblock %}

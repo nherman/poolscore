@@ -80,7 +80,7 @@ def play(tourney_id):
 
     return render_template('play/play.html', tourney_id = tourney_id)
 
-@mod_play.route('/mock', methods = ['GET'])
+@mod_play.route('/mock/<string:label>', methods = ['GET'])
 @SecurityUtil.requires_auth()
-def mock():
-    return render_template('play/tourney.html')
+def mock(label):
+    return render_template('play/' + label + '.html')
