@@ -2,12 +2,16 @@
 {% set header_content = "Tourney <span class='badge'>555</span> : Match <span class='badge'>5</span> : Game <span class='badge'>5</span>" %}
 
 {% block body %}
-<dl class="scoreboard">
-    <dt><h2>THE HEROS FROM PLANET NERO<small>Home Team</small></h2><dt>
-    <dd>15</dd>
-    <dt><h2>THE ZEROS<small>Away Team</small></h2><dt>
-    <dd>0</dd>
-</dl>
+<div class="scoreboard">
+    <div class="row">
+        <div class="home team-name">THE HEROS FROM PLANET NERO<small>Home Team</small></div>
+        <div class="home team-score">15</div>
+    </div>
+    <div class="row">
+        <div class="away team-name">THE ZEROS<small>Away Team</small></div>
+        <div class="away team-score">0</div>
+    </div>
+</div>
 
 <div class="roster">
     <div class="team">
