@@ -1172,7 +1172,7 @@ h6,
 .h4,
 .h5,
 .h6 {
-  font-family: inherit;
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   line-height: 1.1;
   color: inherit;
@@ -6362,7 +6362,9 @@ button.close {
 .modal-footer:before,
 .modal-footer:after,
 .ps-alerts:before,
-.ps-alerts:after {
+.ps-alerts:after,
+.scoreboard:before,
+.scoreboard:after {
   content: " ";
   display: table;
 }
@@ -6382,7 +6384,8 @@ button.close {
 .panel-body:after,
 .modal-header:after,
 .modal-footer:after,
-.ps-alerts:after {
+.ps-alerts:after,
+.scoreboard:after {
   clear: both;
 }
 .center-block {
@@ -6705,7 +6708,8 @@ header .logo {
     top: 25px;
   }
 }
-.container.main {
+.main {
+  margin-top: 10px;
   margin-bottom: 50px;
 }
 /* Alerts & Messages*/
@@ -6933,19 +6937,79 @@ a#loading div:focus {
   transform: rotate(90deg);
 }
 /* play.css */
+.hr-sm {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+.scoreboard {
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #337ab7;
+  line-height: 0.85;
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+}
+@media (min-width: 768px) {
+  .scoreboard {
+    width: 740px;
+  }
+}
+@media (min-width: 992px) {
+  .scoreboard {
+    width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .scoreboard {
+    width: 1160px;
+  }
+}
+.scoreboard > .navbar-header,
+.scoreboard > .navbar-collapse {
+  margin-right: -10px;
+  margin-left: -10px;
+}
+@media (min-width: 768px) {
+  .scoreboard > .navbar-header,
+  .scoreboard > .navbar-collapse {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+@media (min-width: 768px) {
+  .scoreboard {
+    top: 25px;
+  }
+}
+.scoreboard .row {
+  margin-bottom: 10px;
+}
 .scoreboard .team-name {
   position: relative;
   float: left;
-  width: 90%;
+  width: 80%;
   min-height: 1px;
   padding-left: 10px;
   padding-right: 10px;
+  font-size: 18px;
+}
+.scoreboard .team-name small {
+  font-size: 12px;
+}
+.scoreboard .team-name div {
+  font-weight: bold;
 }
 .scoreboard .team-score {
   position: relative;
   float: left;
-  width: 10%;
+  width: 20%;
   min-height: 1px;
   padding-left: 10px;
   padding-right: 10px;
+  text-align: center;
+  font-size: 30px;
 }

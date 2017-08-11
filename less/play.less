@@ -1,12 +1,40 @@
 /* play.css */
-@grid-columns:              10;
-@grid-gutter-width:         20px;
+@grid-columns:          10;
+@grid-gutter-width:     20px;
+
+@headings-font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+.hr-sm {
+    margin-top:0px;
+    margin-bottom:0px;
+}
 
 .scoreboard {
+    font-family: @headings-font-family;
+    color: @brand-primary;
+    line-height: 0.85;
+    .container;
+
+    .row {
+        margin-bottom:10px;
+    }
     .team-name {
-        .make-xs-column(9);
+        .make-xs-column(8);
+        font-size: @font-size-large;
+
+        small {
+            font-size: @font-size-small;
+        }
+
+        div {
+            font-weight: bold;
+        }
+
     }
     .team-score {
-        .make-xs-column(1);
+        .make-xs-column(2);
+        .text-center;
+        font-size: @font-size-h2;
     }
 }
+
