@@ -6364,7 +6364,9 @@ button.close {
 .ps-alerts:before,
 .ps-alerts:after,
 .scoreboard:before,
-.scoreboard:after {
+.scoreboard:after,
+.roster:before,
+.roster:after {
   content: " ";
   display: table;
 }
@@ -6385,7 +6387,8 @@ button.close {
 .modal-header:after,
 .modal-footer:after,
 .ps-alerts:after,
-.scoreboard:after {
+.scoreboard:after,
+.roster:after {
   clear: both;
 }
 .center-block {
@@ -6941,6 +6944,10 @@ a#loading div:focus {
   margin-top: 0px;
   margin-bottom: 0px;
 }
+.no-wrap-truncate {
+  overflow: hidden;
+  white-space: nowrap;
+}
 .scoreboard {
   font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #337ab7;
@@ -7012,4 +7019,127 @@ a#loading div:focus {
   padding-right: 10px;
   text-align: center;
   font-size: 30px;
+}
+.roster {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .roster {
+    width: 740px;
+  }
+}
+@media (min-width: 992px) {
+  .roster {
+    width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .roster {
+    width: 1160px;
+  }
+}
+.roster > .navbar-header,
+.roster > .navbar-collapse {
+  margin-right: -10px;
+  margin-left: -10px;
+}
+@media (min-width: 768px) {
+  .roster > .navbar-header,
+  .roster > .navbar-collapse {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+@media (min-width: 768px) {
+  .roster {
+    top: 25px;
+  }
+}
+.roster table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+.roster table > thead > tr > th,
+.roster table > tbody > tr > th,
+.roster table > tfoot > tr > th,
+.roster table > thead > tr > td,
+.roster table > tbody > tr > td,
+.roster table > tfoot > tr > td {
+  padding: 8px;
+  line-height: 1.42857143;
+  vertical-align: top;
+  border-top: 1px solid #ddd;
+}
+.roster table > thead > tr > th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #ddd;
+}
+.roster table > caption + thead > tr:first-child > th,
+.roster table > colgroup + thead > tr:first-child > th,
+.roster table > thead:first-child > tr:first-child > th,
+.roster table > caption + thead > tr:first-child > td,
+.roster table > colgroup + thead > tr:first-child > td,
+.roster table > thead:first-child > tr:first-child > td {
+  border-top: 0;
+}
+.roster table > tbody + tbody {
+  border-top: 2px solid #ddd;
+}
+.roster table .table {
+  background-color: #fff;
+}
+.roster table > thead > tr > th,
+.roster table > tbody > tr > th,
+.roster table > tfoot > tr > th,
+.roster table > thead > tr > td,
+.roster table > tbody > tr > td,
+.roster table > tfoot > tr > td {
+  padding: 5px;
+}
+.roster table td {
+  overflow: hidden;
+}
+.roster .team {
+  position: relative;
+  float: left;
+  width: 50%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+}
+.roster .team .team-title {
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  margin: 0 0;
+  color: #337ab7;
+}
+.roster .team .team-title small,
+.roster .team .team-title .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.roster .team .team-title small,
+.roster .team .team-title .small {
+  font-size: 75%;
+}
+.roster .team .team-name {
+  overflow: hidden;
+  white-space: nowrap;
 }

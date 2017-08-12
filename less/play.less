@@ -9,6 +9,11 @@
     margin-bottom:0px;
 }
 
+.no-wrap-truncate {
+    overflow:hidden;
+    white-space: nowrap;
+}
+
 .scoreboard {
     font-family: @headings-font-family;
     color: @brand-primary;
@@ -38,3 +43,34 @@
     }
 }
 
+.roster {
+    .container;
+    margin-top: 10px;
+    overflow:hidden;
+
+    table {
+        .table;
+        .table-condensed;
+
+        font-size: @font-size-small;
+
+        td {
+            overflow: hidden;
+        }
+    }
+
+    .team {
+        .make-xs-column(5);
+        overflow:hidden;
+
+        .team-title {
+            .h6;
+            margin:0 0;
+            color: @brand-primary;
+        }
+
+        .team-name {
+            .no-wrap-truncate;
+        }
+    }
+}
