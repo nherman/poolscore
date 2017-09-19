@@ -1,12 +1,20 @@
 /* play.css */
 @grid-columns:          10;
 @grid-gutter-width:     20px;
-
 @headings-font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+@match-height: 75px;
+@yellow-highlight: #fdffb7;
 
 .hr-sm {
     margin-top:0px;
     margin-bottom:0px;
+}
+
+.title-sm {
+    .h6;
+    margin:0 0;
+    color: @brand-primary;
 }
 
 .no-wrap-truncate {
@@ -64,13 +72,60 @@
         overflow:hidden;
 
         .team-title {
-            .h6;
-            margin:0 0;
-            color: @brand-primary;
+            .title-sm;
         }
 
         .team-name {
             .no-wrap-truncate;
         }
+    }
+}
+
+.matches {
+    .container;
+    margin-top: 10px;
+    overflow:hidden;
+
+    .matches-title {
+        .title-sm;
+        .text-center;        
+    }
+
+    .match {
+        .make-row();
+        padding:10px 0;
+        border-top: 1px solid #eee;
+
+        .match-num {
+            .make-xs-column(1);
+            line-height: 70px;
+        }
+
+        .match-players {
+            .make-xs-column(8);
+
+            .match-player {
+                .make-row();
+                padding:5px 0;
+                background-color: @yellow-highlight;
+            }
+
+            .match-player.lagger {
+                margin-bottom:10px;
+            }
+
+            .match-team, .match-games-needed, .match-games-won, .match-points-won {
+               .make-xs-column(1);
+            }
+
+            .match-player-name {
+                .make-xs-column(6);
+            }
+
+        }
+    }
+
+    .match.first {
+        border-top:none;
     }
 }

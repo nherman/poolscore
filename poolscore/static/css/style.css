@@ -6366,7 +6366,13 @@ button.close {
 .scoreboard:before,
 .scoreboard:after,
 .roster:before,
-.roster:after {
+.roster:after,
+.matches:before,
+.matches:after,
+.matches .match:before,
+.matches .match:after,
+.matches .match .match-players .match-player:before,
+.matches .match .match-players .match-player:after {
   content: " ";
   display: table;
 }
@@ -6388,7 +6394,10 @@ button.close {
 .modal-footer:after,
 .ps-alerts:after,
 .scoreboard:after,
-.roster:after {
+.roster:after,
+.matches:after,
+.matches .match:after,
+.matches .match .match-players .match-player:after {
   clear: both;
 }
 .center-block {
@@ -6944,6 +6953,27 @@ a#loading div:focus {
   margin-top: 0px;
   margin-bottom: 0px;
 }
+.title-sm {
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  margin: 0 0;
+  color: #337ab7;
+}
+.title-sm small,
+.title-sm .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.title-sm small,
+.title-sm .small {
+  font-size: 75%;
+}
 .no-wrap-truncate {
   overflow: hidden;
   white-space: nowrap;
@@ -7142,4 +7172,123 @@ a#loading div:focus {
 .roster .team .team-name {
   overflow: hidden;
   white-space: nowrap;
+}
+.matches {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .matches {
+    width: 740px;
+  }
+}
+@media (min-width: 992px) {
+  .matches {
+    width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .matches {
+    width: 1160px;
+  }
+}
+.matches > .navbar-header,
+.matches > .navbar-collapse {
+  margin-right: -10px;
+  margin-left: -10px;
+}
+@media (min-width: 768px) {
+  .matches > .navbar-header,
+  .matches > .navbar-collapse {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+@media (min-width: 768px) {
+  .matches {
+    top: 25px;
+  }
+}
+.matches .matches-title {
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  margin: 0 0;
+  color: #337ab7;
+  text-align: center;
+}
+.matches .matches-title small,
+.matches .matches-title .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.matches .matches-title small,
+.matches .matches-title .small {
+  font-size: 75%;
+}
+.matches .match {
+  margin-left: -10px;
+  margin-right: -10px;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+}
+.matches .match .match-num {
+  position: relative;
+  float: left;
+  width: 10%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  line-height: 70px;
+}
+.matches .match .match-players {
+  position: relative;
+  float: left;
+  width: 80%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.matches .match .match-players .match-player {
+  margin-left: -10px;
+  margin-right: -10px;
+  padding: 5px 0;
+  background-color: #fdffb7;
+}
+.matches .match .match-players .match-player.lagger {
+  margin-bottom: 10px;
+}
+.matches .match .match-players .match-team,
+.matches .match .match-players .match-games-needed,
+.matches .match .match-players .match-games-won,
+.matches .match .match-players .match-points-won {
+  position: relative;
+  float: left;
+  width: 10%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.matches .match .match-players .match-player-name {
+  position: relative;
+  float: left;
+  width: 60%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.matches .match.first {
+  border-top: none;
 }
