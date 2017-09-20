@@ -172,8 +172,9 @@
     </div>
     <div class="match new">
         <div class="match-num">#3</div>
+    <form>
         <div class="match-select-players">
-            <select name="match-3-select-lag-winner" id="match-3-select-lag-winner">
+            <select name="match-3-select-lag-winner" id="match-3-select-lag-winner" class="form-control lagger">
                 <option default selected="selected" value="-1">Select Lag Winner</option>
                 <optgroup label="Home Team">
                     <option value="player-12345">Minion, Filet</option>
@@ -196,7 +197,7 @@
                     <option value="player-12345">Tramp, Lady &amp;</option>
                 </optgroup>
             </select>
-            <select name="match-3-select-lag-loser" id="match-3-select-lag-loser">
+            <select name="match-3-select-lag-loser" id="match-3-select-lag-loser" class="form-control">
                 <option default selected="selected" value="-1">Select Lag Loser</option>
                 <optgroup label="Home Team">
                     <option value="player-12345">Minion, Filet</option>
@@ -223,15 +224,16 @@
         <div class="match-start">
             <button id="match-3-start" class="btn btn-sm btn-primary">Start Match #3</button>
         </div>
+    </form>
     </div>
 </div>
 
-<button type="button" data-toggle="modal" data-target="#endTourney" id="tourney-1-end" class="btn btn-lg btn-primary">End Tourney #1</button>
+<button type="button" data-toggle="modal" data-target="#endTourney" id="tourney-1-end" class="btn btn-lg btn-primary center-block">End Tourney #1</button>
 {% endblock %}
 
 {% block script %}
 
-<div class="modal fade" tabindex="-1" role="dialog" id="endTourney">
+<div class="modal fade end-tourney" tabindex="-1" role="dialog" id="endTourney">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -239,9 +241,9 @@
                 <h4 class="modal-title">END TOURNEY?</h4>
             </div>
             <div class="modal-body">
-                <h5>Winner:</h5>
+                <h5 class="title-sm">Winner:</h5>
                 <h3>THE HEROS FROM PLANET ZERO</h3>
-                <h2>11 &mdash; 3</h2>
+                <h2 class="score">11 &mdash; 3</h2>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
