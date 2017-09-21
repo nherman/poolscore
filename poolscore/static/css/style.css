@@ -6372,7 +6372,11 @@ button.close {
 .matches .match:before,
 .matches .match:after,
 .matches .match .match-players .match-player:before,
-.matches .match .match-players .match-player:after {
+.matches .match .match-players .match-player:after,
+.games:before,
+.games:after,
+.games .game:before,
+.games .game:after {
   content: " ";
   display: table;
 }
@@ -6397,7 +6401,9 @@ button.close {
 .roster:after,
 .matches:after,
 .matches .match:after,
-.matches .match .match-players .match-player:after {
+.matches .match .match-players .match-player:after,
+.games:after,
+.games .game:after {
   clear: both;
 }
 .center-block {
@@ -6978,6 +6984,7 @@ a#loading div:focus {
   overflow: hidden;
   white-space: nowrap;
 }
+/* tourney */
 .scoreboard {
   font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #337ab7;
@@ -7034,11 +7041,12 @@ a#loading div:focus {
   padding-right: 10px;
   font-size: 18px;
 }
+.scoreboard .team-name div {
+  font-variant: small-caps;
+  font-weight: bold;
+}
 .scoreboard .team-name small {
   font-size: 12px;
-}
-.scoreboard .team-name div {
-  font-weight: bold;
 }
 .scoreboard .team-score {
   position: relative;
@@ -7306,4 +7314,146 @@ a#loading div:focus {
 .end-tourney .modal-title,
 .end-tourney .score {
   color: #337ab7;
+}
+/* match */
+.games {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+  margin: 10px 0 30px;
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .games {
+    width: 740px;
+  }
+}
+@media (min-width: 992px) {
+  .games {
+    width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .games {
+    width: 1160px;
+  }
+}
+.games > .navbar-header,
+.games > .navbar-collapse {
+  margin-right: -10px;
+  margin-left: -10px;
+}
+@media (min-width: 768px) {
+  .games > .navbar-header,
+  .games > .navbar-collapse {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+@media (min-width: 768px) {
+  .games {
+    top: 25px;
+  }
+}
+.games .games-header {
+  position: relative;
+  float: left;
+  width: 30%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-left: 10%;
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  margin-top: 0;
+  margin-bottom: 0;
+  color: black;
+}
+.games .games-header small,
+.games .games-header .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.games .games-header small,
+.games .games-header .small {
+  font-size: 75%;
+}
+.games .game {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+}
+@media (min-width: 768px) {
+  .games .game {
+    width: 740px;
+  }
+}
+@media (min-width: 992px) {
+  .games .game {
+    width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .games .game {
+    width: 1160px;
+  }
+}
+.games .game > .navbar-header,
+.games .game > .navbar-collapse {
+  margin-right: -10px;
+  margin-left: -10px;
+}
+@media (min-width: 768px) {
+  .games .game > .navbar-header,
+  .games .game > .navbar-collapse {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+@media (min-width: 768px) {
+  .games .game {
+    top: 25px;
+  }
+}
+.games .game .game-title {
+  position: relative;
+  float: left;
+  width: 20%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  margin: 0 0;
+  color: #337ab7;
+  text-align: center;
+}
+.games .game .game-title small,
+.games .game .game-title .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.games .game .game-title small,
+.games .game .game-title .small {
+  font-size: 75%;
 }
