@@ -6376,7 +6376,9 @@ button.close {
 .games:before,
 .games:after,
 .games .game:before,
-.games .game:after {
+.games .game:after,
+.games .game .game-header-row:before,
+.games .game .game-header-row:after {
   content: " ";
   display: table;
 }
@@ -6403,7 +6405,8 @@ button.close {
 .matches .match:after,
 .matches .match .match-players .match-player:after,
 .games:after,
-.games .game:after {
+.games .game:after,
+.games .game .game-header-row:after {
   clear: both;
 }
 .center-block {
@@ -6721,11 +6724,6 @@ header .logo {
   z-index: 1;
   max-width: 740px;
 }
-@media (min-width: 768px) {
-  .container {
-    top: 25px;
-  }
-}
 .main {
   margin-top: 10px;
   margin-bottom: 50px;
@@ -6825,11 +6823,6 @@ a#loading div:focus {
   .ps-alerts > .navbar-collapse {
     margin-right: 0;
     margin-left: 0;
-  }
-}
-@media (min-width: 768px) {
-  .ps-alerts {
-    top: 25px;
   }
 }
 .ps-alerts .alert {
@@ -7024,11 +7017,6 @@ a#loading div:focus {
     margin-left: 0;
   }
 }
-@media (min-width: 768px) {
-  .scoreboard {
-    top: 25px;
-  }
-}
 .scoreboard .row {
   margin-bottom: 10px;
 }
@@ -7094,11 +7082,6 @@ a#loading div:focus {
   .roster > .navbar-collapse {
     margin-right: 0;
     margin-left: 0;
-  }
-}
-@media (min-width: 768px) {
-  .roster {
-    top: 25px;
   }
 }
 .roster table {
@@ -7189,7 +7172,8 @@ a#loading div:focus {
   position: relative;
   z-index: 1;
   max-width: 740px;
-  margin: 10px 0 30px;
+  margin-top: 10px;
+  margin-bottom: 30px;
   overflow: hidden;
 }
 @media (min-width: 768px) {
@@ -7217,11 +7201,6 @@ a#loading div:focus {
   .matches > .navbar-collapse {
     margin-right: 0;
     margin-left: 0;
-  }
-}
-@media (min-width: 768px) {
-  .matches {
-    top: 25px;
   }
 }
 .matches .matches-title {
@@ -7324,8 +7303,8 @@ a#loading div:focus {
   position: relative;
   z-index: 1;
   max-width: 740px;
-  margin: 10px 0 30px;
   overflow: hidden;
+  margin-bottom: 30px;
 }
 @media (min-width: 768px) {
   .games {
@@ -7352,11 +7331,6 @@ a#loading div:focus {
   .games > .navbar-collapse {
     margin-right: 0;
     margin-left: 0;
-  }
-}
-@media (min-width: 768px) {
-  .games {
-    top: 25px;
   }
 }
 .games .games-header {
@@ -7396,6 +7370,8 @@ a#loading div:focus {
   position: relative;
   z-index: 1;
   max-width: 740px;
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
 }
 @media (min-width: 768px) {
   .games .game {
@@ -7424,18 +7400,24 @@ a#loading div:focus {
     margin-left: 0;
   }
 }
-@media (min-width: 768px) {
-  .games .game {
-    top: 25px;
-  }
-}
-.games .game .game-title {
+.games .game.first .game-title {
+  /* the first game title has to share its row with "HOME" & "AWAY" headers */
   position: relative;
   float: left;
   width: 20%;
   min-height: 1px;
   padding-left: 10px;
   padding-right: 10px;
+}
+.games .game.inprogress {
+  background-color: #fdffb7;
+}
+.games .game .game-header-row {
+  margin-left: -10px;
+  margin-right: -10px;
+  margin-bottom: 10px;
+}
+.games .game .game-title {
   font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   line-height: 1.1;
@@ -7456,4 +7438,68 @@ a#loading div:focus {
 .games .game .game-title small,
 .games .game .game-title .small {
   font-size: 75%;
+}
+.games .game .game-data {
+  position: relative;
+  float: left;
+  width: 10%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+  font-size: 12px;
+}
+.games .game .game-data-labels {
+  position: relative;
+  float: left;
+  width: 20%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  padding-left: 0;
+}
+.games .game .game-complete {
+  position: relative;
+  float: left;
+  width: 10%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+}
+.games .game .game-complete.winner {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2fe038;
+  font-size: 18px;
+}
+.games .game .game-complete.winner:before {
+  content: "\e084";
+}
+.games .game .game-innings {
+  position: relative;
+  float: left;
+  width: 20%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+  font-size: 18px;
+  color: #337ab7;
+  line-height: .6em;
+  padding-top: 10px;
+}
+.games .game .game-innings small {
+  font-size: 10px;
+  color: #333333;
+  line-height: 10px;
 }

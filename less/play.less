@@ -5,6 +5,9 @@
 
 @match-height: 80px;
 @yellow-highlight: #fdffb7;
+@green-hightlight: #2fe038;
+
+@font-size-xsmall:         ceil((@font-size-base * 0.714)); // ~10px
 
 .hr-sm {
     margin-top:0px;
@@ -85,7 +88,8 @@
 
 .matches {
     .container;
-    margin: 10px 0 30px;
+    margin-top: 10px;
+    margin-bottom:30px;
     overflow:hidden;
 
     .matches-title {
@@ -150,8 +154,8 @@
 /* match */
 .games {
     .container;
-    margin: 10px 0 30px;
     overflow:hidden;
+    margin-bottom:30px;
 
     .games-header {
         .make-xs-column(3);
@@ -164,12 +168,70 @@
 
     .game {
         .container;
+        border-bottom: 1px solid #eee;
+        padding:10px 0;
+
+        &.first {
+            .game-title {
+                /* the first game title has to share its row with "HOME" & "AWAY" headers */
+                .make-xs-column(2);
+            }
+        }
+
+        &.inprogress {
+            background-color: @yellow-highlight;
+        }
+
+        .game-header-row {
+            .make-row();
+            margin-bottom: 10px;
+        }
 
         .game-title {
-            .make-xs-column(2);
             .title-sm;
             .text-center;
         }
+
+        .game-data {
+            .make-xs-column(1);
+            .text-center;
+            font-size: @font-size-small;
+
+        }
+
+        .game-data-labels {
+            .make-xs-column(2);
+            font-size: @font-size-small;
+            white-space:nowrap;
+            padding-left:0;
+        }
+
+        .game-complete {
+            .make-xs-column(1);
+            .text-center;
+            &.winner {
+                .glyphicon;
+                .glyphicon-ok-sign;
+                color: @green-hightlight;
+                font-size: @font-size-large;
+            }
+        }
+
+        .game-innings {
+            .make-xs-column(2);
+            .text-center;
+            font-size: @font-size-large;
+            color: @brand-primary;
+            line-height: .6em;
+            padding-top:10px;
+
+            small {
+                font-size: @font-size-xsmall;
+                color:@text-color;
+                line-height: 10px;
+            }
+        }
+
     }
 
 }
