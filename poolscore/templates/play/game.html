@@ -1,0 +1,53 @@
+{% extends "master.html" %}
+{% set header_content = "Tourney <span class='badge'>555</span> : Match <span class='badge'>5</span> : Game <span class='badge'>5</span>" %}
+
+{% block body %}
+<div class="scoreboard">
+    <div class="row">
+        <div class="home team-name"><div>sky, blue</div><small>Home Team (won lag)</small></div>
+        <div class="home team-score">1</div>
+    </div>
+    <div class="row">
+        <div class="away team-name"><div>herman, nicholas "Studly"</div><small>Away Team</small></div>
+        <div class="away team-score">1</div>
+    </div>
+</div>
+<hr class="hr-sm">
+<div class="game">
+    <h1>GAME #1</h1>
+
+</div>
+
+<button type="button" data-toggle="modal" data-target="#endMatch" id="match-1-end" class="btn btn-lg btn-primary center-block">End Match #1</button>
+{% endblock %}
+
+{% block script %}
+
+<div class="modal fade end-match" tabindex="-1" role="dialog" id="endMatch">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">END MATCH?</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row lagger">
+                    <div class="match-complete winner"></div>
+                    <div class="match-player">Herman, Nicholas "Studly"</div>
+                    <div class="match-score">2</div>
+                </div>
+                <div class="row">
+                    <div class="match-complete"></div>
+                    <div class="match-player">Sky, Blue</div>
+                    <div class="match-score">1</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">OK</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+{% endblock %}

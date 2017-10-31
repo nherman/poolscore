@@ -7616,3 +7616,10 @@ a#loading div:focus {
   color: #333333;
   line-height: 10px;
 }
+/* game */
+.game h1 {
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #337ab7;
+  font-size: 27px;
+  text-align: center;
+}
