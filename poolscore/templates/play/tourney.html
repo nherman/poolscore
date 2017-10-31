@@ -229,18 +229,21 @@
 </div>
 
 <button type="button" data-toggle="modal" data-target="#endTourney" id="tourney-1-end" class="btn btn-lg btn-primary center-block">End Tourney #1</button>
+
+<button type="button" data-toggle="modal" data-target="#deleteTourney" id="tourney-1-delete" class="btn btn-lg btn-danger btn-delete center-block">Delete Tourney #1</button>
+
 {% endblock %}
 
 {% block script %}
 
-<div class="modal fade end-tourney" tabindex="-1" role="dialog" id="endTourney">
+<div class="modal fade end-modal" tabindex="-1" role="dialog" id="endTourney">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">END TOURNEY?</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body text-center">
                 <h5 class="title-sm">Winner:</h5>
                 <h3>THE HEROS FROM PLANET ZERO</h3>
                 <h2 class="score">11 &mdash; 3</h2>
@@ -248,6 +251,24 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary">OK</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade delete-modal" tabindex="-1" role="dialog" id="deleteTourney">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">DELETE TOURNEY #1?</h4>
+            </div>
+            <div class="modal-body">
+                <p>You will not be able to undo this action.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger">Delete</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
