@@ -6976,6 +6976,23 @@ a#loading div:focus {
 .no-wrap-truncate {
   overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.winner-icon {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2fe038;
+  font-size: 18px;
+}
+.winner-icon:before {
+  content: "\e084";
 }
 /* tourney */
 .scoreboard {
@@ -7163,6 +7180,7 @@ a#loading div:focus {
 .roster .team .team-name {
   overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .matches {
   margin-right: auto;
@@ -7287,12 +7305,94 @@ a#loading div:focus {
 .matches .match .lagger {
   margin-bottom: 10px;
 }
+.end-tourney .modal-title,
+.end-match .modal-title,
+.end-tourney .score,
+.end-match .score {
+  color: #337ab7;
+}
 .end-tourney .modal-body {
   text-align: center;
 }
-.end-tourney .modal-title,
-.end-tourney .score {
-  color: #337ab7;
+.end-match .modal-body .match-complete {
+  position: relative;
+  float: left;
+  width: 20%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+}
+.end-match .modal-body .match-complete.winner {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2fe038;
+  font-size: 18px;
+  font-size: 36px;
+}
+.end-match .modal-body .match-complete.winner:before {
+  content: "\e084";
+}
+.end-match .modal-body .match-player {
+  position: relative;
+  float: left;
+  width: 70%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 18px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.end-match .modal-body .match-player small,
+.end-match .modal-body .match-player .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.end-match .modal-body .match-player small,
+.end-match .modal-body .match-player .small {
+  font-size: 75%;
+}
+.end-match .modal-body .match-score {
+  position: relative;
+  float: left;
+  width: 10%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 18px;
+  text-align: center;
+}
+.end-match .modal-body .match-score small,
+.end-match .modal-body .match-score .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.end-match .modal-body .match-score small,
+.end-match .modal-body .match-score .small {
+  font-size: 75%;
 }
 /* match */
 .games {

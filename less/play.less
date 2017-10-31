@@ -23,6 +23,14 @@
 .no-wrap-truncate {
     overflow:hidden;
     white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.winner-icon {
+    .glyphicon;
+    .glyphicon-ok-sign;
+    color: @green-hightlight;
+    font-size: @font-size-large;
 }
 
 /* tourney */
@@ -139,14 +147,48 @@
     }
 }
 
+
+.end-tourney, .end-match {
+
+    .modal-title, .score {
+        color: @brand-primary;
+    }
+
+}
+
 .end-tourney {
 
     .modal-body {
         .text-center;
     }
 
-    .modal-title, .score {
-        color: @brand-primary;
+}
+
+.end-match {
+
+    .modal-body {
+
+        .match-complete {
+            .make-xs-column(2);
+            .text-center;
+            &.winner {
+                .winner-icon;
+                font-size: @font-size-large * 2;
+            }
+        }
+
+        .match-player {
+            .make-xs-column(7);
+            .h4;
+            .no-wrap-truncate;
+        }
+
+        .match-score {
+            .make-xs-column(1);
+            .h4;
+            .text-center;
+        }
+
     }
 
 }
@@ -210,10 +252,7 @@
             .make-xs-column(1);
             .text-center;
             &.winner {
-                .glyphicon;
-                .glyphicon-ok-sign;
-                color: @green-hightlight;
-                font-size: @font-size-large;
+                .winner-icon;
             }
         }
 
