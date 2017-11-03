@@ -6378,7 +6378,15 @@ button.close {
 .games .game:before,
 .games .game:after,
 .games .game .game-header-row:before,
-.games .game .game-header-row:after {
+.games .game .game-header-row:after,
+.game:before,
+.game:after,
+.game .innings-row:before,
+.game .innings-row:after,
+.game .stat-header-row:before,
+.game .stat-header-row:after,
+.game .stat-row:before,
+.game .stat-row:after {
   content: " ";
   display: table;
 }
@@ -6406,7 +6414,11 @@ button.close {
 .matches .match .match-players .match-player:after,
 .games:after,
 .games .game:after,
-.games .game .game-header-row:after {
+.games .game .game-header-row:after,
+.game:after,
+.game .innings-row:after,
+.game .stat-header-row:after,
+.game .stat-row:after {
   clear: both;
 }
 .center-block {
@@ -7617,9 +7629,412 @@ a#loading div:focus {
   line-height: 10px;
 }
 /* game */
+.game {
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .game {
+    width: 740px;
+  }
+}
+@media (min-width: 992px) {
+  .game {
+    width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .game {
+    width: 1160px;
+  }
+}
+.game > .navbar-header,
+.game > .navbar-collapse {
+  margin-right: -10px;
+  margin-left: -10px;
+}
+@media (min-width: 768px) {
+  .game > .navbar-header,
+  .game > .navbar-collapse {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
 .game h1 {
   font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #337ab7;
   font-size: 27px;
   text-align: center;
+}
+.game .game-button {
+  text-align: center;
+}
+.game .game-button button {
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: normal;
+  text-align: center;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+  margin: 0;
+  font-family: monospace;
+}
+.game .game-button button:focus,
+.game .game-button button:active:focus,
+.game .game-button button.active:focus,
+.game .game-button button.focus,
+.game .game-button button:active.focus,
+.game .game-button button.active.focus {
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+.game .game-button button:hover,
+.game .game-button button:focus,
+.game .game-button button.focus {
+  color: #333;
+  text-decoration: none;
+}
+.game .game-button button:active,
+.game .game-button button.active {
+  outline: 0;
+  background-image: none;
+  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.game .game-button button.disabled,
+.game .game-button button[disabled],
+fieldset[disabled] .game .game-button button {
+  cursor: not-allowed;
+  opacity: 0.65;
+  filter: alpha(opacity=65);
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+a.game .game-button button.disabled,
+fieldset[disabled] a.game .game-button button {
+  pointer-events: none;
+}
+.game .game-button button:focus,
+.game .game-button button.focus {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #8c8c8c;
+}
+.game .game-button button:hover {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+.game .game-button button:active,
+.game .game-button button.active,
+.open > .dropdown-toggle.game .game-button button {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+.game .game-button button:active:hover,
+.game .game-button button.active:hover,
+.open > .dropdown-toggle.game .game-button button:hover,
+.game .game-button button:active:focus,
+.game .game-button button.active:focus,
+.open > .dropdown-toggle.game .game-button button:focus,
+.game .game-button button:active.focus,
+.game .game-button button.active.focus,
+.open > .dropdown-toggle.game .game-button button.focus {
+  color: #333;
+  background-color: #d4d4d4;
+  border-color: #8c8c8c;
+}
+.game .game-button button:active,
+.game .game-button button.active,
+.open > .dropdown-toggle.game .game-button button {
+  background-image: none;
+}
+.game .game-button button.disabled:hover,
+.game .game-button button[disabled]:hover,
+fieldset[disabled] .game .game-button button:hover,
+.game .game-button button.disabled:focus,
+.game .game-button button[disabled]:focus,
+fieldset[disabled] .game .game-button button:focus,
+.game .game-button button.disabled.focus,
+.game .game-button button[disabled].focus,
+fieldset[disabled] .game .game-button button.focus {
+  background-color: #fff;
+  border-color: #ccc;
+}
+.game .game-button button .badge {
+  color: #fff;
+  background-color: #333;
+}
+.game .innings-row {
+  margin-left: -10px;
+  margin-right: -10px;
+  text-align: center;
+  margin: 20 0;
+}
+.game .innings-row .innings {
+  position: relative;
+  float: left;
+  width: 20%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 30px;
+  line-height: 1em;
+}
+.game .innings-row .innings h6 {
+  margin-top: 0;
+  color: #337ab7;
+}
+.game .innings-row .plus,
+.game .innings-row .minus {
+  text-align: center;
+  position: relative;
+  float: left;
+  width: 20%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.game .innings-row .plus button,
+.game .innings-row .minus button {
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: normal;
+  text-align: center;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+  margin: 0;
+  font-family: monospace;
+}
+.game .innings-row .plus button:focus,
+.game .innings-row .minus button:focus,
+.game .innings-row .plus button:active:focus,
+.game .innings-row .minus button:active:focus,
+.game .innings-row .plus button.active:focus,
+.game .innings-row .minus button.active:focus,
+.game .innings-row .plus button.focus,
+.game .innings-row .minus button.focus,
+.game .innings-row .plus button:active.focus,
+.game .innings-row .minus button:active.focus,
+.game .innings-row .plus button.active.focus,
+.game .innings-row .minus button.active.focus {
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+.game .innings-row .plus button:hover,
+.game .innings-row .minus button:hover,
+.game .innings-row .plus button:focus,
+.game .innings-row .minus button:focus,
+.game .innings-row .plus button.focus,
+.game .innings-row .minus button.focus {
+  color: #333;
+  text-decoration: none;
+}
+.game .innings-row .plus button:active,
+.game .innings-row .minus button:active,
+.game .innings-row .plus button.active,
+.game .innings-row .minus button.active {
+  outline: 0;
+  background-image: none;
+  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.game .innings-row .plus button.disabled,
+.game .innings-row .minus button.disabled,
+.game .innings-row .plus button[disabled],
+.game .innings-row .minus button[disabled],
+fieldset[disabled] .game .innings-row .plus button,
+fieldset[disabled] .game .innings-row .minus button {
+  cursor: not-allowed;
+  opacity: 0.65;
+  filter: alpha(opacity=65);
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+a.game .innings-row .plus button.disabled,
+a.game .innings-row .minus button.disabled,
+fieldset[disabled] a.game .innings-row .plus button,
+fieldset[disabled] a.game .innings-row .minus button {
+  pointer-events: none;
+}
+.game .innings-row .plus button:focus,
+.game .innings-row .minus button:focus,
+.game .innings-row .plus button.focus,
+.game .innings-row .minus button.focus {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #8c8c8c;
+}
+.game .innings-row .plus button:hover,
+.game .innings-row .minus button:hover {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+.game .innings-row .plus button:active,
+.game .innings-row .minus button:active,
+.game .innings-row .plus button.active,
+.game .innings-row .minus button.active,
+.open > .dropdown-toggle.game .innings-row .plus button,
+.open > .dropdown-toggle.game .innings-row .minus button {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+.game .innings-row .plus button:active:hover,
+.game .innings-row .minus button:active:hover,
+.game .innings-row .plus button.active:hover,
+.game .innings-row .minus button.active:hover,
+.open > .dropdown-toggle.game .innings-row .plus button:hover,
+.open > .dropdown-toggle.game .innings-row .minus button:hover,
+.game .innings-row .plus button:active:focus,
+.game .innings-row .minus button:active:focus,
+.game .innings-row .plus button.active:focus,
+.game .innings-row .minus button.active:focus,
+.open > .dropdown-toggle.game .innings-row .plus button:focus,
+.open > .dropdown-toggle.game .innings-row .minus button:focus,
+.game .innings-row .plus button:active.focus,
+.game .innings-row .minus button:active.focus,
+.game .innings-row .plus button.active.focus,
+.game .innings-row .minus button.active.focus,
+.open > .dropdown-toggle.game .innings-row .plus button.focus,
+.open > .dropdown-toggle.game .innings-row .minus button.focus {
+  color: #333;
+  background-color: #d4d4d4;
+  border-color: #8c8c8c;
+}
+.game .innings-row .plus button:active,
+.game .innings-row .minus button:active,
+.game .innings-row .plus button.active,
+.game .innings-row .minus button.active,
+.open > .dropdown-toggle.game .innings-row .plus button,
+.open > .dropdown-toggle.game .innings-row .minus button {
+  background-image: none;
+}
+.game .innings-row .plus button.disabled:hover,
+.game .innings-row .minus button.disabled:hover,
+.game .innings-row .plus button[disabled]:hover,
+.game .innings-row .minus button[disabled]:hover,
+fieldset[disabled] .game .innings-row .plus button:hover,
+fieldset[disabled] .game .innings-row .minus button:hover,
+.game .innings-row .plus button.disabled:focus,
+.game .innings-row .minus button.disabled:focus,
+.game .innings-row .plus button[disabled]:focus,
+.game .innings-row .minus button[disabled]:focus,
+fieldset[disabled] .game .innings-row .plus button:focus,
+fieldset[disabled] .game .innings-row .minus button:focus,
+.game .innings-row .plus button.disabled.focus,
+.game .innings-row .minus button.disabled.focus,
+.game .innings-row .plus button[disabled].focus,
+.game .innings-row .minus button[disabled].focus,
+fieldset[disabled] .game .innings-row .plus button.focus,
+fieldset[disabled] .game .innings-row .minus button.focus {
+  background-color: #fff;
+  border-color: #ccc;
+}
+.game .innings-row .plus button .badge,
+.game .innings-row .minus button .badge {
+  color: #fff;
+  background-color: #333;
+}
+.game .innings-row .minus {
+  margin-left: 20%;
+}
+.game .stat-header-row {
+  margin-left: -10px;
+  margin-right: -10px;
+  margin: 20px 0;
+}
+.game .stat-header-row h6 {
+  position: relative;
+  float: left;
+  width: 50%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0;
+  color: black;
+}
+.game .stat-row {
+  margin-left: -10px;
+  margin-right: -10px;
+  text-align: center;
+  margin: 20px 0;
+}
+.game .stat-row .stat-title {
+  position: relative;
+  float: left;
+  width: 20%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 6px;
+  font-variant: small-caps;
+  font-weight: bold;
+  color: #337ab7;
+}
+.game .stat-row .stat {
+  position: relative;
+  float: left;
+  width: 10%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 24px;
+  color: black;
+  text-align: center;
+}
+.game .stat-row .game-button {
+  position: relative;
+  float: left;
+  width: 10%;
+  min-height: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 6px;
+}
+.game .stat-row .game-button button {
+  padding: 4px 8px;
+  margin-left: -5px;
+  font-size: 10px;
 }
