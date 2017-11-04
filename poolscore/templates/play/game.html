@@ -52,9 +52,37 @@
         <div class="game-button"><button type="button">+</button></div>
     </div>
 
+    <div class="flag-row">
+        <div class="col-xs-4 col-xs-offset-1">
+            <div class="checkbox">
+                <label for="input_8break"><input type="checkbox" name="input_8break"> 8 break</label>
+            </div>
+        </div>
+        <div class="col-xs-4 col-xs-offset-1">
+            <div class="checkbox">
+                <label for="input_early8"><input type="checkbox" name="input_early8"> early 8</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="flag-row">
+        <div class="col-xs-4 col-xs-offset-1">
+            <div class="checkbox">
+                <label for="input_breakrun"><input type="checkbox" name="input_breakrun"> break &amp; run</label>
+            </div>
+        </div>
+        <div class="col-xs-4 col-xs-offset-1">
+            <div class="checkbox">
+                <label for="input_scratch8"><input type="checkbox" name="input_scratch8"> scratch 8</label>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<button type="button" data-toggle="modal" data-target="#endMatch" id="match-1-end" class="btn btn-lg btn-primary center-block">End Match #1</button>
+<button type="button" data-toggle="modal" data-target="#endGame" id="game-1-end" class="btn btn-lg btn-primary center-block">End Game #1</button>
+
+<button type="button" data-toggle="modal" data-target="#deleteGame" id="game-1-delete" class="btn btn-lg btn-danger btn-delete center-block">Delete Game #1</button>
 {% endblock %}
 
 {% block script %}

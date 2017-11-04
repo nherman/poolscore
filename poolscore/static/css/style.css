@@ -6386,7 +6386,9 @@ button.close {
 .game .stat-header-row:before,
 .game .stat-header-row:after,
 .game .stat-row:before,
-.game .stat-row:after {
+.game .stat-row:after,
+.game .flag-row:before,
+.game .flag-row:after {
   content: " ";
   display: table;
 }
@@ -6418,7 +6420,8 @@ button.close {
 .game:after,
 .game .innings-row:after,
 .game .stat-header-row:after,
-.game .stat-row:after {
+.game .stat-row:after,
+.game .flag-row:after {
   clear: both;
 }
 .center-block {
@@ -7638,7 +7641,9 @@ a#loading div:focus {
   z-index: 1;
   max-width: 740px;
   margin-bottom: 30px;
+  padding-bottom: 20px;
   overflow: hidden;
+  border-bottom: 1px solid #eee;
 }
 @media (min-width: 768px) {
   .game {
@@ -7792,7 +7797,7 @@ fieldset[disabled] .game .game-button button.focus {
   margin-left: -10px;
   margin-right: -10px;
   text-align: center;
-  margin: 20 0;
+  margin: 15px 0;
 }
 .game .innings-row .innings {
   position: relative;
@@ -8037,4 +8042,31 @@ fieldset[disabled] .game .innings-row .minus button.focus {
   padding: 4px 8px;
   margin-left: -5px;
   font-size: 10px;
+}
+.game .flag-row {
+  margin-left: -10px;
+  margin-right: -10px;
+}
+.game .flag-row label {
+  font-family: "Helvetica Neue Condensed Bold", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  display: inline;
+  margin: 0;
+  font-variant: small-caps;
+  font-weight: bold;
+}
+.game .flag-row label small,
+.game .flag-row label .small {
+  font-weight: normal;
+  line-height: 1;
+  color: #777777;
+}
+.game .flag-row label small,
+.game .flag-row label .small {
+  font-size: 75%;
 }

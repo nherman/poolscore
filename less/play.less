@@ -271,7 +271,9 @@
 .game {
     .container;
     margin-bottom:30px;
+    padding-bottom:20px;
     overflow:hidden;
+    border-bottom: 1px solid #eee;
 
     h1 {
         font-family: @headings-font-family;
@@ -293,7 +295,7 @@
     .innings-row {
         .make-row();
         .text-center;
-        margin:20 0;
+        margin:15px 0;
 
         .innings {
             .make-xs-column(2);
@@ -356,6 +358,18 @@
                 margin-left:-5px;
                 font-size: @font-size-xsmall;
             }
+        }
+    }
+
+    .flag-row {
+        .make-row();
+
+        label {
+            .h6;
+            display:inline;
+            margin:0;
+            font-variant: small-caps;
+            font-weight: bold;
         }
 
     }
