@@ -13,7 +13,7 @@
     </div>
 </div>
 <hr class="hr-sm">
-<div class="game">
+<div class="game-detail">
     <h1>GAME #1</h1>
     <div class="innings-row">
         <div class="minus"><button type="button">-</button></div>
@@ -87,28 +87,38 @@
 
 {% block script %}
 
-<div class="modal fade end-match" tabindex="-1" role="dialog" id="endMatch">
+<div class="modal fade end-game" tabindex="-1" role="dialog" id="endGame">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">END MATCH?</h4>
+                <h4 class="modal-title">END GAME?</h4>
             </div>
-            <div class="modal-body">
-                <div class="row lagger">
-                    <div class="match-complete winner"></div>
-                    <div class="match-player">Herman, Nicholas "Studly"</div>
-                    <div class="match-score">2</div>
-                </div>
-                <div class="row">
-                    <div class="match-complete"></div>
-                    <div class="match-player">Sky, Blue</div>
-                    <div class="match-score">1</div>
-                </div>
+            <div class="modal-body text-center">
+                <h5 class="title-sm">Winner:</h5>
+                <h3>Herman, Nicholas "Studly"</h3>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary">OK</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade delete-modal" tabindex="-1" role="dialog" id="deleteGame">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">DELETE GAME #1?</h4>
+            </div>
+            <div class="modal-body">
+                <p>You will not be able to undo this action.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger">Delete</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
