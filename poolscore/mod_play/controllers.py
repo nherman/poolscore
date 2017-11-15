@@ -78,7 +78,7 @@ def play(tourney_id):
     if not Tourney.has_entityUser(row_id = tourney_id):
         return SecurityUtil.not_found_error_response()
 
-    return render_template('play/play.html', tourney_id = tourney_id)
+    return render_template('play/main.html', tourney_id = tourney_id)
 
 @mod_play.route('/mock/<string:label>', methods = ['GET'])
 def mock(label):
