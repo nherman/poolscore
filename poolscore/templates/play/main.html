@@ -1,0 +1,47 @@
+{% extends "master.html" %}
+{% set body_class = "root-context" %}
+
+<!--
+
+ * Register components for tourney, match & game views
+ * https://vimeo.com/97519516
+ * routing?
+
+-->
+
+
+{% block require_main %}
+require(['knockout',
+         'domReady!'],
+    function(ko) {
+
+
+        ko.components.register('some-component-name', {
+            viewModel: function() {
+                this.val = "Nick";
+            },
+            template: { require: 'text!partials/pirates.html' }
+        });
+
+        function vm() {
+            var self = this;
+
+        }
+
+
+        ko.applyBindings(
+            new vm("{{ tourney_id }}"),
+            document.getElementById('main')
+        );
+
+    }
+);
+
+{% endblock %}
+
+
+{% block body %}
+
+    <div data-bind="component: 'some-component-name'">fucked</div>
+
+{% endblock %}
