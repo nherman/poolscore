@@ -4,7 +4,7 @@
 require.config({
     // ***********************************************
     // Use this only in test mode
-    // urlArgs: 'bust=' + (new Date()).getTime(),
+    urlArgs: 'bust=' + (new Date()).getTime(),
     // ***********************************************
 
     baseUrl: '/static/js',

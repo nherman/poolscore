@@ -12,25 +12,13 @@
 
 {% block require_main %}
 require(['knockout',
+         'pages/main',
          'domReady!'],
-    function(ko) {
-
-
-        ko.components.register('some-component-name', {
-            viewModel: function() {
-                this.val = "Nick";
-            },
-            template: { require: 'text!partials/pirates.html' }
-        });
-
-        function vm() {
-            var self = this;
-
-        }
+    function(ko, mainViewModel) {
 
 
         ko.applyBindings(
-            new vm("{{ tourney_id }}"),
+            new mainViewModel("{{ tourney_id }}"),
             document.getElementById('main')
         );
 
@@ -42,6 +30,6 @@ require(['knockout',
 
 {% block body %}
 
-    <div data-bind="component: 'some-component-name'">fucked</div>
+    <div data-bind="component: mainComponent">fucked</div>
 
 {% endblock %}
