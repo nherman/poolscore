@@ -18,7 +18,9 @@ require(['knockout',
 
 
         ko.applyBindings(
-            new mainViewModel("{{ tourney_id }}"),
+            new mainViewModel({
+                tourney_id: "{{ tourney_id }}"
+            }),
             document.getElementById('main')
         );
 

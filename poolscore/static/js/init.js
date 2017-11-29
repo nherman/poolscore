@@ -25,6 +25,8 @@ require.config({
 
         libs:           'libs',
         services:       'services',
+        components:     'components',
+        pages:          'pages',
 
         partials:       '../partials'
     }
