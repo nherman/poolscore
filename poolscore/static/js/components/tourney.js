@@ -12,17 +12,30 @@ define('components/tourney', ['knockout'], function(ko) {
     return tourneyViewModel;
 
     function tourneyViewModel(options) {
-        var self = this,
-            _options = ko.utils.extend({
-                "tourney_id": ""
-            }, options);
+        var self = this;
 
-        if (_options.tourney_id === undefined || _options.tourney_id === "") {
-            throw "Invalid Tourney ID"
+        if (options.tourney_id === undefined || !options.tourney_id.match(/^\d+$/)) {
+            throw "Invalid Tourney ID";
         }
 
-        self.id = _options.tourney_id;
-        console.log(_options);
+        if (options.rootVM === undefined) {
+            throw "Missing rootVM reference";
+        }
+
+        self.tourney_id = options.tourney_id;
+        self.home_team_id = "";
+        self.away_team_id = "";
+        self.home_team = {};
+        self.away_team = {};
+
+
+        self.date = ko.observable();
+        self.winner_id = ko.observable();
+        self.home_score = ko.observable();
+        self.away_score = ko.observable();
+        self.matches = ko.observableArray();
+
+        self.events = {};
 
     }
 

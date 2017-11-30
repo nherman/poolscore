@@ -18,7 +18,7 @@
 
 </head>
 <body class="{{ body_class }}">
-    <header>
+    <header id="header">
         <nav class="navbar">
             <div class="container">
                 <div class="nav-header">
@@ -40,7 +40,7 @@
                 </div>
                 {% endif %}
 
-                <p class="navbar-text text-center ps-header-content" data-bind="text:ps-header-content">{{header_content|safe}}</p>
+                <p class="navbar-text text-center ps-header-content" data-bind="html:headerContent">{{header_content|safe}}</p>
 
             </div>
         </nav>
