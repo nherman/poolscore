@@ -1,19 +1,19 @@
 <div class="scoreboard">
-    <div class="row">
-        <div class="home team-name"><div>PLANET NERO</div><small>Home Team</small></div>
-        <div class="home team-score">15</div>
+    <div class="row" data-bind="with: home_team">
+        <div class="home team-name"><div data-bind="text: name">PLANET NERO</div><small>Home Team</small></div>
+        <div class="home team-score" data-bind="text: $parent.home_score">15</div>
     </div>
-    <div class="row">
-        <div class="away team-name"><div>THE ZEROS</div><small>Away Team</small></div>
-        <div class="away team-score">0</div>
+    <div class="row" data-bind="with: away_team">
+        <div class="away team-name"><div data-bind="text: name">THE ZEROS</div><small>Away Team</small></div>
+        <div class="away team-score" data-bind="text: $parent.home_score">0</div>
     </div>
 </div>
 <hr class="hr-sm">
 <div class="roster">
     <div class="row">
-        <div class="team">
+        <div class="team" data-bind="with: home_team">
             <h6 class="title-sm">Home Team</h6>
-            <div class="team-name">00405 &nbsp; The Heros from Planet Zero</div>
+            <div class="team-name"><span data-bind="text: team_id"></span> &nbsp; <span data-bind="text: name"></span></div>
             <table>
                 <thead>
                     <tr>
@@ -67,8 +67,8 @@
             </table>
         </div>
         <div class="team">
-            <h6 class="team-title">Away Team</h6>
-            <div class="team-name">00405 &nbsp; The Zeros</div>
+            <h6 class="team-title" data-bind="with: away_team">Away Team</h6>
+            <div class="team-name"><span data-bind="text: team_id"></span> &nbsp; <span data-bind="text: name"></span></div>
             <table>
                 <thead>
                     <tr>
@@ -228,9 +228,6 @@
 
 <button type="button" data-toggle="modal" data-target="#deleteTourney" id="tourney-1-delete" class="btn btn-lg btn-danger btn-delete center-block">Delete Tourney #1</button>
 
-{% endblock %}
-
-{% block script %}
 
 <div class="modal fade end-modal" tabindex="-1" role="dialog" id="endTourney">
     <div class="modal-dialog modal-sm" role="document">

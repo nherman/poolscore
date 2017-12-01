@@ -6,6 +6,11 @@ define('pages/main', ['knockout', 'services/utils', 'components/tourney'], funct
 
     return mainViewModel;
 
+    /* main
+     * routing for child vms
+     * header/breadcrumb content
+     */
+
     function mainViewModel(options) {
         var self = this,
             _options = ko.utils.extend({
