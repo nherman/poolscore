@@ -32,47 +32,29 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
         self.home_team = ko.observable();
         self.away_team = ko.observable();
 
-        // self.home_team = {
-        //     id: ko.observable(),
-        //     name: ko.observable(),
-        //     players = ko.observableArray()
-        // }
-
-        // self.away_team = {
-        //     id: ko.observable(),
-        //     name: ko.observable(),
-        //     players = ko.observableArray()
-        // }
-
         self.matches = ko.observableArray();;
 
         // self.events = {};
 
-        get();
+        api.getTourney(options.tourney_id, function(json) {
+            console.log(json);
+            self.raw = json["tourney"];
 
-        function get() {
-            api.getTourney(options.tourney_id, function(json) {
-                console.log(json);
-                self.raw = json["tourney"];
+            self.date(self.raw.date);
+            self.winner_id(self.raw.winner_id);
+            self.home_score(self.raw.home_score || 0);
+            self.away_score(self.raw.away_score || 0);
 
-                self.date(self.raw.date);
-                self.winner_id(self.raw.winner_id);
-                self.home_score(self.raw.home_score || 0);
-                self.away_score(self.raw.away_score || 0);
+            self.home_team(self.raw.home_team);
+            self.away_team(self.raw.away_team);
 
-                // self.home_team.id(self.raw.home_team.team_id);
-                // self.away_team.id(self.raw.away_team.team_id);
-                // self.home_team.name(self.raw.home_team.name);
-                // self.away_team.name(self.raw.away_team.name);
-                // self.home_team.players(self.raw.home_team.players);
-                // self.away_team.players(self.raw.away_team.players);
+            self.matches(self.raw.matches);
+        });
 
-                self.home_team(self.raw.home_team);
-                self.away_team(self.raw.away_team);
-
-                self.matches(self.raw.matches);
-            });
-        };
+        api.getMatches(options.tourney_id, function(json) {
+            console.log(json);
+            self.matches(json["matches"]);
+        });
 
     }
 
