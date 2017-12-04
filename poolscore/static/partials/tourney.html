@@ -111,67 +111,50 @@
         </div>
     </div>
 -->
-    <div class="match new">
+    <div class="match new" data-bind="if:home_team && away_team">
         <div class="match-num">#<span data-bind="text:matches.length+1"></span></div>
-    <form>
-        <div class="match-select-players">
-            <select name="match-3-select-lag-winner" id="match-3-select-lag-winner" class="form-control lagger">
-                <option default selected="selected" value="-1">Select Lag Winner</option>
-                <optgroup label="Home Team">
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                </optgroup>
-                <optgroup label="Away Team">
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                </optgroup>
-            </select>
-            <select name="match-3-select-lag-loser" id="match-3-select-lag-loser" class="form-control">
-                <option default selected="selected" value="-1">Select Lag Loser</option>
-                <optgroup label="Home Team">
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                </optgroup>
-                <optgroup label="Away Team">
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                    <option value="player-12345">Sky, Blue</option>
-                    <option value="player-12345">Minion, Filet</option>
-                    <option value="player-12345">Tramp, Lady &amp;</option>
-                </optgroup>
-            </select>
-        </div>
-        <div class="match-start">
-            <button id="match-3-start" class="btn btn-sm btn-primary">Start Match #3</button>
-        </div>
-    </form>
+        <form>
+            <div class="match-select-players">
+                <!-- ko template: {
+                    name: 'select_player_template',
+                    data: {
+                        selectValue: lagger,
+                        selectCaption: 'Select Lag Winner',
+                        tourneyVM: $data
+                    }
+                } -->
+                <!-- /ko -->
+                <!-- ko template: {
+                    name: 'select_player_template',
+                    data: {
+                        selectValue: nonLagger,
+                        selectCaption: 'Select Lag Loser',
+                        tourneyVM: $data
+                    }
+                } -->
+                <!-- /ko -->
+            </div>
+            <div class="match-start">
+                <button id="match-start" class="btn btn-sm btn-primary" data-bind="click:newMatch">Start Match #<span data-bind="text:matches.length+1"></span></button>
+            </div>
+        </form>
     </div>
 </div>
+<script type="text/html" id="select_player_template">
+    <select data-bind="uniqueName:true, value:selectValue" class="form-control lagger">
+        <option default selected="selected" value="-1" data-bind="text: selectCaption"></option>
+        <optgroup label="Home Team" data-bind="foreach: tourneyVM.home_team().players">
+            <option data-bind="value: 'home-'+id, text: last_name+', '+first_name"></option>
+        </optgroup>
+        <optgroup label="Away Team" data-bind="foreach: tourneyVM.away_team().players">
+            <option data-bind="value: 'away-'+id, text: last_name+', '+first_name"></option>
+        </optgroup>
+    </select>
+</script>
 
-<button type="button" data-toggle="modal" data-target="#endTourney" id="tourney-1-end" class="btn btn-lg btn-primary center-block">End Tourney #1</button>
+<button type="button" data-toggle="modal" data-target="#endTourney" id="tourney-end" class="btn btn-lg btn-primary center-block">End Tourney #<span data-bind="text:tourney_id"></span></button>
 
-<button type="button" data-toggle="modal" data-target="#deleteTourney" id="tourney-1-delete" class="btn btn-lg btn-danger btn-delete center-block">Delete Tourney #1</button>
+<button type="button" data-toggle="modal" data-target="#deleteTourney" id="tourney-delete" class="btn btn-lg btn-danger btn-delete center-block">Delete Tourney #<span data-bind="text:tourney_id"></span></button>
 
 
 <div class="modal fade end-modal" tabindex="-1" role="dialog" id="endTourney">
