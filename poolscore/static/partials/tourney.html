@@ -35,7 +35,7 @@
 </div>
 <script type="text/html" id="roster_template">
     <h6 class="title-sm"><span data-bind="text: location + ' team'"></h6>
-    <div class="team-name"><span data-bind="visible: (function() { console.log($data); })();, text: team.team_id"></span> &nbsp; <span data-bind="text: team.name"></span></div>
+    <div class="team-name"><span data-bind="text: team.team_id"></span> &nbsp; <span data-bind="text: team.name"></span></div>
     <table>
         <thead>
             <tr>
@@ -56,27 +56,36 @@
 <hr class="hr-sm">
 <div class="matches">
     <h6 class="matches-title">Matches</h6>
-<!-- ko foreach: matches -->
-    <div class="match started complete first">
-        <div class="match-num">#1</div>
+<!-- ko foreach: {data: matches, as: 'match'} -->
+    <div data-bind="css: {'match':true, 'started':true, 'complete': winner_id!==null, 'first': ordinal===1}">
+        <div class="match-num">#<span data-bind="text:match.ordinal"></span></div>
         <div class="match-players">
-            <div class="match-player lagger">
-                <div class="match-team">05</div>
-                <div class="match-player-name">Tramp, Lady &amp;</div>
-                <div class="match-games-needed">3</div>
-                <div class="match-games-won">3</div>
-                <div class="match-points-won">2</div>
+            <div class="match-player lagger"
+                data-bind="template: {
+                    name: 'match_player_template',
+                    data: $parent.getMatchPlayerData(match.events.lag)
+                }">
             </div>
-            <div class="match-player">
-                <div class="match-team">06</div>
-                <div class="match-player-name">Sky, Blue</div>
-                <div class="match-games-needed">3</div>
-                <div class="match-games-won">2</div>
-                <div class="match-points-won">1</div>
+            <div class="match-player"
+                data-bind="template: {
+                    name: 'match_player_template',
+                    data: $parent.getMatchPlayerData(match.events.lag == 'home' ? 'away' : 'home')
+                }">
             </div>
         </div>
     </div>
 <!-- /ko -->
+
+<script type="text/html" id="match_player_template">
+    <div class="match-player">
+        <div class="match-team" data-bind="text: team_id"></div>
+        <div class="match-player-name"><span data-bind="text: match[team + '_players'][0].last_name"></span>, <span data-bind="text: match[team + '_players'][0].first_name"></span></div>
+        <div class="match-games-needed" data-bind="text: match[team + '_games_needed']"></div>
+        <div class="match-games-won" data-bind="text: match[team + '_games_won']"></div>
+        <div class="match-points-won" data-bind="text: match[team + '_score']"></div>
+    </div>
+</script>
+
 <!--
     <div class="match started complete first">
         <div class="match-num">#1</div>
@@ -118,7 +127,7 @@
     </div>
 -->
     <div class="match new" data-bind="if:home_team && away_team">
-        <div class="match-num">#<span data-bind="text:matches.length+1"></span></div>
+        <div class="match-num">#<span data-bind="text:matches().length+1"></span></div>
         <form>
             <div class="match-select-players">
                 <!-- ko template: {
@@ -141,7 +150,7 @@
                 <!-- /ko -->
             </div>
             <div class="match-start">
-                <button id="match-start" class="btn btn-sm btn-primary" data-bind="click:newMatch">Start Match #<span data-bind="text:matches.length+1"></span></button>
+                <button id="match-start" class="btn btn-sm btn-primary" data-bind="click:newMatch">Start Match #<span data-bind="text:matches().length+1"></span></button>
             </div>
         </form>
     </div>

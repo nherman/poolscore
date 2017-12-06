@@ -56,21 +56,29 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
         self.away_team = ko.observable();
 
         self.matches = ko.observableArray();
+        /* generate data object for match_player_template */
+        /* TODO: convert to knockout custom binding */
+        self.getMatchPlayerData = function(team) {
+            var team_id = self[team + '_team']().team_id;
+            team_id = team_id.substring(team_id.length-2, team_id.length);
+            return {
+                team: team,
+                team_id: team_id
+            };
+        };
 
+        /* TODO: refactor new Match into singleton */
         self.lagger = ko.observable();
         self.nonLagger = ko.observable();
         self.newMatch = function() {
-            console.log(self.lagger());
-            console.log(self.nonLagger());
-
             var lagger, nonLagger, data = {
                     "match":{
                         "events": {
                             "lag": null
-                        }
-                    },
-                    "home_players": [],
-                    "away_players": []
+                        },
+                        "home_players": [],
+                        "away_players": []
+                    }
                 };
 
             function _p(o) {
@@ -92,8 +100,8 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
             if (lagger.team == nonLagger.team) return;
 
             //populate data
-            data[lagger.team + '_players'].push(lagger.id);
-            data[nonLagger.team + '_players'].push(nonLagger.id);
+            data.match[lagger.team + '_players'].push(lagger.id);
+            data.match[nonLagger.team + '_players'].push(nonLagger.id);
             data.match.events.lag = lagger.team;
 
             api.createMatch(options.tourney_id, data,

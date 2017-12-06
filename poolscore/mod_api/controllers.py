@@ -235,7 +235,8 @@ def tourneys_count():
 # GET Match by ID
 # Update Match by ID (PUT)
 # Create Match for Tourney (POST)
-@mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['GET', 'POST'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None, 'json_serializer_property': 'serialize_deep'}, methods = ['GET'])
+@mod_api.route('/tourneys/<int:tourney_id>/matches.json', defaults = {'match_id': None}, methods = ['POST'])
 @mod_api.route('/tourneys/<int:tourney_id>/matches/<int:match_id>.json', defaults = {'json_serializer_property': 'serialize_deep'}, methods = ['GET', 'PUT'])
 @SecurityUtil.requires_auth()
 def match(tourney_id, match_id, json_serializer_property=None):
