@@ -1,10 +1,10 @@
 <div class="scoreboard">
     <div class="row" data-bind="with: home_team">
-        <div class="home team-name"><div data-bind="text: name">PLANET NERO</div><small>Home Team</small></div>
+        <div class="home team-name"><div data-bind="text: name"></div><small>Home Team</small></div>
         <div class="home team-score" data-bind="text: $parent.home_score">15</div>
     </div>
     <div class="row" data-bind="with: away_team">
-        <div class="away team-name"><div data-bind="text: name">THE ZEROS</div><small>Away Team</small></div>
+        <div class="away team-name"><div data-bind="text: name"></div><small>Away Team</small></div>
         <div class="away team-score" data-bind="text: $parent.home_score">0</div>
     </div>
 </div>
@@ -14,22 +14,28 @@
         <div class="team"
              data-bind="template: {
                         name: 'roster_template',
-                        data: home_team,
+                        data: {
+                            team: home_team(),
+                            location: 'home'
+                        },
                         if: home_team
                     }">
         </div>
         <div class="team"
              data-bind="template: {
                         name: 'roster_template',
-                        data: away_team,
+                        data: {
+                            team: away_team(),
+                            location: 'away'
+                        },
                         if: away_team
                     }">
         </div>
     </div>
 </div>
 <script type="text/html" id="roster_template">
-    <h6 class="title-sm">Home Team</h6>
-    <div class="team-name"><span data-bind="text: team_id"></span> &nbsp; <span data-bind="text: name"></span></div>
+    <h6 class="title-sm"><span data-bind="text: location + ' team'"></h6>
+    <div class="team-name"><span data-bind="visible: (function() { console.log($data); })();, text: team.team_id"></span> &nbsp; <span data-bind="text: team.name"></span></div>
     <table>
         <thead>
             <tr>
@@ -38,7 +44,7 @@
                 <th>Name</th>
             </tr>
         </thead>
-        <tbody data-bind="foreach: players">
+        <tbody data-bind="foreach: team.players">
             <tr>
                 <td data-bind="text: handicap"></td>
                 <td data-bind="text: player_id"></td>

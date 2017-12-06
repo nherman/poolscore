@@ -6977,6 +6977,7 @@ a#loading div:focus {
   font-size: 12px;
   margin: 0 0;
   color: #337ab7;
+  text-transform: capitalize;
 }
 .title-sm small,
 .title-sm .small {
@@ -7184,6 +7185,7 @@ a#loading div:focus {
   font-size: 12px;
   margin: 0 0;
   color: #337ab7;
+  text-transform: capitalize;
 }
 .roster .team .team-title small,
 .roster .team .team-title .small {
@@ -7249,6 +7251,7 @@ a#loading div:focus {
   font-size: 12px;
   margin: 0 0;
   color: #337ab7;
+  text-transform: capitalize;
   text-align: center;
 }
 .matches .matches-title small,
@@ -7555,6 +7558,7 @@ a#loading div:focus {
   font-size: 12px;
   margin: 0 0;
   color: #337ab7;
+  text-transform: capitalize;
   text-align: center;
 }
 .games .game .game-title small,
