@@ -56,77 +56,35 @@
 <hr class="hr-sm">
 <div class="matches">
     <h6 class="matches-title">Matches</h6>
-<!-- ko foreach: {data: matches, as: 'match'} -->
-    <div data-bind="css: {'match':true, 'started':true, 'complete': winner_id!==null, 'first': ordinal===1}">
+    <!-- ko foreach: {data: matches, as: 'match'} -->
+    <div data-bind="click: $root.viewMatch, css: {'match':true, 'started':true, 'complete': winner_id!==null, 'first': ordinal===1}">
         <div class="match-num">#<span data-bind="text:match.ordinal"></span></div>
         <div class="match-players">
             <div class="match-player lagger"
                 data-bind="template: {
                     name: 'match_player_template',
-                    data: $parent.getMatchPlayerData(match.events.lag)
+                    data: $parent.getMatchPlayerData(match, match.events.lag)
                 }">
             </div>
             <div class="match-player"
                 data-bind="template: {
                     name: 'match_player_template',
-                    data: $parent.getMatchPlayerData(match.events.lag == 'home' ? 'away' : 'home')
+                    data: $parent.getMatchPlayerData(match, match.events.lag == 'home' ? 'away' : 'home')
                 }">
             </div>
         </div>
     </div>
-<!-- /ko -->
-
-<script type="text/html" id="match_player_template">
-    <div class="match-player">
+    <!-- /ko -->
+    <script type="text/html" id="match_player_template">
         <div class="match-team" data-bind="text: team_id"></div>
-        <div class="match-player-name"><span data-bind="text: match[team + '_players'][0].last_name"></span>, <span data-bind="text: match[team + '_players'][0].first_name"></span></div>
-        <div class="match-games-needed" data-bind="text: match[team + '_games_needed']"></div>
-        <div class="match-games-won" data-bind="text: match[team + '_games_won']"></div>
-        <div class="match-points-won" data-bind="text: match[team + '_score']"></div>
-    </div>
-</script>
+        <div class="match-player-name" data-bind="text: player_name"></div>
+        <div class="match-games-needed" data-bind="text: games_needed"></div>
+        <div class="match-games-won" data-bind="text: games_won"></div>
+        <div class="match-points-won" data-bind="text: points"></div>
+    </script>
 
-<!--
-    <div class="match started complete first">
-        <div class="match-num">#1</div>
-        <div class="match-players">
-            <div class="match-player lagger">
-                <div class="match-team">05</div>
-                <div class="match-player-name">Tramp, Lady &amp;</div>
-                <div class="match-games-needed">3</div>
-                <div class="match-games-won">3</div>
-                <div class="match-points-won">2</div>
-            </div>
-            <div class="match-player">
-                <div class="match-team">06</div>
-                <div class="match-player-name">Sky, Blue</div>
-                <div class="match-games-needed">3</div>
-                <div class="match-games-won">2</div>
-                <div class="match-points-won">1</div>
-            </div>
-        </div>
-    </div>
-    <div class="match started">
-        <div class="match-num">#2</div>
-        <div class="match-players">
-            <div class="match-player lagger">
-                <div class="match-team">05</div>
-                <div class="match-player-name">Minion, Filet</div>
-                <div class="match-games-needed">3</div>
-                <div class="match-games-won">1</div>
-                <div class="match-points-won">0</div>
-            </div>
-            <div class="match-player">
-                <div class="match-team">06</div>
-                <div class="match-player-name">Sky, Blue</div>
-                <div class="match-games-needed">3</div>
-                <div class="match-games-won">0</div>
-                <div class="match-points-won">0</div>
-            </div>
-        </div>
-    </div>
--->
-    <div class="match new" data-bind="if:home_team && away_team">
+
+    <div class="match new" data-bind="if:newMatchAllowed && home_team && away_team">
         <div class="match-num">#<span data-bind="text:matches().length+1"></span></div>
         <form>
             <div class="match-select-players">

@@ -55,6 +55,17 @@ define('pages/main', ['knockout', 'services/utils', 'components/tourney'], funct
             return html;
         });
 
+        /* navigate to new page */
+        self.viewTrourney = function(tourney) {
+            self.routes.go(); //reset route
+        }
+        self.viewMatch = function(match) {
+            self.routes.go('/match/' + match.id);
+        }
+        self.viewGame = function(game) {
+            self.routes.go('/game/' + game.id);
+        }
+
         self.mainComponent = ko.observable();
 
         utils.routes.call(self, {

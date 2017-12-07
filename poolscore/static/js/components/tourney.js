@@ -12,7 +12,8 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
     return tourneyViewModel;
 
     function tourneyViewModel(options) {
-        var self = this;
+        var self = this,
+            MAX_MATCHES = 5;
 
         if (options.tourney_id === undefined || !options.tourney_id.match(/^\d+$/)) {
             throw "Invalid Tourney ID";
@@ -58,18 +59,35 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
         self.matches = ko.observableArray();
         /* generate data object for match_player_template */
         /* TODO: convert to knockout custom binding */
-        self.getMatchPlayerData = function(team) {
-            var team_id = self[team + '_team']().team_id;
-            team_id = team_id.substring(team_id.length-2, team_id.length);
-            return {
-                team: team,
-                team_id: team_id
-            };
+
+        self.getMatchPlayerData = function(match, team) {
+            var data = {
+                    team_id:"",
+                    player_name:"",
+                    games_needed:"",
+                    games_won:"",
+                    points:"",
+                },
+
+                long_team_id = self[team + '_team']().team_id,
+                player = (match[team + '_players'] && match[team + '_players'][0]) ? match[team + '_players'][0] : "";
+
+            data.team_id = long_team_id.substring(long_team_id.length-2, long_team_id.length);
+            data.player_name = player.last_name + ", " + player.first_name;
+            data.games_needed = match[team + '_games_needed'];
+            data.games_won = match[team + '_games_won'];
+            data.points = match[team + '_score'];
+
+            return data;
         };
 
         /* TODO: refactor new Match into singleton */
         self.lagger = ko.observable();
         self.nonLagger = ko.observable();
+        self.newMatchAllowed = ko.computed(function() {
+            console.log(self.matches().length < MAX_MATCHES);
+            return self.matches().length < MAX_MATCHES;
+        });
         self.newMatch = function() {
             var lagger, nonLagger, data = {
                     "match":{
@@ -88,6 +106,8 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
                     "id": a[1]
                 };
             }
+
+            if (!self.newMatchAllowed()) return;
 
             //validate select value format
             if (!self.lagger().match(/.+-\d+/) || !self.nonLagger().match(/.+-\d+/)) return;
