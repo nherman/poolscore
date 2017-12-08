@@ -1,6 +1,6 @@
 /* main.js */
 
-define('pages/main', ['knockout', 'services/utils', 'components/tourney'], function(ko, utils) {
+define('pages/main', ['knockout', 'services/utils', 'components/tourney', 'components/match'], function(ko, utils) {
 
     'use strict';
 
@@ -29,18 +29,12 @@ define('pages/main', ['knockout', 'services/utils', 'components/tourney'], funct
         function routeHandler(path, payload) {
             //path: entity/id || ""
 
-            var data = path.split('/'),
+            var data = path.match(/(match|game)\/([^\/]+)/),
                 _componentOptions = defaultComponentOptions;
 
-            switch (data[0]) {
-                case "match":
-                    _componentOptions.name = "match-component";
-                    _componentOptions.params.match_id = data[1];
-                    break;
-                case "game":
-                    _componentOptions.name = "game-component";
-                    _componentOptions.params.game_id = data[1];
-                    break;
+            if (data != null) {
+                _componentOptions.name = data[1] + "-component";
+                _componentOptions.params.match_id = data[2];
             }
 
             self.mainComponent(_componentOptions);
