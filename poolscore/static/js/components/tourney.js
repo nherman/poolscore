@@ -57,9 +57,9 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
         self.away_team = ko.observable();
 
         self.matches = ko.observableArray();
+
         /* generate data object for match_player_template */
         /* TODO: convert to knockout custom binding */
-
         self.getMatchPlayerData = function(match, team) {
             var data = {
                     team_id:"",
@@ -136,7 +136,21 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
 
         }
 
-        // self.events = {};
+        self.winnerName = ko.computed(function() {
+            if (self.home_score() > self.away_score()) {
+                return self.home_team().name;
+            }
+            if (self.home_score() < self.away_score()) {
+                return self.away_team().name;
+            }
+            return null;
+        });
+        self.winnerScore = ko.computed(function() {
+            return Math.ceil(self.home_score(), self.away_score());
+        });
+        self.loserScore = ko.computed(function() {
+            return Math.floor(self.home_score(), self.away_score());
+        });
 
         //initialize view model
         getTourney();
