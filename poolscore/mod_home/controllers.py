@@ -13,5 +13,5 @@ mod_home = Blueprint('home', __name__)
 @mod_home.route('/', methods = ['GET'])
 @SecurityUtil.requires_auth()
 def index():
-    tourneys = Tourney.secure_all()
+    tourneys = Tourney.secure_query().filter(Tourney.active == 1).order_by(Tourney.id).all()
     return render_template('home/index.html', tourneys = tourneys)
