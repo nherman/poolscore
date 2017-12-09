@@ -38,6 +38,18 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
             });
         }
 
+        function updateTourney(data, callback) {
+            var _data = {
+                "tourney": ko.utils.extend({
+                    "winner_id": self.winner_id(),
+                    "home_score": self.home_score(),
+                    "away_score": self.away_score()
+                }, data)
+            };
+
+            api.updateTourney(options.tourney_id, _data, callback);
+        }
+
         function getMatches() {
             api.getMatches(options.tourney_id, function(json) {
                 console.log(json);
@@ -134,6 +146,20 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
                 }
             );
 
+        }
+
+        self.endTourney = function() {
+            /* set winner id, unless there's a tie */
+            if (self.home_score() > self.away_score()) {
+                self.winner_id(self.home_team().id);
+            }
+            if (self.home_score() < self.away_score()) {
+                self.winner_id(self.away_team().id);
+            }
+
+            updateTourney({"active":false}, function(json) {
+                location.href="/";
+            });
         }
 
         self.winnerName = ko.computed(function() {
