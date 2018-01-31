@@ -17,40 +17,63 @@ define('pages/main', ['knockout', 'services/utils', 'components/tourney', 'compo
                 "tourney_id": "",
                 "match_id": "",
                 "game_id": ""
-            }, options),
-            defaultComponentOptions = {
-                'name':'tourney-component',
-                'params': {
-                    'rootVM': self,
-                    'tourney_id':_options.tourney_id
-                }
-            };
+            }, options);
 
         function routeHandler(path, payload) {
-            //path: entity/id || ""
+            //path: entity/id || entity/id/entity/id || ""
 
-            var data = path.match(/(match|game)\/([^\/]+)/),
-                _componentOptions = defaultComponentOptions;
+            var data = path.match(/(match|game)\/([^\/]+)/g),
+                _componentOptions = {
+                    'name':'tourney-component',
+                    'params': {
+                        'rootVM': self,
+                        'tourney_id':_options.tourney_id
+                    }
+                };
 
-            if (data != null) {
-                _componentOptions.name = data[1] + "-component";
-                _componentOptions.params.match_id = data[2];
+
+            // data == [] or ["match/1"] or ["match/1", "game/2"]
+            while (data !== null && data.length > 0) {
+                var pair = data.shift().split('/');
+                _componentOptions.name = pair[0] + "-component";
+                _componentOptions.params[pair[0]+"_id"] = pair[1];
             }
 
             self.mainComponent(_componentOptions);
+            self.headerContent(
+                buildHeaderContent(_componentOptions.params)
+            );
+
         }
 
-        self.headerContent = ko.computed(function() {
-            var html = "Tourney <span class='badge'>" + _options.tourney_id + "</span>";
+        function buildHeaderContent(options) {
+            var path = "#",
+                html = "<a href='" + path + "'>Tourney</a>";
 
-            // html += " : Match <span class='badge'>" + _options.match_id + "</span>";
-            // html += " : Game <span class='badge'>" + _options.game_id + "</span>";
+            options = ko.utils.extend({
+                "match_id": "",
+                "game_id": ""
+            }, options);
+
+            if (options.match_id !== "") {
+                path += "/match/" + options.match_id;
+                html += " : <a href='" + path + "'>Match <span class='badge'>" + options.match_id + "</span></a>";
+            }
+            if (options.game_id !== "") {
+                path += "/game/" + options.game_id;
+                html += " : <a href='" + path + "'>Game <span class='badge'>" + options.game_id + "</span></a>";
+            }
 
             return html;
-        });
+        }
+
+        /* observables */
+        self.mainComponent = ko.observable();
+        self.headerContent = ko.observable();
+
 
         /* navigate to new page */
-        self.viewTrourney = function(tourney) {
+        self.viewTourney = function(tourney) {
             self.routes.go(); //reset route
         }
         self.viewMatch = function(match) {
@@ -59,8 +82,6 @@ define('pages/main', ['knockout', 'services/utils', 'components/tourney', 'compo
         self.viewGame = function(game) {
             self.routes.go('/game/' + game.id);
         }
-
-        self.mainComponent = ko.observable();
 
         utils.routes.call(self, {
             onRouteChange: routeHandler

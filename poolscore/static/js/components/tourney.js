@@ -25,7 +25,6 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
 
         function getTourney() {
             api.getTourney(options.tourney_id, function(json) {
-                console.log(json);
                 self.raw = json["tourney"];
 
                 self.date(self.raw.date);
@@ -52,7 +51,6 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
 
         function getMatches() {
             api.getMatches(options.tourney_id, function(json) {
-                console.log(json);
                 self.matches(json["matches"]);
             });
         }
@@ -97,7 +95,6 @@ define('components/tourney', ['knockout','services/api',], function(ko, api) {
         self.lagger = ko.observable();
         self.nonLagger = ko.observable();
         self.newMatchAllowed = ko.computed(function() {
-            console.log(self.matches().length < MAX_MATCHES);
             return self.matches().length < MAX_MATCHES;
         });
         self.newMatch = function() {
